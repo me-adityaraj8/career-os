@@ -1,0 +1,386 @@
+import { useState } from 'react';
+import { Sparkles, Loader2, FileText, Target, MessageSquareText, Save, Info } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useApplications } from '@/hooks/useApplications';
+import { useResumes } from '@/hooks/useResumes';
+import {
+  useAIStatus,
+  useAnalyzeJob,
+  useGenerateCoverLetter,
+  useUpdateCoverLetter,
+  useGenerateInterviewQuestions,
+} from '@/hooks/useAI';
+import { toast } from '@/stores/toastStore';
+import { apiErrorMessage } from '@/lib/api';
+import { cn } from '@/lib/utils';
+import type { CoverLetter, InterviewQuestionSet, JobAnalysis } from '@/types';
+
+function MockBadge({ isMock }: { isMock: boolean }) {
+  if (!isMock) return null;
+  return (
+    <Badge variant="outline" className="gap-1 text-amber-600 dark:text-amber-500">
+      <Info className="size-3" /> Mock
+    </Badge>
+  );
+}
+
+export default function AIToolsPage() {
+  const { data: status } = useAIStatus();
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <PageHeader
+        title="AI Tools"
+        description="Analyze job descriptions, draft cover letters, and prep for interviews."
+      />
+
+      {status?.mode === 'mock' && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+          <Info className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-500" />
+          <div>
+            <p className="font-medium">Running in mock mode</p>
+            <p className="text-muted-foreground">
+              No Anthropic API key is configured, so results are realistic placeholders. Add{' '}
+              <code className="rounded bg-muted px-1">ANTHROPIC_API_KEY</code> to{' '}
+              <code className="rounded bg-muted px-1">backend/.env</code> to enable live AI.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <Tabs defaultValue="analyzer">
+        <TabsList>
+          <TabsTrigger value="analyzer">
+            <Target className="size-4" /> Job Analyzer
+          </TabsTrigger>
+          <TabsTrigger value="cover">
+            <FileText className="size-4" /> Cover Letter
+          </TabsTrigger>
+          <TabsTrigger value="coach">
+            <MessageSquareText className="size-4" /> Interview Coach
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analyzer">
+          <JobAnalyzer />
+        </TabsContent>
+        <TabsContent value="cover">
+          <CoverLetterGenerator />
+        </TabsContent>
+        <TabsContent value="coach">
+          <InterviewCoach />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+/** Shared application + resume pickers used by the analyzer and cover letter tabs. */
+function ContextPickers({
+  applicationId,
+  setApplicationId,
+  resumeId,
+  setResumeId,
+}: {
+  applicationId: string;
+  setApplicationId: (v: string) => void;
+  resumeId: string;
+  setResumeId: (v: string) => void;
+}) {
+  const { data: applications } = useApplications();
+  const { data: resumes } = useResumes();
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="space-y-2">
+        <Label>Link to application (optional)</Label>
+        <Select value={applicationId} onValueChange={setApplicationId}>
+          <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {applications?.map((a) => (
+              <SelectItem key={a.id} value={a.id}>{a.company} — {a.role}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Compare against resume (optional)</Label>
+        <Select value={resumeId} onValueChange={setResumeId}>
+          <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {resumes?.map((r) => (
+              <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
+
+function JobAnalyzer() {
+  const analyze = useAnalyzeJob();
+  const [jd, setJd] = useState('');
+  const [applicationId, setApplicationId] = useState('none');
+  const [resumeId, setResumeId] = useState('none');
+  const [result, setResult] = useState<JobAnalysis | null>(null);
+
+  async function run() {
+    try {
+      const r = await analyze.mutateAsync({
+        jobDescription: jd,
+        applicationId: applicationId === 'none' ? null : applicationId,
+        resumeId: resumeId === 'none' ? null : resumeId,
+      });
+      setResult(r);
+    } catch (e) {
+      toast({ title: apiErrorMessage(e), variant: 'error' });
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <ContextPickers
+            applicationId={applicationId}
+            setApplicationId={setApplicationId}
+            resumeId={resumeId}
+            setResumeId={setResumeId}
+          />
+          <div className="space-y-2">
+            <Label htmlFor="jd">Job description</Label>
+            <Textarea id="jd" rows={8} placeholder="Paste the job description…" value={jd} onChange={(e) => setJd(e.target.value)} />
+          </div>
+          <Button onClick={run} disabled={analyze.isPending || jd.trim().length < 20}>
+            {analyze.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+            Analyze
+          </Button>
+        </CardContent>
+      </Card>
+
+      {result && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Analysis</CardTitle>
+              <MockBadge isMock={result.isMock} />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {result.matchScore !== null && (
+              <div>
+                <div className="mb-1 flex items-center justify-between text-sm">
+                  <span className="font-medium">Resume match</span>
+                  <span className="font-semibold">{result.matchScore}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={cn(
+                      'h-full rounded-full transition-all',
+                      result.matchScore >= 70 ? 'bg-emerald-500' : result.matchScore >= 40 ? 'bg-amber-500' : 'bg-rose-500',
+                    )}
+                    style={{ width: `${result.matchScore}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              <p className="mb-1 text-sm font-medium">Summary</p>
+              <p className="text-sm text-muted-foreground">{result.summary}</p>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-medium">Required skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {result.requiredSkills.map((s) => (
+                  <Badge key={s} variant="secondary">{s}</Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-medium">ATS keywords</p>
+              <div className="flex flex-wrap gap-1.5">
+                {result.atsKeywords.map((k) => (
+                  <Badge key={k} variant="outline">{k}</Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function CoverLetterGenerator() {
+  const generate = useGenerateCoverLetter();
+  const update = useUpdateCoverLetter();
+  const [jd, setJd] = useState('');
+  const [applicationId, setApplicationId] = useState('none');
+  const [resumeId, setResumeId] = useState('none');
+  const [company, setCompany] = useState('');
+  const [role, setRole] = useState('');
+  const [result, setResult] = useState<CoverLetter | null>(null);
+  const [draft, setDraft] = useState('');
+
+  async function run() {
+    try {
+      const r = await generate.mutateAsync({
+        jobDescription: jd,
+        company: company || undefined,
+        role: role || undefined,
+        applicationId: applicationId === 'none' ? null : applicationId,
+        resumeId: resumeId === 'none' ? null : resumeId,
+      });
+      setResult(r);
+      setDraft(r.content);
+    } catch (e) {
+      toast({ title: apiErrorMessage(e), variant: 'error' });
+    }
+  }
+
+  async function save() {
+    if (!result) return;
+    await update.mutateAsync({ id: result.id, content: draft });
+    toast({ title: 'Cover letter saved', variant: 'success' });
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <ContextPickers
+            applicationId={applicationId}
+            setApplicationId={setApplicationId}
+            resumeId={resumeId}
+            setResumeId={setResumeId}
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="clcompany">Company</Label>
+              <Input id="clcompany" value={company} onChange={(e) => setCompany(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clrole">Role</Label>
+              <Input id="clrole" value={role} onChange={(e) => setRole(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="cljd">Job description</Label>
+            <Textarea id="cljd" rows={6} placeholder="Paste the job description…" value={jd} onChange={(e) => setJd(e.target.value)} />
+          </div>
+          <Button onClick={run} disabled={generate.isPending || jd.trim().length < 20}>
+            {generate.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+            Generate cover letter
+          </Button>
+        </CardContent>
+      </Card>
+
+      {result && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Draft (editable)</CardTitle>
+              <MockBadge isMock={result.isMock} />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Textarea rows={16} value={draft} onChange={(e) => setDraft(e.target.value)} className="font-mono text-sm" />
+            <Button onClick={save} disabled={update.isPending || draft === result.content}>
+              {update.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+              Save
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function InterviewCoach() {
+  const generate = useGenerateInterviewQuestions();
+  const [company, setCompany] = useState('');
+  const [role, setRole] = useState('');
+  const [jd, setJd] = useState('');
+  const [result, setResult] = useState<InterviewQuestionSet | null>(null);
+
+  const categories: Array<{ key: 'technical' | 'behavioral' | 'company'; label: string }> = [
+    { key: 'technical', label: 'Technical' },
+    { key: 'behavioral', label: 'Behavioral' },
+    { key: 'company', label: 'Company-specific' },
+  ];
+
+  async function run() {
+    try {
+      const r = await generate.mutateAsync({ company, role, jobDescription: jd || null });
+      setResult(r);
+    } catch (e) {
+      toast({ title: apiErrorMessage(e), variant: 'error' });
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="iccompany">Company</Label>
+              <Input id="iccompany" value={company} onChange={(e) => setCompany(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="icrole">Role</Label>
+              <Input id="icrole" value={role} onChange={(e) => setRole(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="icjd">Job description (optional)</Label>
+            <Textarea id="icjd" rows={4} value={jd} onChange={(e) => setJd(e.target.value)} />
+          </div>
+          <Button onClick={run} disabled={generate.isPending || !company || !role}>
+            {generate.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+            Generate questions
+          </Button>
+        </CardContent>
+      </Card>
+
+      {result && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-end">
+            <MockBadge isMock={result.isMock} />
+          </div>
+          {categories.map((cat) => {
+            const items = result.questions.filter((q) => q.category === cat.key);
+            if (items.length === 0) return null;
+            return (
+              <Card key={cat.key}>
+                <CardHeader>
+                  <CardTitle className="text-base">{cat.label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {items.map((q, i) => (
+                      <li key={i} className="flex gap-2 text-sm">
+                        <span className="text-muted-foreground">{i + 1}.</span>
+                        <span>{q.question}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
