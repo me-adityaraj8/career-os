@@ -1,0 +1,74 @@
+# Career OS — local development stack
+# Services: postgres (db), backend (Express API), frontend (Vite dev server)
+#
+# Usage:
+#   docker compose up --build
+#   docker compose exec backend npm run migrate     # run DB migrations
+#   docker compose exec backend npm run seed         # seed sample data
+#
+# The backend waits for postgres to be healthy before starting.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: careeros_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-careeros}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-careeros_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-careeros}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - careeros_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-careeros} -d ${POSTGRES_DB:-careeros}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: careeros_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgres://${POSTGRES_USER:-careeros}:${POSTGRES_PASSWORD:-careeros_dev_password}@db:5432/${POSTGRES_DB:-careeros}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_me}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-4-8}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - careeros_uploads:/app/uploads
+    command: sh -c "npm run migrate && npm run dev"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: careeros_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/api/v1}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  careeros_pgdata:
+  careeros_uploads:
