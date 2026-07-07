@@ -61,11 +61,6 @@ export default {
           active: 'hsl(var(--sidebar-active))',
           'active-foreground': 'hsl(var(--sidebar-active-foreground))',
         },
-        brand: {
-          DEFAULT: 'hsl(var(--brand))',
-          2: 'hsl(var(--brand-2))',
-          foreground: 'hsl(var(--brand-foreground))',
-        },
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
         info: 'hsl(var(--info))',

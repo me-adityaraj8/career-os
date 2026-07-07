@@ -107,7 +107,7 @@ export default function GoalsPage() {
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <motion.div
-                          className="h-full rounded-full bg-gradient-to-r from-brand to-brand-2"
+                          className="h-full rounded-full bg-foreground/80"
                           initial={{ width: 0 }}
                           animate={{ width: `${percent}%` }}
                           transition={{ duration: 0.5, ease: 'easeOut' }}

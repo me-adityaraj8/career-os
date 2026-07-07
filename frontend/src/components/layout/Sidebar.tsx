@@ -61,10 +61,10 @@ function NavItem({
               className="absolute inset-0 rounded-lg bg-secondary"
               transition={{ type: 'spring', stiffness: 350, damping: 30 }}
             >
-              <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-gradient-to-b from-brand to-brand-2" />
+              <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-foreground" />
             </motion.div>
           )}
-          <item.icon className={cn('relative z-10 size-4', isActive && 'text-brand')} />
+          <item.icon className="relative z-10 size-4" />
           <span className="relative z-10">{item.label}</span>
         </>
       )}
