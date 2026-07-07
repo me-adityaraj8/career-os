@@ -223,7 +223,7 @@ function JobAnalyzer() {
                       <span className="font-medium">Resume match</span>
                       <span className={cn(
                         'text-lg font-bold',
-                        result.matchScore >= 70 ? 'text-foreground' : result.matchScore >= 40 ? 'text-foreground/70' : 'text-muted-foreground',
+                        result.matchScore >= 70 ? 'text-emerald-500' : result.matchScore >= 40 ? 'text-amber-500' : 'text-rose-500',
                       )}>
                         {result.matchScore}%
                       </span>
@@ -232,7 +232,7 @@ function JobAnalyzer() {
                       <motion.div
                         className={cn(
                           'h-full rounded-full',
-                          result.matchScore >= 70 ? 'bg-foreground' : result.matchScore >= 40 ? 'bg-foreground/60' : 'bg-foreground/30',
+                          result.matchScore >= 70 ? 'bg-emerald-500' : result.matchScore >= 40 ? 'bg-amber-500' : 'bg-rose-500',
                         )}
                         initial={{ width: 0 }}
                         animate={{ width: `${result.matchScore}%` }}
