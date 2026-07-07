@@ -30,6 +30,16 @@ export function createApp(): Application {
 
   app.use('/api/v1', apiRouter);
 
+  // In production, serve the frontend's static build from ../frontend/dist.
+  // All non-API routes fall through to index.html for client-side routing.
+  if (isProduction) {
+    const clientDir = path.resolve(__dirname, '../../frontend/dist');
+    app.use(express.static(clientDir));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(clientDir, 'index.html'));
+    });
+  }
+
   app.use(notFoundHandler);
   app.use(errorHandler);
 
