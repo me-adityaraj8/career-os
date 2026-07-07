@@ -1,7 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import path from 'path';
-import { env } from './config/env';
+import { env, isProduction } from './config/env';
 import { apiRouter } from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
@@ -12,7 +12,17 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 export function createApp(): Application {
   const app = express();
 
-  app.use(cors({ origin: env.corsOrigin, credentials: true }));
+  // In dev, dev-server tooling (e.g. preview autoPort) can bind the frontend to
+  // any localhost port, so reflect any localhost origin instead of a fixed one.
+  // Production stays locked to the configured CORS_ORIGIN.
+  const corsOrigin = isProduction
+    ? env.corsOrigin
+    : (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+        if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) return cb(null, true);
+        cb(null, false);
+      };
+
+  app.use(cors({ origin: corsOrigin, credentials: true }));
   app.use(express.json({ limit: '1mb' }));
 
   // Serve uploaded resume PDFs statically (auth-checked download route also exists).
