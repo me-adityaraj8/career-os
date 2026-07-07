@@ -21,11 +21,12 @@ function weekLabel(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+// Monochrome funnel: progression reads as a luminance ramp, not hue.
 const funnelColors = [
-  'hsl(215 20% 65%)',
-  'hsl(217 91% 60%)',
-  'hsl(38 92% 50%)',
-  'hsl(142 71% 45%)',
+  'hsl(var(--foreground) / 0.30)',
+  'hsl(var(--foreground) / 0.50)',
+  'hsl(var(--foreground) / 0.72)',
+  'hsl(var(--foreground) / 0.95)',
 ];
 
 const stagger = {

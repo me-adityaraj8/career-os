@@ -32,7 +32,7 @@ const fadeIn = {
 function MockBadge({ isMock }: { isMock: boolean }) {
   if (!isMock) return null;
   return (
-    <Badge variant="outline" className="gap-1 text-amber-600 dark:text-amber-500">
+    <Badge variant="outline" className="gap-1 text-muted-foreground">
       <Info className="size-3" /> Mock
     </Badge>
   );
@@ -75,8 +75,8 @@ export default function AIToolsPage() {
           className="mb-6 flex items-center gap-2.5 rounded-xl border bg-secondary/40 px-4 py-2.5 text-[13px] text-muted-foreground"
         >
           <span className="relative flex size-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-            <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/60 opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-foreground/80" />
           </span>
           <span>
             <span className="font-medium text-foreground">Mock mode</span> — results are realistic
@@ -223,7 +223,7 @@ function JobAnalyzer() {
                       <span className="font-medium">Resume match</span>
                       <span className={cn(
                         'text-lg font-bold',
-                        result.matchScore >= 70 ? 'text-emerald-500' : result.matchScore >= 40 ? 'text-amber-500' : 'text-rose-500',
+                        result.matchScore >= 70 ? 'text-foreground' : result.matchScore >= 40 ? 'text-foreground/70' : 'text-muted-foreground',
                       )}>
                         {result.matchScore}%
                       </span>
@@ -232,7 +232,7 @@ function JobAnalyzer() {
                       <motion.div
                         className={cn(
                           'h-full rounded-full',
-                          result.matchScore >= 70 ? 'bg-emerald-500' : result.matchScore >= 40 ? 'bg-amber-500' : 'bg-rose-500',
+                          result.matchScore >= 70 ? 'bg-foreground' : result.matchScore >= 40 ? 'bg-foreground/60' : 'bg-foreground/30',
                         )}
                         initial={{ width: 0 }}
                         animate={{ width: `${result.matchScore}%` }}

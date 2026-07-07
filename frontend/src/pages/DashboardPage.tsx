@@ -233,8 +233,8 @@ export default function DashboardPage() {
                         variant="secondary"
                         className={cn('shrink-0 capitalize text-[11px] font-medium', {
                           'bg-foreground/10 text-foreground': a.stage === 'offer',
-                          'bg-blue-500/10 text-blue-600 dark:text-blue-400': a.stage === 'interview',
-                          'bg-amber-500/10 text-amber-600 dark:text-amber-400': a.stage === 'online_assessment',
+                          'bg-foreground/[0.07] text-foreground/80': a.stage === 'interview',
+                          'bg-foreground/[0.05] text-foreground/60': a.stage === 'online_assessment',
                           'bg-muted text-muted-foreground': a.stage === 'rejected',
                         })}
                       >

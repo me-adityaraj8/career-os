@@ -160,6 +160,28 @@
   50% { transform: translateY(-4px); }
 }
 
+/* Cinematic depth layers — noise + ambient gradient */
+@layer utilities {
+  /* Film-grain noise: SVG turbulence at ~2.5% opacity. Pure texture, no color. */
+  .noise::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* Soft ambient glow from the top of the viewport — a faint horizon. */
+  .ambient {
+    background-image: radial-gradient(
+      1200px 500px at 50% -10%,
+      hsl(var(--foreground) / 0.05),
+      transparent 70%
+    );
+  }
+}
+
 @layer utilities {
   .animate-gradient {
     background-size: 200% 200%;
