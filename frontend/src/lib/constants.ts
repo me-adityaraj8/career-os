@@ -1,16 +1,13 @@
 import type { Priority, Stage, InterviewType, Relationship, InterviewOutcome } from '@/types';
 
-/**
- * Kanban stages in board order. Monochrome design language: progression is a
- * luminance ramp (dim → solid) rather than hue; rejected fades out.
- */
+/** Kanban stages in board order — soft functional hues on the mono canvas. */
 export const STAGES: { value: Stage; label: string; color: string }[] = [
-  { value: 'saved', label: 'Saved', color: 'bg-foreground/25' },
-  { value: 'applied', label: 'Applied', color: 'bg-foreground/45' },
-  { value: 'online_assessment', label: 'Online Assessment', color: 'bg-foreground/60' },
-  { value: 'interview', label: 'Interview', color: 'bg-foreground/80' },
-  { value: 'offer', label: 'Offer', color: 'bg-foreground' },
-  { value: 'rejected', label: 'Rejected', color: 'bg-foreground/15' },
+  { value: 'saved', label: 'Saved', color: 'bg-slate-400' },
+  { value: 'applied', label: 'Applied', color: 'bg-blue-500' },
+  { value: 'online_assessment', label: 'Online Assessment', color: 'bg-violet-500' },
+  { value: 'interview', label: 'Interview', color: 'bg-amber-500' },
+  { value: 'offer', label: 'Offer', color: 'bg-emerald-500' },
+  { value: 'rejected', label: 'Rejected', color: 'bg-rose-500/80' },
 ];
 
 export const STAGE_LABEL: Record<Stage, string> = Object.fromEntries(
@@ -18,9 +15,9 @@ export const STAGE_LABEL: Record<Stage, string> = Object.fromEntries(
 ) as Record<Stage, string>;
 
 export const PRIORITIES: { value: Priority; label: string; className: string }[] = [
-  { value: 'low', label: 'Low', className: 'text-foreground/25' },
-  { value: 'medium', label: 'Medium', className: 'text-foreground/55' },
-  { value: 'high', label: 'High', className: 'text-foreground' },
+  { value: 'low', label: 'Low', className: 'text-slate-400' },
+  { value: 'medium', label: 'Medium', className: 'text-amber-500' },
+  { value: 'high', label: 'High', className: 'text-rose-500' },
 ];
 
 export const PRIORITY_LABEL: Record<Priority, string> = {
@@ -43,10 +40,10 @@ export const INTERVIEW_TYPE_LABEL: Record<InterviewType, string> = Object.fromEn
 ) as Record<InterviewType, string>;
 
 export const INTERVIEW_OUTCOMES: { value: InterviewOutcome; label: string; className: string }[] = [
-  { value: 'pending', label: 'Pending', className: 'text-foreground/50' },
-  { value: 'passed', label: 'Passed', className: 'text-foreground' },
-  { value: 'failed', label: 'Failed', className: 'text-muted-foreground' },
-  { value: 'cancelled', label: 'Cancelled', className: 'text-muted-foreground/50' },
+  { value: 'pending', label: 'Pending', className: 'text-amber-500' },
+  { value: 'passed', label: 'Passed', className: 'text-emerald-500' },
+  { value: 'failed', label: 'Failed', className: 'text-rose-500' },
+  { value: 'cancelled', label: 'Cancelled', className: 'text-slate-400' },
 ];
 
 export const RELATIONSHIPS: { value: Relationship; label: string }[] = [
