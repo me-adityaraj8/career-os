@@ -48,7 +48,7 @@ function NavItem({
         cn(
           'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200',
           isActive
-            ? 'text-sidebar-active-foreground'
+            ? 'text-sidebar-foreground'
             : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/5',
         )
       }
@@ -58,7 +58,7 @@ function NavItem({
           {isActive && (
             <motion.div
               layoutId="sidebar-active"
-              className="absolute inset-0 rounded-lg bg-sidebar-active"
+              className="absolute inset-0 rounded-lg bg-sidebar-foreground/10"
               transition={{ type: 'spring', stiffness: 350, damping: 30 }}
             />
           )}

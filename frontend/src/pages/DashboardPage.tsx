@@ -135,7 +135,7 @@ export default function DashboardPage() {
                         <div key={g.id}>
                           <div className="mb-1.5 flex items-center justify-between text-sm">
                             <span className="flex items-center gap-1.5 truncate pr-2">
-                              {done && <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />}
+                              {done && <CheckCircle2 className="size-3.5 shrink-0 text-primary" />}
                               <span className="truncate">{g.title}</span>
                             </span>
                             <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
@@ -144,7 +144,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                             <motion.div
-                              className={cn('h-full rounded-full', done ? 'bg-emerald-500' : 'bg-primary')}
+                              className="h-full rounded-full bg-primary"
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.6, ease: 'easeOut' }}

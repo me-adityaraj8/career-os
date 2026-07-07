@@ -23,7 +23,7 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar: 240 4.8% 97%;
     --sidebar-foreground: 240 5.9% 10%;
@@ -37,6 +37,10 @@
 
     --glass: 0 0% 100% / 0.7;
     --glass-border: 0 0% 100% / 0.2;
+
+    --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+    --card-hover-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    --surface-elevated: 0 0% 100%;
   }
 
   .dark {
@@ -68,6 +72,10 @@
 
     --glass: 240 6% 7% / 0.6;
     --glass-border: 240 6% 20% / 0.3;
+
+    --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.15);
+    --card-hover-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+    --surface-elevated: 240 6% 9%;
   }
 }
 
@@ -78,13 +86,16 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: 'rlig' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
   }
 }
 
-/* Scrollbars */
+/* Scrollbars — thin & unobtrusive */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
@@ -112,6 +123,18 @@
   }
 }
 
+/* Floating card utility — premium elevation */
+@layer utilities {
+  .card-float {
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .card-float:hover {
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-2px);
+  }
+}
+
 /* Animated gradient for accent elements */
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }
@@ -123,6 +146,11 @@
   100% { transform: translateX(100%); }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
 @layer utilities {
   .animate-gradient {
     background-size: 200% 200%;
@@ -130,5 +158,8 @@
   }
   .animate-shimmer {
     animation: shimmer 2s infinite;
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 }
