@@ -25,7 +25,7 @@ export function Toaster() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, x: 24 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="pointer-events-auto flex items-start gap-3 rounded-xl border bg-card/95 p-4 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)] backdrop-blur-sm"
+              className="pointer-events-auto flex items-start gap-3 rounded-2xl border bg-popover/90 p-4 shadow-elev-3 backdrop-blur-xl"
             >
               <Icon
                 className={cn(
