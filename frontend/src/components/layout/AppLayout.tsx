@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Menu, Moon, Sun, LogOut, User as UserIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Menu, Moon, Sun, LogOut, User as UserIcon, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,10 +17,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { useLogout, useUpdateProfile } from '@/hooks/useAuth';
 import { initials } from '@/lib/utils';
 
-/**
- * Authenticated app shell: fixed sidebar on desktop, slide-over drawer on mobile,
- * a top bar with theme toggle + user menu, and an <Outlet> for the active page.
- */
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggle } = useThemeStore();
@@ -27,7 +24,6 @@ export function AppLayout() {
   const logout = useLogout();
   const updateProfile = useUpdateProfile();
 
-  // Toggling theme also persists the preference to the user's account.
   function onToggleTheme() {
     toggle();
     updateProfile.mutate({ darkMode: theme !== 'dark' });
@@ -36,24 +32,44 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r lg:block">
-        <div className="sticky top-0 h-screen">
+      <aside className="hidden w-[260px] shrink-0 lg:block">
+        <div className="sticky top-0 h-screen border-r border-sidebar-border bg-sidebar">
           <Sidebar />
         </div>
       </aside>
 
       {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-64 border-r bg-background">
-            <Sidebar onNavigate={() => setMobileOpen(false)} />
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed left-0 top-0 z-50 h-full w-[260px] border-r border-sidebar-border bg-sidebar lg:hidden"
+            >
+              <div className="absolute right-3 top-4">
+                <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
+                  <X className="size-4" />
+                </Button>
+              </div>
+              <Sidebar onNavigate={() => setMobileOpen(false)} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur">
+        {/* Header */}
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-xl lg:px-6">
           <Button
             variant="ghost"
             size="icon"
@@ -64,21 +80,27 @@ export function AppLayout() {
           </Button>
           <div className="flex-1" />
 
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={onToggleTheme} aria-label="Toggle theme">
-              {theme === 'dark' ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleTheme}
+              aria-label="Toggle theme"
+              className="text-muted-foreground"
+            >
+              {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                <button className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground transition-transform hover:scale-105">
                   {user ? initials(user.name) : <UserIcon className="size-4" />}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
-                    <span>{user?.name}</span>
+                    <span className="font-semibold">{user?.name}</span>
                     <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
                   </div>
                 </DropdownMenuLabel>
@@ -92,8 +114,10 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

@@ -29,9 +29,9 @@ export default function RegisterPage() {
 
   return (
     <AuthShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Start organizing your job search in minutes.
         </p>
       </div>
@@ -73,7 +73,11 @@ export default function RegisterPage() {
           />
         </div>
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && (
+          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
 
         <Button type="submit" className="w-full" disabled={register.isPending}>
           {register.isPending && <Loader2 className="size-4 animate-spin" />}
@@ -81,9 +85,9 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-sm text-muted-foreground">
+      <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-foreground hover:underline">
+        <Link to="/login" className="font-medium text-foreground transition-colors hover:underline">
           Log in
         </Link>
       </p>
