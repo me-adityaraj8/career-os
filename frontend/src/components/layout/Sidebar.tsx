@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
   Kanban,
@@ -13,45 +14,93 @@ import {
 import { Logo } from '@/components/Logo';
 import { cn } from '@/lib/utils';
 
-const nav = [
+const mainNav = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/applications', label: 'Applications', icon: Kanban },
   { to: '/resumes', label: 'Resumes', icon: FileText },
   { to: '/interviews', label: 'Interviews', icon: MessageSquare },
   { to: '/network', label: 'Network', icon: Users },
+];
+
+const toolsNav = [
   { to: '/ai', label: 'AI Tools', icon: Sparkles },
   { to: '/goals', label: 'Goals', icon: Target },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+];
+
+const bottomNav = [
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
-/** Left navigation. Rendered in a static column on desktop and inside a drawer on mobile. */
+function NavItem({
+  item,
+  onNavigate,
+}: {
+  item: { to: string; label: string; icon: React.ElementType; end?: boolean };
+  onNavigate?: () => void;
+}) {
+  return (
+    <NavLink
+      to={item.to}
+      end={item.end}
+      onClick={onNavigate}
+      className={({ isActive }) =>
+        cn(
+          'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200',
+          isActive
+            ? 'text-sidebar-active-foreground'
+            : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/5',
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <motion.div
+              layoutId="sidebar-active"
+              className="absolute inset-0 rounded-lg bg-sidebar-active"
+              transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+            />
+          )}
+          <item.icon className="relative z-10 size-4" />
+          <span className="relative z-10">{item.label}</span>
+        </>
+      )}
+    </NavLink>
+  );
+}
+
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <div className="flex h-full flex-col gap-2 p-4">
-      <div className="px-2 py-3">
+    <div className="flex h-full flex-col px-3 py-4">
+      <div className="mb-6 px-3 py-1">
         <Logo />
       </div>
-      <nav className="flex flex-1 flex-col gap-1">
-        {nav.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-secondary text-secondary-foreground'
-                  : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground',
-              )
-            }
-          >
-            <item.icon className="size-4" />
-            {item.label}
-          </NavLink>
-        ))}
+
+      <nav className="flex flex-1 flex-col gap-6">
+        <div className="space-y-1">
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+            Overview
+          </p>
+          {mainNav.map((item) => (
+            <NavItem key={item.to} item={item} onNavigate={onNavigate} />
+          ))}
+        </div>
+
+        <div className="space-y-1">
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+            Tools
+          </p>
+          {toolsNav.map((item) => (
+            <NavItem key={item.to} item={item} onNavigate={onNavigate} />
+          ))}
+        </div>
+
+        <div className="mt-auto space-y-1">
+          {bottomNav.map((item) => (
+            <NavItem key={item.to} item={item} onNavigate={onNavigate} />
+          ))}
+        </div>
       </nav>
     </div>
   );

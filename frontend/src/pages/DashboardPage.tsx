@@ -1,5 +1,20 @@
 import { Link } from 'react-router-dom';
-import { Send, MessageSquare, Trophy, Target, Bell, Calendar, ArrowRight, Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
+import {
+  Send,
+  MessageSquare,
+  Trophy,
+  Target,
+  Bell,
+  Calendar,
+  ArrowRight,
+  Plus,
+  TrendingUp,
+  Sparkles,
+  CheckCircle2,
+  Clock,
+  Briefcase,
+} from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/StatCard';
 import { EmptyState } from '@/components/EmptyState';
@@ -13,7 +28,16 @@ import { useGoals } from '@/hooks/useGoals';
 import { useInterviews } from '@/hooks/useInterviews';
 import { useContacts } from '@/hooks/useContacts';
 import { useApplications } from '@/hooks/useApplications';
-import { cn, formatDate } from '@/lib/utils';
+import { cn, formatDate, timeAgo } from '@/lib/utils';
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+};
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
@@ -26,17 +50,28 @@ export default function DashboardPage() {
   const upcomingInterviews = (interviews ?? [])
     .filter((r) => r.scheduledAt && new Date(r.scheduledAt) >= new Date() && r.outcome === 'pending')
     .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime())
-    .slice(0, 4);
+    .slice(0, 5);
 
-  const followUps = (contacts ?? []).filter((c) => c.followUp).slice(0, 4);
+  const followUps = (contacts ?? []).filter((c) => c.followUp).slice(0, 5);
   const appById = new Map((applications ?? []).map((a) => [a.id, a]));
 
+  const recentApps = [...(applications ?? [])]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+
   const empty = !isLoading && analytics && analytics.totals.applications === 0;
+
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   return (
     <div>
       <PageHeader
-        title={`Welcome back${user ? `, ${user.name.split(' ')[0]}` : ''}`}
+        title={`${greeting()}${user ? `, ${user.name.split(' ')[0]}` : ''}`}
         description="Here's your job search at a glance."
         actions={
           <Button asChild>
@@ -63,118 +98,206 @@ export default function DashboardPage() {
       )}
 
       {!empty && (
-        <div className="space-y-6">
+        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
           {/* Stat cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <motion.div variants={fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading || !analytics ? (
-              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28" />)
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[104px] rounded-xl" />)
             ) : (
               <>
                 <StatCard label="Applications" value={analytics.totals.applications} icon={Send} />
-                <StatCard label="In interview" value={analytics.totals.interviews} icon={MessageSquare} />
+                <StatCard label="In Interview" value={analytics.totals.interviews} icon={MessageSquare} />
                 <StatCard label="Offers" value={analytics.totals.offers} icon={Trophy} />
-                <StatCard label="Interview rate" value={`${analytics.rates.interviewRate}%`} icon={Target} />
+                <StatCard label="Interview Rate" value={`${analytics.rates.interviewRate}%`} icon={TrendingUp} />
               </>
             )}
-          </div>
+          </motion.div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-12">
             {/* Goals */}
-            <Card className="lg:col-span-1">
-              <CardHeader className="flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-base">Goals</CardTitle>
-                <Link to="/goals" className="text-xs text-muted-foreground hover:text-foreground">
-                  View all
-                </Link>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {goals && goals.length > 0 ? (
-                  goals.slice(0, 3).map((g) => {
-                    const pct = Math.min(100, Math.round((g.progress / g.target) * 100));
-                    return (
-                      <div key={g.id}>
-                        <div className="mb-1 flex items-center justify-between text-sm">
-                          <span className="truncate pr-2">{g.title}</span>
-                          <span className="shrink-0 text-muted-foreground">{g.progress}/{g.target}</span>
+            <motion.div variants={fadeUp} className="lg:col-span-4">
+              <Card className="h-full">
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Target className="size-4 text-muted-foreground" />
+                    Goals
+                  </CardTitle>
+                  <Link to="/goals" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    View all <ArrowRight className="ml-0.5 inline size-3" />
+                  </Link>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(goals ?? []).length > 0 ? (
+                    (goals ?? []).slice(0, 4).map((g: any) => {
+                      const pct = Math.min(100, Math.round((g.progress / g.target) * 100));
+                      const done = g.progress >= g.target;
+                      return (
+                        <div key={g.id}>
+                          <div className="mb-1.5 flex items-center justify-between text-sm">
+                            <span className="flex items-center gap-1.5 truncate pr-2">
+                              {done && <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />}
+                              <span className="truncate">{g.title}</span>
+                            </span>
+                            <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                              {g.progress}/{g.target}
+                            </span>
+                          </div>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                            <motion.div
+                              className={cn('h-full rounded-full', done ? 'bg-emerald-500' : 'bg-primary')}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${pct}%` }}
+                              transition={{ duration: 0.6, ease: 'easeOut' }}
+                            />
+                          </div>
                         </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                          <div className={cn('h-full rounded-full', g.progress >= g.target ? 'bg-emerald-500' : 'bg-primary')} style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No goals yet.{' '}
-                    <Link to="/goals" className="text-foreground hover:underline">Set one</Link>.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No goals yet.{' '}
+                      <Link to="/goals" className="text-foreground hover:underline">Set one</Link>.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Upcoming interviews */}
-            <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-base">Upcoming interviews</CardTitle>
-                <Link to="/interviews" className="text-xs text-muted-foreground hover:text-foreground">View all</Link>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {upcomingInterviews.length > 0 ? (
-                  upcomingInterviews.map((r) => (
-                    <div key={r.id} className="flex items-center gap-3 text-sm">
-                      <Calendar className="size-4 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate">{appById.get(r.applicationId)?.company ?? 'Application'}</p>
-                        <p className="text-xs text-muted-foreground">{formatDate(r.scheduledAt)}</p>
+            <motion.div variants={fadeUp} className="lg:col-span-4">
+              <Card className="h-full">
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Calendar className="size-4 text-muted-foreground" />
+                    Upcoming Interviews
+                  </CardTitle>
+                  <Link to="/interviews" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    View all <ArrowRight className="ml-0.5 inline size-3" />
+                  </Link>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {upcomingInterviews.length > 0 ? (
+                    upcomingInterviews.map((r: any) => (
+                      <div key={r.id} className="flex items-center gap-3 rounded-lg p-2 text-sm transition-colors hover:bg-secondary/50">
+                        <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                          <MessageSquare className="size-3.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">{appById.get(r.applicationId)?.company ?? 'Company'}</p>
+                          <p className="text-xs text-muted-foreground">{formatDate(r.scheduledAt)}</p>
+                        </div>
+                        <Badge variant="secondary" className="shrink-0 capitalize text-[10px]">
+                          {r.type.replace('_', ' ')}
+                        </Badge>
                       </div>
-                      <Badge variant="secondary" className="shrink-0 capitalize">{r.type.replace('_', ' ')}</Badge>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">No interviews scheduled.</p>
-                )}
-              </CardContent>
-            </Card>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No interviews scheduled.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Follow-ups */}
-            <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-base">Follow-ups</CardTitle>
-                <Link to="/network" className="text-xs text-muted-foreground hover:text-foreground">View all</Link>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {followUps.length > 0 ? (
-                  followUps.map((c) => (
-                    <div key={c.id} className="flex items-center gap-3 text-sm">
-                      <Bell className="size-4 shrink-0 text-amber-500" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.company ?? '—'}</p>
+            <motion.div variants={fadeUp} className="lg:col-span-4">
+              <Card className="h-full">
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Bell className="size-4 text-muted-foreground" />
+                    Follow-ups
+                  </CardTitle>
+                  <Link to="/network" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    View all <ArrowRight className="ml-0.5 inline size-3" />
+                  </Link>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {followUps.length > 0 ? (
+                    followUps.map((c: any) => (
+                      <div key={c.id} className="flex items-center gap-3 rounded-lg p-2 text-sm transition-colors hover:bg-secondary/50">
+                        <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                          <Bell className="size-3.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">{c.name}</p>
+                          <p className="text-xs text-muted-foreground">{c.company ?? '—'}</p>
+                        </div>
+                        {c.followUpDate && (
+                          <span className="shrink-0 text-xs text-muted-foreground">{formatDate(c.followUpDate)}</span>
+                        )}
                       </div>
-                      {c.followUpDate && (
-                        <span className="shrink-0 text-xs text-muted-foreground">{formatDate(c.followUpDate)}</span>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">No follow-ups flagged.</p>
-                )}
-              </CardContent>
-            </Card>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No follow-ups flagged.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
-          <Card>
-            <CardContent className="flex flex-col items-start justify-between gap-3 p-5 sm:flex-row sm:items-center">
-              <div>
-                <p className="font-medium">Analyze a job description with AI</p>
-                <p className="text-sm text-muted-foreground">Extract skills, ATS keywords, and a resume-match score.</p>
-              </div>
-              <Button variant="outline" asChild>
-                <Link to="/ai">Open AI Tools <ArrowRight className="size-4" /></Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+          {/* Recent activity */}
+          <motion.div variants={fadeUp}>
+            <Card>
+              <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Clock className="size-4 text-muted-foreground" />
+                  Recent Activity
+                </CardTitle>
+                <Link to="/applications" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                  View all <ArrowRight className="ml-0.5 inline size-3" />
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1">
+                  {recentApps.map((a: any) => (
+                    <div key={a.id} className="flex items-center gap-3 rounded-lg p-2.5 text-sm transition-colors hover:bg-secondary/50">
+                      <div className="flex size-8 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                        <Briefcase className="size-3.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{a.company}</p>
+                        <p className="truncate text-xs text-muted-foreground">{a.role}</p>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className={cn('shrink-0 capitalize text-[10px]', {
+                          'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400': a.stage === 'offer',
+                          'bg-blue-500/10 text-blue-600 dark:text-blue-400': a.stage === 'interview',
+                          'bg-amber-500/10 text-amber-600 dark:text-amber-400': a.stage === 'online_assessment',
+                          'bg-rose-500/10 text-rose-600 dark:text-rose-400': a.stage === 'rejected',
+                        })}
+                      >
+                        {a.stage.replace('_', ' ')}
+                      </Badge>
+                      <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(a.createdAt)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* AI CTA */}
+          <motion.div variants={fadeUp}>
+            <Card className="border-dashed bg-gradient-to-r from-primary/5 to-blue-500/5">
+              <CardContent className="flex flex-col items-start justify-between gap-4 p-6 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Sparkles className="size-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Analyze a job description with AI</p>
+                    <p className="text-sm text-muted-foreground">Extract skills, ATS keywords, and get a resume-match score.</p>
+                  </div>
+                </div>
+                <Button variant="outline" asChild className="shrink-0">
+                  <Link to="/ai">
+                    Open AI Tools <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

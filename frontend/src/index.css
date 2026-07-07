@@ -2,11 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* shadcn-style design tokens. Light theme on :root, dark theme on .dark.
-   The theme store toggles the `dark` class on <html>. */
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 99%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -25,29 +23,51 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-    --radius: 0.65rem;
+    --radius: 0.75rem;
+
+    --sidebar: 240 4.8% 97%;
+    --sidebar-foreground: 240 5.9% 10%;
+    --sidebar-border: 240 5.9% 92%;
+    --sidebar-active: 240 5.9% 10%;
+    --sidebar-active-foreground: 0 0% 98%;
+
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --info: 217 91% 60%;
+
+    --glass: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.2;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 8% 6%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --background: 240 10% 4%;
+    --foreground: 0 0% 95%;
+    --card: 240 6% 7%;
+    --card-foreground: 0 0% 95%;
+    --popover: 240 6% 7%;
+    --popover-foreground: 0 0% 95%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --secondary: 240 4% 14%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 240 4% 14%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 240 4% 14%;
+    --accent-foreground: 0 0% 95%;
     --destructive: 0 62.8% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
     --ring: 240 4.9% 83.9%;
+
+    --sidebar: 240 8% 6%;
+    --sidebar-foreground: 0 0% 80%;
+    --sidebar-border: 240 4% 14%;
+    --sidebar-active: 0 0% 100%;
+    --sidebar-active-foreground: 240 5.9% 10%;
+
+    --glass: 240 6% 7% / 0.6;
+    --glass-border: 240 6% 20% / 0.3;
   }
 }
 
@@ -61,15 +81,54 @@
   }
 }
 
-/* Thin, unobtrusive scrollbars that respect the theme. */
+/* Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
   border-radius: 8px;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.3);
+}
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Glass card utility */
+@layer utilities {
+  .glass {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(12px) saturate(1.5);
+    -webkit-backdrop-filter: blur(12px) saturate(1.5);
+    border: 1px solid hsl(var(--glass-border));
+  }
+  .glass-subtle {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+/* Animated gradient for accent elements */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@layer utilities {
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
 }
