@@ -1,0 +1,9 @@
+node_modules
+.git
+.claude
+*.md
+frontend/node_modules
+frontend/dist
+backend/node_modules
+backend/dist
+backend/uploads
