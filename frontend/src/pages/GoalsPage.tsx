@@ -16,7 +16,6 @@ import { GoalDialog } from '@/components/goals/GoalDialog';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useGoals, useDeleteGoal } from '@/hooks/useGoals';
 import { toast } from '@/stores/toastStore';
-import { cn } from '@/lib/utils';
 import type { Goal } from '@/types';
 
 const PERIOD_LABEL: Record<Goal['period'], string> = {
@@ -101,14 +100,14 @@ export default function GoalsPage() {
                     <div className="mt-4">
                       <div className="mb-1.5 flex items-center justify-between text-sm">
                         <span className="flex items-center gap-1 font-medium">
-                          {done && <CheckCircle2 className="size-4 text-emerald-500" />}
+                          {done && <CheckCircle2 className="size-4 text-primary" />}
                           {g.progress} / {g.target}
                         </span>
                         <span className="text-muted-foreground">{percent}%</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <motion.div
-                          className={cn('h-full rounded-full', done ? 'bg-emerald-500' : 'bg-primary')}
+                          className="h-full rounded-full bg-primary"
                           initial={{ width: 0 }}
                           animate={{ width: `${percent}%` }}
                           transition={{ duration: 0.5, ease: 'easeOut' }}

@@ -79,7 +79,7 @@ function Column({
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `col:${stage}`, data: { stage } });
   return (
-    <div className="flex w-72 shrink-0 flex-col">
+    <div className="flex min-w-0 flex-1 flex-col">
       <div className="mb-2 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <span className={cn('size-2 rounded-full', color)} />
@@ -197,7 +197,7 @@ export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="flex gap-4 pb-4">
         {STAGES.map((s) => (
           <Column
             key={s.value}
@@ -212,7 +212,7 @@ export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
         ))}
       </div>
       <DragOverlay>
-        {activeApp && <ApplicationCard application={activeApp} className="w-72 rotate-2 shadow-xl ring-2 ring-primary/20" />}
+        {activeApp && <ApplicationCard application={activeApp} className="w-64 rotate-2 shadow-xl ring-2 ring-primary/20" />}
       </DragOverlay>
     </DndContext>
   );
