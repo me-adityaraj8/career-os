@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, Moon, Sun, LogOut, User as UserIcon, X } from 'lucide-react';
+import { Menu, Moon, Sun, LogOut, User as UserIcon, X, Search } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,16 +17,23 @@ import { useAuthStore } from '@/stores/authStore';
 import { useLogout, useUpdateProfile } from '@/hooks/useAuth';
 import { initials } from '@/lib/utils';
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggle } = useThemeStore();
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const updateProfile = useUpdateProfile();
+  const location = useLocation();
 
   function onToggleTheme() {
     toggle();
     updateProfile.mutate({ darkMode: theme !== 'dark' });
+  }
+
+  function openPalette() {
+    window.dispatchEvent(new Event('rys:command-palette'));
   }
 
   return (
@@ -80,7 +87,18 @@ export function AppLayout() {
           </Button>
           <div className="flex-1" />
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={openPalette}
+              className="group hidden h-8 items-center gap-2 rounded-lg border bg-secondary/40 pl-2.5 pr-1.5 text-[13px] text-muted-foreground/70 transition-all hover:border-border hover:bg-secondary hover:text-muted-foreground sm:flex"
+            >
+              <Search className="size-3.5" />
+              <span className="pr-6">Search</span>
+              <kbd className="rounded-md border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/60">
+                {isMac ? '⌘' : 'Ctrl'} K
+              </kbd>
+            </button>
+
             <Button
               variant="ghost"
               size="icon"
@@ -115,9 +133,18 @@ export function AppLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10">
-          <div className="mx-auto max-w-[1440px]">
-            <Outlet />
-          </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              className="mx-auto max-w-[1440px]"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

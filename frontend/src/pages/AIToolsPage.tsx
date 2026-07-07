@@ -72,17 +72,18 @@ export default function AIToolsPage() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm"
+          className="mb-6 flex items-center gap-2.5 rounded-xl border bg-secondary/40 px-4 py-2.5 text-[13px] text-muted-foreground"
         >
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-500" />
-          <div>
-            <p className="font-medium">Running in mock mode</p>
-            <p className="text-muted-foreground">
-              No Anthropic API key is configured, so results are realistic placeholders. Add{' '}
-              <code className="rounded bg-muted px-1 text-xs">ANTHROPIC_API_KEY</code> to{' '}
-              <code className="rounded bg-muted px-1 text-xs">backend/.env</code> to enable live AI.
-            </p>
-          </div>
+          <span className="relative flex size-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
+          </span>
+          <span>
+            <span className="font-medium text-foreground">Mock mode</span> — results are realistic
+            placeholders. Set{' '}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">ANTHROPIC_API_KEY</code> to go
+            live.
+          </span>
         </motion.div>
       )}
 
