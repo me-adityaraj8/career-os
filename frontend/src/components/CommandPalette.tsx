@@ -85,8 +85,15 @@ export function CommandPalette() {
         setOpen((prev) => !prev);
       }
     }
+    function onOpenEvent() {
+      setOpen(true);
+    }
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener('rys:command-palette', onOpenEvent);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('rys:command-palette', onOpenEvent);
+    };
   }, []);
 
   useEffect(() => {
