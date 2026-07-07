@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { KanbanBoard } from '@/components/applications/KanbanBoard';
 import { ApplicationsListView } from '@/components/applications/ApplicationsListView';
 import { ApplicationDialog } from '@/components/applications/ApplicationDialog';
+import { ApplicationDetailModal } from '@/components/applications/ApplicationDetailModal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import {
   useApplications,
@@ -34,6 +35,7 @@ export default function ApplicationsPage() {
   const [editing, setEditing] = useState<Application | null>(null);
   const [addStage, setAddStage] = useState<Stage>('saved');
   const [deleting, setDeleting] = useState<Application | null>(null);
+  const [viewing, setViewing] = useState<Application | null>(null);
 
   const filtered = useMemo(() => {
     if (!applications) return [];
@@ -74,7 +76,7 @@ export default function ApplicationsPage() {
       />
 
       {/* Toolbar */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <div className="relative flex-1 sm:max-w-xs">
             <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -165,6 +167,7 @@ export default function ApplicationsPage() {
               applications={filtered}
               onEdit={openEdit}
               onDelete={setDeleting}
+              onView={setViewing}
               onAdd={openAdd}
             />
           ) : (
@@ -187,6 +190,17 @@ export default function ApplicationsPage() {
           deleting ? `This will permanently remove ${deleting.company} — ${deleting.role}.` : ''
         }
         onConfirm={confirmDelete}
+      />
+      <ApplicationDetailModal
+        application={viewing}
+        open={Boolean(viewing)}
+        onClose={() => setViewing(null)}
+        onEdit={() => {
+          if (viewing) {
+            openEdit(viewing);
+            setViewing(null);
+          }
+        }}
       />
     </div>
   );

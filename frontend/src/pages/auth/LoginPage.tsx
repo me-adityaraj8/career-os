@@ -40,7 +40,7 @@ export default function LoginPage() {
     <AuthShell>
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Log in to your Career OS workspace.</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">Log in to your Rys workspace.</p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
