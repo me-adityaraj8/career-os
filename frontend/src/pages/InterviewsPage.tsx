@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { MessageSquare, Plus, Calendar, MoreVertical } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { MessageSquare, Plus, Calendar, MoreVertical, Clock } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,15 @@ import { cn, formatDate } from '@/lib/utils';
 import { toast } from '@/stores/toastStore';
 import type { Application, InterviewRound } from '@/types';
 
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+};
+
 export default function InterviewsPage() {
   const { data: interviews, isLoading, isError } = useInterviews();
   const { data: applications } = useApplications();
@@ -36,7 +46,6 @@ export default function InterviewsPage() {
     return m;
   }, [applications]);
 
-  // Group rounds by application so each company shows its full interview loop.
   const grouped = useMemo(() => {
     const groups = new Map<string, InterviewRound[]>();
     interviews?.forEach((r) => {
@@ -85,62 +94,74 @@ export default function InterviewsPage() {
         />
       )}
 
-      <div className="space-y-6">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-8">
         {grouped.map(([appId, rounds]) => {
           const app = appById.get(appId);
           return (
-            <div key={appId}>
-              <div className="mb-2 flex items-center gap-2">
-                <h3 className="font-medium">{app ? `${app.company}` : 'Application'}</h3>
-                {app && <span className="text-sm text-muted-foreground">{app.role}</span>}
-                <Badge variant="secondary" className="ml-1">{rounds.length} round{rounds.length > 1 ? 's' : ''}</Badge>
+            <motion.div key={appId} variants={fadeUp}>
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                  <MessageSquare className="size-4" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{app ? app.company : 'Application'}</h3>
+                  {app && <p className="text-xs text-muted-foreground">{app.role}</p>}
+                </div>
+                <Badge variant="secondary" className="ml-auto">{rounds.length} round{rounds.length > 1 ? 's' : ''}</Badge>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {rounds.map((r) => {
-                  const outcome = INTERVIEW_OUTCOMES.find((o) => o.value === r.outcome);
-                  return (
-                    <Card key={r.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{INTERVIEW_TYPE_LABEL[r.type]}</Badge>
-                            <span className={cn('text-xs font-medium', outcome?.className)}>
-                              {outcome?.label}
-                            </span>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger className="rounded p-1 text-muted-foreground hover:bg-secondary">
-                              <MoreVertical className="size-4" />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => { setEditing(r); setDialogOpen(true); }}>
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setDeleting(r)} className="text-destructive">
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        {r.scheduledAt && (
-                          <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Calendar className="size-3.5" />
-                            {formatDate(r.scheduledAt)}{' '}
-                            {new Date(r.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        )}
-                        {r.notes && (
-                          <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{r.notes}</p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+
+              <div className="relative ml-4 border-l-2 border-border pl-6">
+                <div className="grid gap-3">
+                  {rounds.map((r) => {
+                    const outcome = INTERVIEW_OUTCOMES.find((o) => o.value === r.outcome);
+                    return (
+                      <div key={r.id} className="relative">
+                        <div className="absolute -left-[31px] top-4 size-2.5 rounded-full border-2 border-background bg-primary" />
+                        <Card className="transition-all duration-200 hover:shadow-md">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">{INTERVIEW_TYPE_LABEL[r.type]}</Badge>
+                                <span className={cn('text-xs font-medium', outcome?.className)}>
+                                  {outcome?.label}
+                                </span>
+                              </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className="rounded p-1 text-muted-foreground hover:bg-secondary">
+                                  <MoreVertical className="size-4" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => { setEditing(r); setDialogOpen(true); }}>
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setDeleting(r)} className="text-destructive">
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                            {r.scheduledAt && (
+                              <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Calendar className="size-3.5" />
+                                {formatDate(r.scheduledAt)}
+                                <Clock className="ml-1 size-3" />
+                                {new Date(r.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            )}
+                            {r.notes && (
+                              <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{r.notes}</p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       <InterviewDialog open={dialogOpen} onOpenChange={setDialogOpen} round={editing} />
       <ConfirmDialog
