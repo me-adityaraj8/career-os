@@ -114,8 +114,8 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">
+        <main className="flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10">
+          <div className="mx-auto max-w-[1440px]">
             <Outlet />
           </div>
         </main>

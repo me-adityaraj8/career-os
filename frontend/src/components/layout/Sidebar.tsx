@@ -48,8 +48,8 @@ function NavItem({
         cn(
           'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200',
           isActive
-            ? 'text-sidebar-foreground'
-            : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/5',
+            ? 'text-foreground'
+            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50',
         )
       }
     >
@@ -58,7 +58,7 @@ function NavItem({
           {isActive && (
             <motion.div
               layoutId="sidebar-active"
-              className="absolute inset-0 rounded-lg bg-sidebar-foreground/10"
+              className="absolute inset-0 rounded-lg bg-secondary"
               transition={{ type: 'spring', stiffness: 350, damping: 30 }}
             />
           )}
@@ -73,13 +73,13 @@ function NavItem({
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col px-3 py-4">
-      <div className="mb-6 px-3 py-1">
+      <div className="mb-8 px-3 py-1">
         <Logo />
       </div>
 
-      <nav className="flex flex-1 flex-col gap-6">
+      <nav className="flex flex-1 flex-col gap-7">
         <div className="space-y-1">
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/40">
             Overview
           </p>
           {mainNav.map((item) => (
@@ -88,7 +88,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
 
         <div className="space-y-1">
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/40">
             Tools
           </p>
           {toolsNav.map((item) => (

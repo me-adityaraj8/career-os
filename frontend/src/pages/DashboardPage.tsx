@@ -13,7 +13,7 @@ import {
   Sparkles,
   CheckCircle2,
   Clock,
-  Briefcase,
+  Building2,
 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/StatCard';
@@ -32,11 +32,11 @@ import { cn, formatDate, timeAgo } from '@/lib/utils';
 
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.06 } },
+  show: { transition: { staggerChildren: 0.08 } },
 };
 const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
 export default function DashboardPage() {
@@ -50,9 +50,9 @@ export default function DashboardPage() {
   const upcomingInterviews = (interviews ?? [])
     .filter((r) => r.scheduledAt && new Date(r.scheduledAt) >= new Date() && r.outcome === 'pending')
     .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime())
-    .slice(0, 5);
+    .slice(0, 4);
 
-  const followUps = (contacts ?? []).filter((c) => c.followUp).slice(0, 5);
+  const followUps = (contacts ?? []).filter((c) => c.followUp).slice(0, 4);
   const appById = new Map((applications ?? []).map((a) => [a.id, a]));
 
   const recentApps = [...(applications ?? [])]
@@ -69,7 +69,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-10">
       <PageHeader
         title={`${greeting()}${user ? `, ${user.name.split(' ')[0]}` : ''}`}
         description="Here's your job search at a glance."
@@ -98,11 +98,11 @@ export default function DashboardPage() {
       )}
 
       {!empty && (
-        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
+        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-10">
           {/* Stat cards */}
-          <motion.div variants={fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <motion.div variants={fadeUp} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading || !analytics ? (
-              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[104px] rounded-xl" />)
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)
             ) : (
               <>
                 <StatCard label="Applications" value={analytics.totals.applications} icon={Send} />
@@ -113,12 +113,13 @@ export default function DashboardPage() {
             )}
           </motion.div>
 
-          <div className="grid gap-6 lg:grid-cols-12">
+          {/* Two-column layout: Goals + Upcoming */}
+          <div className="grid gap-6 lg:grid-cols-2">
             {/* Goals */}
-            <motion.div variants={fadeUp} className="lg:col-span-4">
+            <motion.div variants={fadeUp}>
               <Card className="h-full">
-                <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
                     <Target className="size-4 text-muted-foreground" />
                     Goals
                   </CardTitle>
@@ -126,25 +127,25 @@ export default function DashboardPage() {
                     View all <ArrowRight className="ml-0.5 inline size-3" />
                   </Link>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-5 pt-2">
                   {(goals ?? []).length > 0 ? (
-                    (goals ?? []).slice(0, 4).map((g: any) => {
+                    (goals ?? []).slice(0, 3).map((g: any) => {
                       const pct = Math.min(100, Math.round((g.progress / g.target) * 100));
                       const done = g.progress >= g.target;
                       return (
                         <div key={g.id}>
-                          <div className="mb-1.5 flex items-center justify-between text-sm">
-                            <span className="flex items-center gap-1.5 truncate pr-2">
-                              {done && <CheckCircle2 className="size-3.5 shrink-0 text-primary" />}
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="flex items-center gap-2 truncate pr-2 text-sm font-medium">
+                              {done && <CheckCircle2 className="size-3.5 shrink-0 text-foreground" />}
                               <span className="truncate">{g.title}</span>
                             </span>
                             <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                               {g.progress}/{g.target}
                             </span>
                           </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
                             <motion.div
-                              className="h-full rounded-full bg-primary"
+                              className="h-full rounded-full bg-foreground/70"
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -154,7 +155,7 @@ export default function DashboardPage() {
                       );
                     })
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="py-4 text-sm text-muted-foreground">
                       No goals yet.{' '}
                       <Link to="/goals" className="text-foreground hover:underline">Set one</Link>.
                     </p>
@@ -164,10 +165,10 @@ export default function DashboardPage() {
             </motion.div>
 
             {/* Upcoming interviews */}
-            <motion.div variants={fadeUp} className="lg:col-span-4">
+            <motion.div variants={fadeUp}>
               <Card className="h-full">
-                <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
                     <Calendar className="size-4 text-muted-foreground" />
                     Upcoming Interviews
                   </CardTitle>
@@ -175,70 +176,35 @@ export default function DashboardPage() {
                     View all <ArrowRight className="ml-0.5 inline size-3" />
                   </Link>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-1 pt-2">
                   {upcomingInterviews.length > 0 ? (
                     upcomingInterviews.map((r: any) => (
-                      <div key={r.id} className="flex items-center gap-3 rounded-lg p-2 text-sm transition-colors hover:bg-secondary/50">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
-                          <MessageSquare className="size-3.5" />
+                      <div key={r.id} className="flex items-center gap-4 rounded-xl p-3 text-sm transition-colors hover:bg-secondary/40">
+                        <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+                          <MessageSquare className="size-4" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{appById.get(r.applicationId)?.company ?? 'Company'}</p>
-                          <p className="text-xs text-muted-foreground">{formatDate(r.scheduledAt)}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">{formatDate(r.scheduledAt)}</p>
                         </div>
-                        <Badge variant="secondary" className="shrink-0 capitalize text-[10px]">
+                        <Badge variant="secondary" className="shrink-0 capitalize text-[11px]">
                           {r.type.replace('_', ' ')}
                         </Badge>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">No interviews scheduled.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Follow-ups */}
-            <motion.div variants={fadeUp} className="lg:col-span-4">
-              <Card className="h-full">
-                <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Bell className="size-4 text-muted-foreground" />
-                    Follow-ups
-                  </CardTitle>
-                  <Link to="/network" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
-                    View all <ArrowRight className="ml-0.5 inline size-3" />
-                  </Link>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {followUps.length > 0 ? (
-                    followUps.map((c: any) => (
-                      <div key={c.id} className="flex items-center gap-3 rounded-lg p-2 text-sm transition-colors hover:bg-secondary/50">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
-                          <Bell className="size-3.5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium">{c.name}</p>
-                          <p className="text-xs text-muted-foreground">{c.company ?? '—'}</p>
-                        </div>
-                        {c.followUpDate && (
-                          <span className="shrink-0 text-xs text-muted-foreground">{formatDate(c.followUpDate)}</span>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No follow-ups flagged.</p>
+                    <p className="py-4 text-sm text-muted-foreground">No interviews scheduled.</p>
                   )}
                 </CardContent>
               </Card>
             </motion.div>
           </div>
 
-          {/* Recent activity */}
+          {/* Recent activity — full width */}
           <motion.div variants={fadeUp}>
             <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
+              <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
                   <Clock className="size-4 text-muted-foreground" />
                   Recent Activity
                 </CardTitle>
@@ -246,47 +212,88 @@ export default function DashboardPage() {
                   View all <ArrowRight className="ml-0.5 inline size-3" />
                 </Link>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-2">
                 <div className="space-y-1">
-                  {recentApps.map((a: any) => (
-                    <div key={a.id} className="flex items-center gap-3 rounded-lg p-2.5 text-sm transition-colors hover:bg-secondary/50">
-                      <div className="flex size-8 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                        <Briefcase className="size-3.5" />
+                  {recentApps.map((a: any, i: number) => (
+                    <motion.div
+                      key={a.id}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                      className="flex items-center gap-4 rounded-xl p-3.5 text-sm transition-all hover:bg-secondary/40"
+                    >
+                      <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+                        <Building2 className="size-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">{a.company}</p>
-                        <p className="truncate text-xs text-muted-foreground">{a.role}</p>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">{a.role}</p>
                       </div>
                       <Badge
                         variant="secondary"
-                        className={cn('shrink-0 capitalize text-[10px]', {
-                          'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400': a.stage === 'offer',
+                        className={cn('shrink-0 capitalize text-[11px] font-medium', {
+                          'bg-foreground/10 text-foreground': a.stage === 'offer',
                           'bg-blue-500/10 text-blue-600 dark:text-blue-400': a.stage === 'interview',
                           'bg-amber-500/10 text-amber-600 dark:text-amber-400': a.stage === 'online_assessment',
-                          'bg-rose-500/10 text-rose-600 dark:text-rose-400': a.stage === 'rejected',
+                          'bg-muted text-muted-foreground': a.stage === 'rejected',
                         })}
                       >
                         {a.stage.replace('_', ' ')}
                       </Badge>
-                      <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(a.createdAt)}</span>
-                    </div>
+                      <span className="shrink-0 text-xs text-muted-foreground/60">{timeAgo(a.createdAt)}</span>
+                    </motion.div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
+          {/* Follow-ups */}
+          {followUps.length > 0 && (
+            <motion.div variants={fadeUp}>
+              <Card>
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
+                    <Bell className="size-4 text-muted-foreground" />
+                    Follow-ups
+                  </CardTitle>
+                  <Link to="/network" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    View all <ArrowRight className="ml-0.5 inline size-3" />
+                  </Link>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {followUps.map((c: any) => (
+                      <div key={c.id} className="flex items-center gap-4 rounded-xl border border-border/50 p-4 transition-colors hover:bg-secondary/30">
+                        <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+                          <Bell className="size-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{c.name}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">{c.company ?? '—'}</p>
+                        </div>
+                        {c.followUpDate && (
+                          <span className="shrink-0 text-xs text-muted-foreground/60">{formatDate(c.followUpDate)}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
           {/* AI CTA */}
           <motion.div variants={fadeUp}>
-            <Card className="border-dashed bg-gradient-to-r from-primary/5 to-blue-500/5">
-              <CardContent className="flex flex-col items-start justify-between gap-4 p-6 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-4">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-5">
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
                     <Sparkles className="size-6" />
                   </div>
                   <div>
-                    <p className="font-semibold">Analyze a job description with AI</p>
-                    <p className="text-sm text-muted-foreground">Extract skills, ATS keywords, and get a resume-match score.</p>
+                    <p className="text-[15px] font-semibold tracking-tight">Analyze a job description with AI</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Extract skills, ATS keywords, and get a resume-match score.</p>
                   </div>
                 </div>
                 <Button variant="outline" asChild className="shrink-0">

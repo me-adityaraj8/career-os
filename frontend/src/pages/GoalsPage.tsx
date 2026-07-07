@@ -100,14 +100,14 @@ export default function GoalsPage() {
                     <div className="mt-4">
                       <div className="mb-1.5 flex items-center justify-between text-sm">
                         <span className="flex items-center gap-1 font-medium">
-                          {done && <CheckCircle2 className="size-4 text-primary" />}
+                          {done && <CheckCircle2 className="size-4 text-foreground" />}
                           {g.progress} / {g.target}
                         </span>
                         <span className="text-muted-foreground">{percent}%</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <motion.div
-                          className="h-full rounded-full bg-primary"
+                          className="h-full rounded-full bg-foreground/70"
                           initial={{ width: 0 }}
                           animate={{ width: `${percent}%` }}
                           transition={{ duration: 0.5, ease: 'easeOut' }}
