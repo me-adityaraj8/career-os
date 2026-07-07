@@ -19,12 +19,12 @@ interface Props {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  saved: 'bg-slate-400',
-  applied: 'bg-blue-500',
-  online_assessment: 'bg-violet-500',
-  interview: 'bg-amber-500',
-  offer: 'bg-emerald-500',
-  rejected: 'bg-rose-500',
+  saved: 'bg-foreground/40 text-background',
+  applied: 'bg-foreground/60 text-background',
+  online_assessment: 'bg-foreground/70 text-background',
+  interview: 'bg-foreground/85 text-background',
+  offer: 'bg-foreground text-background',
+  rejected: 'bg-foreground/20 text-foreground',
 };
 
 export function ApplicationDetailModal({ application, open, onClose, onEdit }: Props) {
@@ -34,7 +34,7 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
 
   const priority = PRIORITIES.find((p) => p.value === application.priority);
   const interviews = allInterviews?.filter((i) => i.applicationId === application.id) ?? [];
-  const stageColor = STAGE_COLORS[application.stage] ?? 'bg-slate-400';
+  const stageColor = STAGE_COLORS[application.stage] ?? 'bg-foreground/40 text-background';
 
   return createPortal(
     <AnimatePresence>
@@ -81,7 +81,7 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
                   <h2 className="text-xl font-bold tracking-tight">{application.company}</h2>
                   <p className="mt-0.5 text-[15px] text-muted-foreground">{application.role}</p>
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                    <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-white', stageColor)}>
+                    <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium', stageColor)}>
                       {STAGE_LABEL[application.stage]}
                     </span>
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -158,10 +158,10 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
                             variant="secondary"
                             className={cn(
                               'rounded-lg capitalize',
-                              interview.outcome === 'passed' && 'bg-emerald-500/10 text-emerald-500',
-                              interview.outcome === 'failed' && 'bg-rose-500/10 text-rose-500',
-                              interview.outcome === 'pending' && 'bg-amber-500/10 text-amber-500',
-                              interview.outcome === 'cancelled' && 'bg-slate-500/10 text-slate-500',
+                              interview.outcome === 'passed' && 'bg-foreground/10 text-foreground',
+                              interview.outcome === 'failed' && 'bg-secondary text-muted-foreground',
+                              interview.outcome === 'pending' && 'bg-secondary text-foreground/60',
+                              interview.outcome === 'cancelled' && 'bg-secondary text-muted-foreground/50',
                             )}
                           >
                             {interview.outcome}

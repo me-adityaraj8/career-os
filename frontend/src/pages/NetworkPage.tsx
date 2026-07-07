@@ -72,7 +72,7 @@ export default function NetworkPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {contacts.map((c, i) => (
             <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-              <Card className={cn('h-full', c.followUp && 'ring-1 ring-amber-500/40')}>
+              <Card className={cn('h-full', c.followUp && 'ring-1 ring-foreground/25')}>
                 <CardContent className="flex h-full flex-col gap-3 p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -125,7 +125,7 @@ export default function NetworkPage() {
                       {c.lastContactDate ? `Last: ${formatDate(c.lastContactDate)}` : 'No contact yet'}
                     </span>
                     {c.followUp && (
-                      <span className="flex items-center gap-1 font-medium text-amber-500">
+                      <span className="flex items-center gap-1 font-medium text-foreground/80">
                         <Bell className="size-3" />
                         {c.followUpDate ? formatDate(c.followUpDate) : 'Follow up'}
                       </span>
