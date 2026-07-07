@@ -145,7 +145,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
                             <motion.div
-                              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-2"
+                              className="h-full rounded-full bg-foreground/80"
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -288,7 +288,7 @@ export default function DashboardPage() {
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-5">
-                  <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/15 to-brand-2/15 text-brand">
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
                     <Sparkles className="size-6" />
                   </div>
                   <div>

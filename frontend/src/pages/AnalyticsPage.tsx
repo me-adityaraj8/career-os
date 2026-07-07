@@ -21,12 +21,12 @@ function weekLabel(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-// Funnel progression: brand ramp from faint to full saturation.
+// Monochrome funnel: progression reads as a luminance ramp, not hue.
 const funnelColors = [
-  'hsl(var(--brand) / 0.35)',
-  'hsl(var(--brand) / 0.55)',
-  'hsl(var(--brand) / 0.75)',
-  'hsl(var(--brand))',
+  'hsl(var(--foreground) / 0.30)',
+  'hsl(var(--foreground) / 0.50)',
+  'hsl(var(--foreground) / 0.72)',
+  'hsl(var(--foreground) / 0.95)',
 ];
 
 const stagger = {
@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
                           boxShadow: '0 4px 12px hsl(var(--foreground) / 0.05)',
                         }}
                       />
-                      <Bar dataKey="count" fill="hsl(var(--brand))" radius={[6, 6, 0, 0]} animationDuration={800} />
+                      <Bar dataKey="count" fill="hsl(var(--foreground))" radius={[6, 6, 0, 0]} animationDuration={800} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
