@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, Moon, Sun, LogOut, User as UserIcon, X, Search } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { Starfield } from '@/components/Starfield';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -37,7 +38,12 @@ export function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="noise ambient relative flex min-h-screen bg-background">
+      {/* Ambient starfield behind all content */}
+      <div className="absolute inset-0 -z-10" aria-hidden>
+        <Starfield density={0.7} />
+      </div>
+
       {/* Desktop sidebar */}
       <aside className="hidden w-[260px] shrink-0 lg:block">
         <div className="sticky top-0 h-screen border-r border-sidebar-border bg-sidebar">
