@@ -51,13 +51,16 @@ export function AuthShell({ children }: { children: ReactNode }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <p className="mb-2 text-sm font-medium tracking-wide text-blue-400">
-              CAREER OS
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-background/15 bg-background/5 px-3 py-1 text-xs font-medium tracking-wide text-background/70 backdrop-blur-sm">
+              <span className="size-1.5 rounded-full bg-emerald-400" />
+              Rys — early access
             </p>
-            <h2 className="max-w-md text-3xl font-bold leading-tight text-background xl:text-4xl">
+            <h2 className="max-w-md text-4xl font-bold leading-[1.1] tracking-tight text-background xl:text-5xl">
               Your job search,
               <br />
-              unified.
+              <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
+                unified.
+              </span>
             </h2>
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-background/60">
               Track applications, manage resumes, prep for interviews, and get AI-powered insights — all in one workspace.
