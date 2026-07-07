@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { CommandPalette } from '@/components/CommandPalette';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthStore } from '@/stores/authStore';
 import LoginPage from '@/pages/auth/LoginPage';
@@ -31,6 +32,7 @@ export default function App() {
         <Route
           element={
             <ProtectedRoute>
+              <CommandPalette />
               <AppLayout />
             </ProtectedRoute>
           }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Sparkles, Loader2, FileText, Target, MessageSquareText, Save, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Loader2, FileText, Target, MessageSquareText, Save, Info, Zap } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,12 +24,37 @@ import { apiErrorMessage } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { CoverLetter, InterviewQuestionSet, JobAnalysis } from '@/types';
 
+const fadeIn = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 function MockBadge({ isMock }: { isMock: boolean }) {
   if (!isMock) return null;
   return (
     <Badge variant="outline" className="gap-1 text-amber-600 dark:text-amber-500">
       <Info className="size-3" /> Mock
     </Badge>
+  );
+}
+
+function AILoadingState({ label }: { label: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4"
+    >
+      <div className="relative">
+        <Sparkles className="size-5 text-primary" />
+        <motion.div
+          className="absolute inset-0 rounded-full bg-primary/20"
+          animate={{ scale: [1, 1.8, 1], opacity: [0.5, 0, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+      </div>
+      <p className="text-sm font-medium">{label}</p>
+    </motion.div>
   );
 }
 
@@ -43,17 +69,21 @@ export default function AIToolsPage() {
       />
 
       {status?.mode === 'mock' && (
-        <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm"
+        >
           <Info className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-500" />
           <div>
             <p className="font-medium">Running in mock mode</p>
             <p className="text-muted-foreground">
               No Anthropic API key is configured, so results are realistic placeholders. Add{' '}
-              <code className="rounded bg-muted px-1">ANTHROPIC_API_KEY</code> to{' '}
-              <code className="rounded bg-muted px-1">backend/.env</code> to enable live AI.
+              <code className="rounded bg-muted px-1 text-xs">ANTHROPIC_API_KEY</code> to{' '}
+              <code className="rounded bg-muted px-1 text-xs">backend/.env</code> to enable live AI.
             </p>
           </div>
-        </div>
+        </motion.div>
       )}
 
       <Tabs defaultValue="analyzer">
@@ -83,7 +113,6 @@ export default function AIToolsPage() {
   );
 }
 
-/** Shared application + resume pickers used by the analyzer and cover letter tabs. */
 function ContextPickers({
   applicationId,
   setApplicationId,
@@ -161,62 +190,81 @@ function JobAnalyzer() {
             <Label htmlFor="jd">Job description</Label>
             <Textarea id="jd" rows={8} placeholder="Paste the job description…" value={jd} onChange={(e) => setJd(e.target.value)} />
           </div>
-          <Button onClick={run} disabled={analyze.isPending || jd.trim().length < 20}>
-            {analyze.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+          <Button onClick={run} disabled={analyze.isPending || jd.trim().length < 20} className="gap-2">
+            {analyze.isPending ? <Loader2 className="size-4 animate-spin" /> : <Zap className="size-4" />}
             Analyze
           </Button>
         </CardContent>
       </Card>
 
-      {result && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Analysis</CardTitle>
-              <MockBadge isMock={result.isMock} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {result.matchScore !== null && (
-              <div>
-                <div className="mb-1 flex items-center justify-between text-sm">
-                  <span className="font-medium">Resume match</span>
-                  <span className="font-semibold">{result.matchScore}%</span>
+      <AnimatePresence>
+        {analyze.isPending && (
+          <AILoadingState label="Analyzing job description…" />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {result && (
+          <motion.div variants={fadeIn} initial="hidden" animate="show" exit="hidden">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Sparkles className="size-4 text-primary" /> Analysis
+                  </CardTitle>
+                  <MockBadge isMock={result.isMock} />
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={cn(
-                      'h-full rounded-full transition-all',
-                      result.matchScore >= 70 ? 'bg-emerald-500' : result.matchScore >= 40 ? 'bg-amber-500' : 'bg-rose-500',
-                    )}
-                    style={{ width: `${result.matchScore}%` }}
-                  />
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {result.matchScore !== null && (
+                  <div>
+                    <div className="mb-2 flex items-center justify-between text-sm">
+                      <span className="font-medium">Resume match</span>
+                      <span className={cn(
+                        'text-lg font-bold',
+                        result.matchScore >= 70 ? 'text-emerald-500' : result.matchScore >= 40 ? 'text-amber-500' : 'text-rose-500',
+                      )}>
+                        {result.matchScore}%
+                      </span>
+                    </div>
+                    <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                      <motion.div
+                        className={cn(
+                          'h-full rounded-full',
+                          result.matchScore >= 70 ? 'bg-emerald-500' : result.matchScore >= 40 ? 'bg-amber-500' : 'bg-rose-500',
+                        )}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${result.matchScore}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <p className="mb-1 text-sm font-medium">Summary</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{result.summary}</p>
                 </div>
-              </div>
-            )}
-            <div>
-              <p className="mb-1 text-sm font-medium">Summary</p>
-              <p className="text-sm text-muted-foreground">{result.summary}</p>
-            </div>
-            <div>
-              <p className="mb-2 text-sm font-medium">Required skills</p>
-              <div className="flex flex-wrap gap-1.5">
-                {result.requiredSkills.map((s) => (
-                  <Badge key={s} variant="secondary">{s}</Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="mb-2 text-sm font-medium">ATS keywords</p>
-              <div className="flex flex-wrap gap-1.5">
-                {result.atsKeywords.map((k) => (
-                  <Badge key={k} variant="outline">{k}</Badge>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                <div>
+                  <p className="mb-2 text-sm font-medium">Required skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {result.requiredSkills.map((s) => (
+                      <Badge key={s} variant="secondary">{s}</Badge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium">ATS keywords</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {result.atsKeywords.map((k) => (
+                      <Badge key={k} variant="outline">{k}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -278,30 +326,42 @@ function CoverLetterGenerator() {
             <Label htmlFor="cljd">Job description</Label>
             <Textarea id="cljd" rows={6} placeholder="Paste the job description…" value={jd} onChange={(e) => setJd(e.target.value)} />
           </div>
-          <Button onClick={run} disabled={generate.isPending || jd.trim().length < 20}>
-            {generate.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+          <Button onClick={run} disabled={generate.isPending || jd.trim().length < 20} className="gap-2">
+            {generate.isPending ? <Loader2 className="size-4 animate-spin" /> : <Zap className="size-4" />}
             Generate cover letter
           </Button>
         </CardContent>
       </Card>
 
-      {result && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Draft (editable)</CardTitle>
-              <MockBadge isMock={result.isMock} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Textarea rows={16} value={draft} onChange={(e) => setDraft(e.target.value)} className="font-mono text-sm" />
-            <Button onClick={save} disabled={update.isPending || draft === result.content}>
-              {update.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-              Save
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      <AnimatePresence>
+        {generate.isPending && (
+          <AILoadingState label="Crafting your cover letter…" />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {result && (
+          <motion.div variants={fadeIn} initial="hidden" animate="show" exit="hidden">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Sparkles className="size-4 text-primary" /> Draft (editable)
+                  </CardTitle>
+                  <MockBadge isMock={result.isMock} />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Textarea rows={16} value={draft} onChange={(e) => setDraft(e.target.value)} className="font-mono text-sm leading-relaxed" />
+                <Button onClick={save} disabled={update.isPending || draft === result.content} className="gap-2">
+                  {update.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                  Save
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -313,10 +373,10 @@ function InterviewCoach() {
   const [jd, setJd] = useState('');
   const [result, setResult] = useState<InterviewQuestionSet | null>(null);
 
-  const categories: Array<{ key: 'technical' | 'behavioral' | 'company'; label: string }> = [
-    { key: 'technical', label: 'Technical' },
-    { key: 'behavioral', label: 'Behavioral' },
-    { key: 'company', label: 'Company-specific' },
+  const categories: Array<{ key: 'technical' | 'behavioral' | 'company'; label: string; icon: React.ReactNode }> = [
+    { key: 'technical', label: 'Technical', icon: <Target className="size-4" /> },
+    { key: 'behavioral', label: 'Behavioral', icon: <MessageSquareText className="size-4" /> },
+    { key: 'company', label: 'Company-specific', icon: <Sparkles className="size-4" /> },
   ];
 
   async function run() {
@@ -346,41 +406,60 @@ function InterviewCoach() {
             <Label htmlFor="icjd">Job description (optional)</Label>
             <Textarea id="icjd" rows={4} value={jd} onChange={(e) => setJd(e.target.value)} />
           </div>
-          <Button onClick={run} disabled={generate.isPending || !company || !role}>
-            {generate.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+          <Button onClick={run} disabled={generate.isPending || !company || !role} className="gap-2">
+            {generate.isPending ? <Loader2 className="size-4 animate-spin" /> : <Zap className="size-4" />}
             Generate questions
           </Button>
         </CardContent>
       </Card>
 
-      {result && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-end">
-            <MockBadge isMock={result.isMock} />
-          </div>
-          {categories.map((cat) => {
-            const items = result.questions.filter((q) => q.category === cat.key);
-            if (items.length === 0) return null;
-            return (
-              <Card key={cat.key}>
-                <CardHeader>
-                  <CardTitle className="text-base">{cat.label}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {items.map((q, i) => (
-                      <li key={i} className="flex gap-2 text-sm">
-                        <span className="text-muted-foreground">{i + 1}.</span>
-                        <span>{q.question}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+      <AnimatePresence>
+        {generate.isPending && (
+          <AILoadingState label="Preparing interview questions…" />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {result && (
+          <motion.div
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+            initial="hidden"
+            animate="show"
+            className="space-y-4"
+          >
+            <div className="flex items-center justify-end">
+              <MockBadge isMock={result.isMock} />
+            </div>
+            {categories.map((cat) => {
+              const items = result.questions.filter((q) => q.category === cat.key);
+              if (items.length === 0) return null;
+              return (
+                <motion.div key={cat.key} variants={fadeIn}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        {cat.icon} {cat.label}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-3">
+                        {items.map((q, i) => (
+                          <li key={i} className="flex gap-3 text-sm">
+                            <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary text-xs font-medium text-muted-foreground">
+                              {i + 1}
+                            </span>
+                            <span className="leading-relaxed">{q.question}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
