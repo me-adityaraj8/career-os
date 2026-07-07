@@ -26,7 +26,7 @@ export const ApplicationCard = forwardRef<HTMLDivElement, Props>(
       <div
         ref={ref}
         className={cn(
-          'group rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md',
+          'group rounded-xl border bg-card p-3.5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
           dragging && 'opacity-50',
           className,
         )}

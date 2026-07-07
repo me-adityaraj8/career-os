@@ -96,8 +96,8 @@ function Column({
       <div
         ref={setNodeRef}
         className={cn(
-          'flex min-h-[120px] flex-1 flex-col gap-2 rounded-lg p-2 transition-colors',
-          isOver ? 'bg-secondary/70' : 'bg-secondary/30',
+          'flex min-h-[120px] flex-1 flex-col gap-2.5 rounded-xl p-2.5 transition-all duration-200',
+          isOver ? 'bg-secondary/70 ring-2 ring-primary/20' : 'bg-secondary/30',
         )}
       >
         <SortableContext items={applications.map((a) => a.id)} strategy={verticalListSortingStrategy}>
@@ -212,7 +212,7 @@ export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
         ))}
       </div>
       <DragOverlay>
-        {activeApp && <ApplicationCard application={activeApp} className="w-72 rotate-2 shadow-lg" />}
+        {activeApp && <ApplicationCard application={activeApp} className="w-72 rotate-2 shadow-xl ring-2 ring-primary/20" />}
       </DragOverlay>
     </DndContext>
   );
