@@ -45,25 +45,23 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        'transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.3)]',
+        'group hover:-translate-y-0.5 hover:border-border-strong hover:shadow-elev-2',
         className,
       )}
     >
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
-            <p className="text-3xl font-bold tracking-tight tabular-nums">
-              {numeric ? <CountUp value={numeric.n} suffix={numeric.suffix} /> : value}
-            </p>
-            {sublabel && <p className="text-xs text-muted-foreground">{sublabel}</p>}
-          </div>
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between">
+          <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
           {Icon && (
-            <div className="flex size-11 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
-              <Icon className="size-5" />
+            <div className="flex size-8 items-center justify-center rounded-lg border bg-secondary/50 text-muted-foreground/70 transition-colors duration-300 group-hover:text-foreground">
+              <Icon className="size-4" />
             </div>
           )}
         </div>
+        <p className="mt-3 text-[28px] font-semibold leading-none tracking-tight tabular-nums">
+          {numeric ? <CountUp value={numeric.n} suffix={numeric.suffix} /> : value}
+        </p>
+        {sublabel && <p className="mt-2 text-xs text-muted-foreground">{sublabel}</p>}
       </CardContent>
     </Card>
   );

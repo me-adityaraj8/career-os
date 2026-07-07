@@ -82,7 +82,7 @@ export function AppLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-xl lg:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b bg-background/70 px-4 backdrop-blur-xl lg:px-6">
           <Button
             variant="ghost"
             size="icon"
@@ -91,20 +91,19 @@ export function AppLayout() {
           >
             <Menu className="size-5" />
           </Button>
-          <div className="flex-1" />
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={openPalette}
-              className="group hidden h-8 items-center gap-2 rounded-lg border bg-secondary/40 pl-2.5 pr-1.5 text-[13px] text-muted-foreground/70 transition-all hover:border-border hover:bg-secondary hover:text-muted-foreground sm:flex"
-            >
-              <Search className="size-3.5" />
-              <span className="pr-6">Search</span>
-              <kbd className="rounded-md border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/60">
-                {isMac ? '⌘' : 'Ctrl'} K
-              </kbd>
-            </button>
+          <button
+            onClick={openPalette}
+            className="group hidden h-9 w-full max-w-[280px] items-center gap-2 rounded-lg border bg-secondary/40 px-3 text-[13px] text-muted-foreground/70 transition-all duration-200 ease-premium hover:border-border-strong hover:bg-secondary sm:flex"
+          >
+            <Search className="size-3.5" />
+            <span>Search or jump to…</span>
+            <kbd className="ml-auto rounded-md border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/60">
+              {isMac ? '⌘' : 'Ctrl'} K
+            </kbd>
+          </button>
 
+          <div className="flex flex-1 items-center justify-end gap-1.5 sm:flex-none">
             <Button
               variant="ghost"
               size="icon"
@@ -117,7 +116,7 @@ export function AppLayout() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground transition-transform hover:scale-105">
+                <button className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground ring-2 ring-transparent ring-offset-2 ring-offset-background transition-all hover:ring-border-strong">
                   {user ? initials(user.name) : <UserIcon className="size-4" />}
                 </button>
               </DropdownMenuTrigger>
