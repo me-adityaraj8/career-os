@@ -19,12 +19,12 @@ interface Props {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  saved: 'bg-foreground/40 text-background',
-  applied: 'bg-foreground/60 text-background',
-  online_assessment: 'bg-foreground/70 text-background',
-  interview: 'bg-foreground/85 text-background',
-  offer: 'bg-foreground text-background',
-  rejected: 'bg-foreground/20 text-foreground',
+  saved: 'bg-slate-500/10 text-slate-500 dark:text-slate-400',
+  applied: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  online_assessment: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+  interview: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  offer: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  rejected: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
 };
 
 export function ApplicationDetailModal({ application, open, onClose, onEdit }: Props) {
@@ -34,7 +34,7 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
 
   const priority = PRIORITIES.find((p) => p.value === application.priority);
   const interviews = allInterviews?.filter((i) => i.applicationId === application.id) ?? [];
-  const stageColor = STAGE_COLORS[application.stage] ?? 'bg-foreground/40 text-background';
+  const stageColor = STAGE_COLORS[application.stage] ?? 'bg-slate-500/10 text-slate-500';
 
   return createPortal(
     <AnimatePresence>
@@ -158,10 +158,10 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
                             variant="secondary"
                             className={cn(
                               'rounded-lg capitalize',
-                              interview.outcome === 'passed' && 'bg-foreground/10 text-foreground',
-                              interview.outcome === 'failed' && 'bg-secondary text-muted-foreground',
-                              interview.outcome === 'pending' && 'bg-secondary text-foreground/60',
-                              interview.outcome === 'cancelled' && 'bg-secondary text-muted-foreground/50',
+                              interview.outcome === 'passed' && 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                              interview.outcome === 'failed' && 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+                              interview.outcome === 'pending' && 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                              interview.outcome === 'cancelled' && 'bg-secondary text-muted-foreground/60',
                             )}
                           >
                             {interview.outcome}

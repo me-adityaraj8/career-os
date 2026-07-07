@@ -145,7 +145,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
                             <motion.div
-                              className="h-full rounded-full bg-foreground/70"
+                              className="h-full rounded-full bg-gradient-to-r from-brand to-brand-2"
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -232,9 +232,9 @@ export default function DashboardPage() {
                       <Badge
                         variant="secondary"
                         className={cn('shrink-0 capitalize text-[11px] font-medium', {
-                          'bg-foreground/10 text-foreground': a.stage === 'offer',
-                          'bg-foreground/[0.07] text-foreground/80': a.stage === 'interview',
-                          'bg-foreground/[0.05] text-foreground/60': a.stage === 'online_assessment',
+                          'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400': a.stage === 'offer',
+                          'bg-blue-500/10 text-blue-600 dark:text-blue-400': a.stage === 'interview',
+                          'bg-violet-500/10 text-violet-600 dark:text-violet-400': a.stage === 'online_assessment',
                           'bg-muted text-muted-foreground': a.stage === 'rejected',
                         })}
                       >
@@ -288,7 +288,7 @@ export default function DashboardPage() {
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-5">
-                  <div className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-foreground">
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/15 to-brand-2/15 text-brand">
                     <Sparkles className="size-6" />
                   </div>
                   <div>

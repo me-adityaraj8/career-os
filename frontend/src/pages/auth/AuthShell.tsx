@@ -36,8 +36,9 @@ export function AuthShell({ children }: { children: ReactNode }) {
 
         {/* Soft monochrome glows — a distant light source, not color */}
         <div className="absolute inset-0">
-          <div className="absolute -top-40 left-1/2 h-96 w-[720px] -translate-x-1/2 rounded-full bg-white/[0.06] blur-3xl" />
-          <div className="absolute -bottom-32 -right-24 size-96 rounded-full bg-white/[0.03] blur-3xl" />
+          <div className="absolute -top-40 left-1/2 h-96 w-[720px] -translate-x-1/2 rounded-full bg-indigo-500/[0.16] blur-3xl" />
+          <div className="absolute -bottom-32 -right-24 size-96 rounded-full bg-violet-500/[0.12] blur-3xl" />
+          <div className="absolute left-1/4 top-1/2 size-72 rounded-full bg-white/[0.03] blur-3xl" />
         </div>
 
         {/* Horizon line — thin gradient rule, Interstellar-style */}
@@ -59,7 +60,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
             <h2 className="max-w-md text-4xl font-bold leading-[1.1] tracking-tight text-white xl:text-5xl">
               Your job search,
               <br />
-              <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-indigo-400 via-violet-300 to-indigo-400 bg-clip-text text-transparent">
                 unified.
               </span>
             </h2>
