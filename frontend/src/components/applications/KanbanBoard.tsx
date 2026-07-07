@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   DndContext,
   DragEndEvent,
@@ -27,18 +28,20 @@ interface Props {
   applications: Application[];
   onEdit: (app: Application) => void;
   onDelete: (app: Application) => void;
+  onView: (app: Application) => void;
   onAdd: (stage: Stage) => void;
 }
 
-/** One draggable card. */
 function SortableCard({
   application,
   onEdit,
   onDelete,
+  onView,
 }: {
   application: Application;
   onEdit: () => void;
   onDelete: () => void;
+  onView: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: application.id,
@@ -51,6 +54,7 @@ function SortableCard({
       application={application}
       onEdit={onEdit}
       onDelete={onDelete}
+      onView={onView}
       dragging={isDragging}
       className="cursor-grab active:cursor-grabbing"
       {...attributes}
@@ -59,7 +63,6 @@ function SortableCard({
   );
 }
 
-/** A stage column that accepts drops (including when empty). */
 function Column({
   stage,
   label,
@@ -67,7 +70,9 @@ function Column({
   applications,
   onEdit,
   onDelete,
+  onView,
   onAdd,
+  index,
 }: {
   stage: Stage;
   label: string;
@@ -75,30 +80,42 @@ function Column({
   applications: Application[];
   onEdit: (a: Application) => void;
   onDelete: (a: Application) => void;
+  onView: (a: Application) => void;
   onAdd: (stage: Stage) => void;
+  index: number;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `col:${stage}`, data: { stage } });
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
-      <div className="mb-2 flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
+    <motion.div
+      className="flex min-w-0 flex-1 flex-col"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
+    >
+      <div className="mb-4 flex items-center justify-between px-1">
+        <div className="flex items-center gap-2.5">
           <span className={cn('size-2 rounded-full', color)} />
-          <span className="text-sm font-medium">{label}</span>
-          <span className="text-xs text-muted-foreground">{applications.length}</span>
+          <span className="text-[13px] font-semibold tracking-tight">{label}</span>
+          <span className="flex size-5 items-center justify-center rounded-md bg-secondary text-[11px] font-medium text-muted-foreground">
+            {applications.length}
+          </span>
         </div>
         <button
           onClick={() => onAdd(stage)}
-          className="rounded p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="rounded-lg p-1.5 text-muted-foreground/40 transition-all hover:bg-secondary hover:text-foreground"
         >
-          <Plus className="size-4" />
+          <Plus className="size-3.5" />
         </button>
       </div>
       <div
         ref={setNodeRef}
         className={cn(
-          'flex min-h-[120px] flex-1 flex-col gap-2.5 rounded-xl p-2.5 transition-all duration-200',
-          isOver ? 'bg-secondary/70 ring-2 ring-primary/20' : 'bg-secondary/30',
+          'flex flex-1 flex-col gap-3 rounded-2xl p-3 transition-all duration-300',
+          isOver
+            ? 'bg-primary/[0.04] ring-2 ring-primary/15 dark:bg-primary/[0.06]'
+            : 'bg-secondary/20',
         )}
+        style={{ minHeight: 160 }}
       >
         <SortableContext items={applications.map((a) => a.id)} strategy={verticalListSortingStrategy}>
           {applications.map((a) => (
@@ -107,22 +124,20 @@ function Column({
               application={a}
               onEdit={() => onEdit(a)}
               onDelete={() => onDelete(a)}
+              onView={() => onView(a)}
             />
           ))}
         </SortableContext>
         {applications.length === 0 && (
-          <p className="py-6 text-center text-xs text-muted-foreground">Drop here</p>
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-[13px] text-muted-foreground/40">Drop here</p>
+          </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-/**
- * Compute a fractional position that places `activeId` at `index` within the
- * target column's ordered list. Using fractions means a move only updates the
- * one dragged row instead of renumbering the whole column.
- */
 function positionForIndex(columnCards: Application[], index: number): number {
   const before = columnCards[index - 1];
   const after = columnCards[index];
@@ -132,16 +147,14 @@ function positionForIndex(columnCards: Application[], index: number): number {
   return (before.position + after.position) / 2;
 }
 
-export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
+export function KanbanBoard({ applications, onEdit, onDelete, onView, onAdd }: Props) {
   const update = useUpdateApplication();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    // Small activation distance so clicks (menus) still work.
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
 
-  // Group applications by stage, each sorted by position.
   const byStage = useMemo(() => {
     const map: Record<Stage, Application[]> = {
       saved: [], applied: [], online_assessment: [], interview: [], offer: [], rejected: [],
@@ -165,7 +178,6 @@ export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
     const app = applications.find((a) => a.id === active.id);
     if (!app) return;
 
-    // Resolve the target stage + insertion index.
     let targetStage: Stage;
     let overId = String(over.id);
     if (overId.startsWith('col:')) {
@@ -176,7 +188,6 @@ export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
       targetStage = overApp.stage;
     }
 
-    // Column cards excluding the one being dragged.
     const column = byStage[targetStage].filter((a) => a.id !== app.id);
     let index = column.length;
     if (!overId.startsWith('col:')) {
@@ -197,8 +208,8 @@ export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 pb-4">
-        {STAGES.map((s) => (
+      <div className="grid grid-cols-6 gap-5">
+        {STAGES.map((s, i) => (
           <Column
             key={s.value}
             stage={s.value}
@@ -207,12 +218,20 @@ export function KanbanBoard({ applications, onEdit, onDelete, onAdd }: Props) {
             applications={byStage[s.value]}
             onEdit={onEdit}
             onDelete={onDelete}
+            onView={onView}
             onAdd={onAdd}
+            index={i}
           />
         ))}
       </div>
       <DragOverlay>
-        {activeApp && <ApplicationCard application={activeApp} className="w-64 rotate-2 shadow-xl ring-2 ring-primary/20" />}
+        {activeApp && (
+          <ApplicationCard
+            application={activeApp}
+            className="rotate-[2deg] shadow-2xl ring-2 ring-primary/10"
+            style={{ width: 'auto', minWidth: 200 }}
+          />
+        )}
       </DragOverlay>
     </DndContext>
   );
