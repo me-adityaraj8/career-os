@@ -45,6 +45,14 @@
     --warning: 32 90% 48%;
     --info: 217 80% 52%;
 
+    /* Data-viz slots (validated palette) — single-hue blue for magnitude,
+       ordinal blue ramp for funnel stages. Values are mode-specific. */
+    --viz-1: #2a78d6;
+    --viz-seq-1: #86b6ef;
+    --viz-seq-2: #5598e7;
+    --viz-seq-3: #2a78d6;
+    --viz-seq-4: #1c5cab;
+
     /* Elevation ladder — layered, tight top-light shadows */
     --elev-1: 0 1px 2px 0 hsl(240 8% 10% / 0.05), 0 1px 3px -1px hsl(240 8% 10% / 0.04);
     --elev-2: 0 2px 4px -1px hsl(240 8% 10% / 0.06), 0 4px 12px -2px hsl(240 8% 10% / 0.06);
@@ -89,6 +97,12 @@
     --success: 142 60% 48%;
     --warning: 36 90% 56%;
     --info: 217 80% 62%;
+
+    --viz-1: #3987e5;
+    --viz-seq-1: #6da7ec;
+    --viz-seq-2: #3987e5;
+    --viz-seq-3: #256abf;
+    --viz-seq-4: #184f95;
 
     /* In dark mode shadows are near-black; a faint top inner highlight is
        applied per-surface via the .surface utility for the etched look. */
