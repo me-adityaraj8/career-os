@@ -16,7 +16,7 @@ import {
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useLogout, useUpdateProfile } from '@/hooks/useAuth';
-import { initials } from '@/lib/utils';
+import { cn, initials } from '@/lib/utils';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
@@ -51,34 +51,39 @@ export function AppLayout() {
         </div>
       </aside>
 
-      {/* Mobile drawer */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm lg:hidden"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.div
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed left-0 top-0 z-50 h-full w-[260px] border-r border-sidebar-border bg-sidebar lg:hidden"
-            >
-              <div className="absolute right-3 top-4">
-                <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
-                  <X className="size-4" />
-                </Button>
-              </div>
-              <Sidebar onNavigate={() => setMobileOpen(false)} />
-            </motion.div>
-          </>
+      {/* Mobile drawer. Kept mounted and driven by the `animate` prop instead
+          of AnimatePresence exit — a stuck exit here previously left an
+          invisible full-screen backdrop that swallowed every click and drag.
+          pointer-events is gated on state, so the closed drawer can never
+          block the app even if an animation misbehaves. */}
+      <motion.div
+        initial={false}
+        animate={{ opacity: mobileOpen ? 1 : 0 }}
+        transition={{ duration: 0.2 }}
+        aria-hidden={!mobileOpen}
+        className={cn(
+          'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm lg:hidden',
+          mobileOpen ? 'pointer-events-auto' : 'pointer-events-none',
         )}
-      </AnimatePresence>
+        onClick={() => setMobileOpen(false)}
+      />
+      <motion.div
+        initial={false}
+        animate={{ x: mobileOpen ? 0 : -280 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        aria-hidden={!mobileOpen}
+        className={cn(
+          'fixed left-0 top-0 z-50 h-full w-[260px] border-r border-sidebar-border bg-sidebar lg:hidden',
+          !mobileOpen && 'pointer-events-none',
+        )}
+      >
+        <div className="absolute right-3 top-4">
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
+            <X className="size-4" />
+          </Button>
+        </div>
+        <Sidebar onNavigate={() => setMobileOpen(false)} />
+      </motion.div>
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Header */}

@@ -126,12 +126,12 @@ export default function ApplicationsPage() {
 
       {/* States */}
       {isLoading && (
-        <div className="flex gap-4 overflow-hidden">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="w-72 shrink-0 space-y-2">
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
+        <div className="grid grid-flow-col auto-cols-[minmax(232px,1fr)] gap-5 overflow-hidden">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-32 w-full rounded-2xl" />
+              <Skeleton className="h-32 w-full rounded-2xl" style={{ opacity: 1 - i * 0.12 }} />
             </div>
           ))}
         </div>
