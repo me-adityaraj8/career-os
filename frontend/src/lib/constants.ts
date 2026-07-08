@@ -39,6 +39,16 @@ export const INTERVIEW_TYPE_LABEL: Record<InterviewType, string> = Object.fromEn
   INTERVIEW_TYPES.map((t) => [t.value, t.label]),
 ) as Record<InterviewType, string>;
 
+/** Tinted pill classes per interview type — categorical identity colors. */
+export const INTERVIEW_TYPE_COLORS: Record<InterviewType, string> = {
+  coding: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  behavioral: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  system_design: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+  online_assessment: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  phone_screen: 'bg-pink-500/10 text-pink-600 dark:text-pink-400',
+  other: 'bg-secondary text-muted-foreground',
+};
+
 export const INTERVIEW_OUTCOMES: { value: InterviewOutcome; label: string; className: string }[] = [
   { value: 'pending', label: 'Pending', className: 'text-amber-500' },
   { value: 'passed', label: 'Passed', className: 'text-emerald-500' },

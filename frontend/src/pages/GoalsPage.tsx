@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Target, Plus, MoreVertical, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
@@ -107,7 +108,7 @@ export default function GoalsPage() {
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <motion.div
-                          className="h-full rounded-full bg-foreground/80"
+                          className={cn('h-full rounded-full', done ? 'bg-emerald-500' : 'bg-[var(--viz-1)]')}
                           initial={{ width: 0 }}
                           animate={{ width: `${percent}%` }}
                           transition={{ duration: 0.5, ease: 'easeOut' }}

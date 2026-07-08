@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   DndContext,
@@ -47,6 +47,12 @@ function SortableCard({
     id: application.id,
     data: { stage: application.stage },
   });
+  // Browsers fire a click on the source element after a completed drag;
+  // without this guard every drop would also open the detail modal.
+  const draggedRef = useRef(false);
+  useEffect(() => {
+    if (isDragging) draggedRef.current = true;
+  }, [isDragging]);
   return (
     <ApplicationCard
       ref={setNodeRef}
@@ -54,7 +60,13 @@ function SortableCard({
       application={application}
       onEdit={onEdit}
       onDelete={onDelete}
-      onView={onView}
+      onView={() => {
+        if (draggedRef.current) {
+          draggedRef.current = false;
+          return;
+        }
+        onView();
+      }}
       dragging={isDragging}
       className="cursor-grab active:cursor-grabbing"
       {...attributes}
@@ -208,7 +220,9 @@ export function KanbanBoard({ applications, onEdit, onDelete, onView, onAdd }: P
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid grid-cols-6 gap-5">
+      {/* All six columns share the row on wide screens; below that the board
+          scrolls horizontally with usable column widths instead of slivers. */}
+      <div className="grid grid-flow-col auto-cols-[minmax(232px,1fr)] gap-5 overflow-x-auto pb-4">
         {STAGES.map((s, i) => (
           <Column
             key={s.value}

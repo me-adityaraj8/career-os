@@ -29,6 +29,8 @@ import { useInterviews } from '@/hooks/useInterviews';
 import { useContacts } from '@/hooks/useContacts';
 import { useApplications } from '@/hooks/useApplications';
 import { cn, formatDate, timeAgo } from '@/lib/utils';
+import { INTERVIEW_TYPE_COLORS, INTERVIEW_TYPE_LABEL } from '@/lib/constants';
+import type { InterviewType } from '@/types';
 
 const stagger = {
   hidden: {},
@@ -145,7 +147,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
                             <motion.div
-                              className="h-full rounded-full bg-foreground/80"
+                              className={cn('h-full rounded-full', done ? 'bg-emerald-500' : 'bg-[var(--viz-1)]')}
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -187,8 +189,11 @@ export default function DashboardPage() {
                           <p className="truncate font-medium">{appById.get(r.applicationId)?.company ?? 'Company'}</p>
                           <p className="mt-0.5 text-xs text-muted-foreground">{formatDate(r.scheduledAt)}</p>
                         </div>
-                        <Badge variant="secondary" className="shrink-0 capitalize text-[11px]">
-                          {r.type.replace('_', ' ')}
+                        <Badge
+                          variant="secondary"
+                          className={cn('shrink-0 text-[11px] font-medium', INTERVIEW_TYPE_COLORS[r.type as InterviewType])}
+                        >
+                          {INTERVIEW_TYPE_LABEL[r.type as InterviewType] ?? r.type}
                         </Badge>
                       </div>
                     ))

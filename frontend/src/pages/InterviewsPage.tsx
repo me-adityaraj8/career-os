@@ -17,7 +17,7 @@ import { InterviewDialog } from '@/components/interviews/InterviewDialog';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useInterviews, useDeleteInterview } from '@/hooks/useInterviews';
 import { useApplications } from '@/hooks/useApplications';
-import { INTERVIEW_TYPE_LABEL, INTERVIEW_OUTCOMES } from '@/lib/constants';
+import { INTERVIEW_TYPE_COLORS, INTERVIEW_TYPE_LABEL, INTERVIEW_OUTCOMES } from '@/lib/constants';
 import { cn, formatDate } from '@/lib/utils';
 import { toast } from '@/stores/toastStore';
 import type { Application, InterviewRound } from '@/types';
@@ -121,7 +121,7 @@ export default function InterviewsPage() {
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
                               <div className="flex items-center gap-2">
-                                <Badge variant="outline">{INTERVIEW_TYPE_LABEL[r.type]}</Badge>
+                                <Badge variant="secondary" className={cn('font-medium', INTERVIEW_TYPE_COLORS[r.type])}>{INTERVIEW_TYPE_LABEL[r.type]}</Badge>
                                 <span className={cn('text-xs font-medium', outcome?.className)}>
                                   {outcome?.label}
                                 </span>
