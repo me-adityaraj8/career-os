@@ -1,7 +1,7 @@
 {
-  "name": "career-os-backend",
+  "name": "rys-backend",
   "version": "1.0.0",
-  "description": "Career OS backend API — job search management platform",
+  "description": "Rys backend API — the unified job-search workspace",
   "main": "dist/index.js",
   "type": "commonjs",
   "scripts": {

@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/me-adityaraj8/career-os?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/github/license/me-adityaraj8/rys?style=flat-square" alt="License" />
   <img src="https://img.shields.io/badge/TypeScript-100%25-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
@@ -153,7 +153,7 @@ sequenceDiagram
     Note over F,A: Subsequent requests include<br/>Authorization: Bearer <token>
 
     U->>F: Click "Try with demo account"
-    F->>A: POST /login (demo@careeros.dev)
+    F->>A: POST /login (demo@rys.app)
     A-->>F: { token, user } with seeded data
 ```
 
@@ -182,8 +182,8 @@ sequenceDiagram
 
 ```bash
 # Clone the repository
-git clone https://github.com/me-adityaraj8/career-os.git
-cd career-os
+git clone https://github.com/me-adityaraj8/rys.git
+cd rys
 
 # Create environment files
 cp backend/.env.example backend/.env
@@ -221,7 +221,7 @@ After seeding, use the **"Try with demo account"** button on the login page, or:
 
 | Field | Value |
 |-------|-------|
-| Email | `demo@careeros.dev` |
+| Email | `demo@rys.app` |
 | Password | `password123` |
 
 ---
@@ -350,7 +350,7 @@ rys/
 ├── Dockerfile                  # Production multi-stage build
 ├── docker-compose.yml          # Local dev stack
 ├── backend/
-│   ├── migrations/             # Versioned SQL (001_init → 005_goals)
+│   ├── migrations/             # Versioned SQL (001_init → 006_missions)
 │   └── src/
 │       ├── config/             # Environment validation
 │       ├── db/                 # Pool, migrate runner, seed
@@ -418,7 +418,7 @@ Covers auth (hashing, JWT, error paths), resume-match scoring, and analytics cal
 Contributions are welcome! Here's how to get started:
 
 1. **Fork** the repository
-2. **Clone** your fork: `git clone https://github.com/<you>/career-os.git`
+2. **Clone** your fork: `git clone https://github.com/<you>/rys.git`
 3. **Create a branch**: `git checkout -b feature/your-feature`
 4. **Make changes** and ensure tests pass: `npm test`
 5. **Commit** with a descriptive message

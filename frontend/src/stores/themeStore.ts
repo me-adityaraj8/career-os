@@ -64,7 +64,7 @@ export const useThemeStore = create<ThemeState>()(
       },
     }),
     {
-      name: 'careeros-theme',
+      name: 'rys-theme',
       onRehydrateStorage: () => (state) => {
         if (state) applyTheme(state.theme);
       },
