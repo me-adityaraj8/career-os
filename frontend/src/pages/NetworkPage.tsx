@@ -49,8 +49,22 @@ export default function NetworkPage() {
 
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full" />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-3 rounded-xl border p-4" style={{ opacity: 1 - i * 0.1 }}>
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-10 rounded-full" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+              <Skeleton className="h-3 w-40" />
+              <Skeleton className="h-3 w-28" />
+              <div className="flex justify-between pt-2">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -71,8 +85,14 @@ export default function NetworkPage() {
       {!isLoading && contacts && contacts.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {contacts.map((c, i) => (
-            <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-              <Card className={cn('h-full', c.followUp && 'ring-1 ring-foreground/25')}>
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
+              whileHover={{ y: -2 }}
+            >
+              <Card className={cn('h-full transition-shadow duration-300 hover:shadow-elev-2', c.followUp && 'ring-1 ring-foreground/25')}>
                 <CardContent className="flex h-full flex-col gap-3 p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">

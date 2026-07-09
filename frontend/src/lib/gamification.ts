@@ -44,6 +44,38 @@ export interface HeatmapCell {
   level: 0 | 1 | 2 | 3 | 4;
 }
 
+export interface HeatmapCellDetail extends HeatmapCell {
+  applications: number;
+  interviews: number;
+  offers: number;
+  saved: number;
+  xp: number;
+  isStreak: boolean;
+}
+
+export function buildDetailedDailyActivity(
+  applications: Application[],
+): Map<string, { total: number; applications: number; interviews: number; offers: number; saved: number; xp: number }> {
+  const map = new Map<string, { total: number; applications: number; interviews: number; offers: number; saved: number; xp: number }>();
+
+  const XP: Record<string, number> = { saved: 5, applied: 10, online_assessment: 20, interview: 30, offer: 100 };
+
+  for (const app of applications) {
+    const date = app.appliedDate ?? app.createdAt;
+    if (!date) continue;
+    const key = toDateKey(new Date(date));
+    const entry = map.get(key) ?? { total: 0, applications: 0, interviews: 0, offers: 0, saved: 0, xp: 0 };
+    entry.total++;
+    entry.xp += XP[app.stage] ?? 5;
+    if (app.stage === 'saved') entry.saved++;
+    else if (app.stage === 'interview' || app.stage === 'online_assessment') entry.interviews++;
+    else if (app.stage === 'offer') entry.offers++;
+    else entry.applications++;
+    map.set(key, entry);
+  }
+  return map;
+}
+
 export function buildHeatmap(daily: Map<string, number>, weeks = 20): HeatmapCell[][] {
   const today = new Date();
   const end = startOfDay(today);
@@ -71,6 +103,57 @@ export function buildHeatmap(daily: Map<string, number>, weeks = 20): HeatmapCel
       const key = toDateKey(cursor);
       const count = daily.get(key) ?? 0;
       week.push({ date: key, count, level: level(count) });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    grid.push(week);
+  }
+
+  return grid;
+}
+
+export function buildDetailedHeatmap(
+  detailed: Map<string, { total: number; applications: number; interviews: number; offers: number; saved: number; xp: number }>,
+  streakDays: Set<string>,
+  weeks = 20,
+): HeatmapCellDetail[][] {
+  const today = new Date();
+  const end = startOfDay(today);
+  const start = new Date(end);
+  start.setDate(start.getDate() - weeks * 7 + 1);
+  const weekStart = startOfWeek(start);
+
+  const totals = [...detailed.values()].map((d) => d.total);
+  const max = Math.max(1, ...totals);
+  const thresholds = [0, Math.ceil(max * 0.25), Math.ceil(max * 0.5), Math.ceil(max * 0.75)];
+
+  function level(count: number): 0 | 1 | 2 | 3 | 4 {
+    if (count === 0) return 0;
+    if (count <= thresholds[1]) return 1;
+    if (count <= thresholds[2]) return 2;
+    if (count <= thresholds[3]) return 3;
+    return 4;
+  }
+
+  const grid: HeatmapCellDetail[][] = [];
+  const cursor = new Date(weekStart);
+
+  while (cursor <= end) {
+    const week: HeatmapCellDetail[] = [];
+    for (let d = 0; d < 7; d++) {
+      const key = toDateKey(cursor);
+      const data = detailed.get(key);
+      const count = data?.total ?? 0;
+      week.push({
+        date: key,
+        count,
+        level: level(count),
+        applications: data?.applications ?? 0,
+        interviews: data?.interviews ?? 0,
+        offers: data?.offers ?? 0,
+        saved: data?.saved ?? 0,
+        xp: data?.xp ?? 0,
+        isStreak: streakDays.has(key),
+      });
       cursor.setDate(cursor.getDate() + 1);
     }
     grid.push(week);
@@ -445,6 +528,79 @@ export const GOAL_TEMPLATES: GoalTemplate[] = [
     ],
   },
 ];
+
+// ── Opportunity Score ────────────────────────────────────────────────
+
+export interface OpportunityScore {
+  score: number;
+  label: string;
+  color: string;
+  breakdown: { stage: number; priority: number; recency: number; completeness: number; tags: number };
+}
+
+const STAGE_SCORE: Record<string, number> = {
+  saved: 10, applied: 25, online_assessment: 45, interview: 70, offer: 95, rejected: 5,
+};
+
+export function computeOpportunityScore(app: Application): OpportunityScore {
+  const stageScore = STAGE_SCORE[app.stage] ?? 10;
+  const priorityScore = app.priority === 'high' ? 20 : app.priority === 'medium' ? 12 : 5;
+
+  const now = Date.now();
+  const applied = app.appliedDate ? new Date(app.appliedDate).getTime() : new Date(app.createdAt).getTime();
+  const daysSince = Math.max(0, (now - applied) / 86_400_000);
+  const recencyScore = Math.max(0, 20 - Math.floor(daysSince / 3));
+
+  let completeness = 0;
+  if (app.location) completeness += 5;
+  if (app.salary) completeness += 5;
+  if (app.notes) completeness += 5;
+  if (app.jobUrl) completeness += 3;
+  if (app.resumeId) completeness += 2;
+
+  const tagScore = Math.min(15, app.tags.length * 3 + (app.tags.some(t => t.includes('dream')) ? 5 : 0));
+
+  const raw = stageScore + priorityScore + recencyScore + completeness + tagScore;
+  const score = Math.min(100, Math.max(0, raw));
+
+  let label: string;
+  let color: string;
+  if (score >= 80) { label = 'Hot'; color = 'text-emerald-500'; }
+  else if (score >= 60) { label = 'Warm'; color = 'text-blue-500'; }
+  else if (score >= 35) { label = 'Cool'; color = 'text-amber-500'; }
+  else { label = 'Cold'; color = 'text-muted-foreground'; }
+
+  return { score, label, color, breakdown: { stage: stageScore, priority: priorityScore, recency: recencyScore, completeness, tags: tagScore } };
+}
+
+// ── Career Timeline Events ──────────────────────────────────────────
+
+export interface TimelineEvent {
+  id: string;
+  date: string;
+  type: 'applied' | 'interview' | 'offer' | 'rejected' | 'saved';
+  company: string;
+  role: string;
+  detail?: string;
+}
+
+export function buildTimeline(applications: Application[]): TimelineEvent[] {
+  const events: TimelineEvent[] = [];
+
+  for (const app of applications) {
+    const date = app.appliedDate ?? app.createdAt.split('T')[0];
+    let type: TimelineEvent['type'];
+    if (app.stage === 'offer') type = 'offer';
+    else if (app.stage === 'interview' || app.stage === 'online_assessment') type = 'interview';
+    else if (app.stage === 'rejected') type = 'rejected';
+    else if (app.stage === 'saved') type = 'saved';
+    else type = 'applied';
+
+    events.push({ id: app.id, date, type, company: app.company, role: app.role });
+  }
+
+  return events.sort((a, b) => b.date.localeCompare(a.date));
+}
 
 export const HEALTH_CONFIG: Record<GoalHealth, { label: string; color: string; bg: string }> = {
   completed: { label: 'Completed', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10' },

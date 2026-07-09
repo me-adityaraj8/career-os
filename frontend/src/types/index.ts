@@ -114,6 +114,28 @@ export interface Goal {
   updatedAt: string;
 }
 
+export type MissionMetric = 'applications' | 'interviews' | 'offers' | 'networking' | 'custom';
+
+export interface Mission {
+  id: string;
+  label: string;
+  target: number;
+  progress: number;
+  completed: boolean;
+  metric: MissionMetric;
+  position: number;
+  missionDate: string;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MissionStreak {
+  current: number;
+  longest: number;
+  todayCompleted: boolean;
+}
+
 export interface JobAnalysis {
   id: string;
   applicationId: string | null;
