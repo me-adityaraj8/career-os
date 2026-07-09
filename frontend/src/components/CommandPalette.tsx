@@ -14,7 +14,13 @@ import {
   Search,
   ArrowRight,
   Command,
+  Building2,
+  Moon,
+  Sun,
+  Plus,
 } from 'lucide-react';
+import { useApplications } from '@/hooks/useApplications';
+import { useThemeStore } from '@/stores/themeStore';
 
 interface PaletteItem {
   id: string;
@@ -24,17 +30,20 @@ interface PaletteItem {
   action: () => void;
   keywords?: string;
   shortcut?: string;
+  subtitle?: string;
 }
 
 export function CommandPalette() {
   const navigate = useNavigate();
+  const { data: applications } = useApplications();
+  const { theme, toggleWithTransition } = useThemeStore();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const items: PaletteItem[] = useMemo(
+  const navItems: PaletteItem[] = useMemo(
     () => [
       { id: 'dashboard', label: 'Dashboard', section: 'Navigation', icon: <LayoutDashboard className="size-4" />, action: () => navigate('/'), keywords: 'home overview', shortcut: 'G D' },
       { id: 'applications', label: 'Applications', section: 'Navigation', icon: <Briefcase className="size-4" />, action: () => navigate('/applications'), keywords: 'jobs kanban board', shortcut: 'G A' },
@@ -45,23 +54,59 @@ export function CommandPalette() {
       { id: 'goals', label: 'Goals', section: 'Navigation', icon: <Target className="size-4" />, action: () => navigate('/goals'), keywords: 'targets progress', shortcut: 'G G' },
       { id: 'analytics', label: 'Analytics', section: 'Navigation', icon: <BarChart3 className="size-4" />, action: () => navigate('/analytics'), keywords: 'charts funnel stats', shortcut: 'G L' },
       { id: 'settings', label: 'Settings', section: 'Navigation', icon: <Settings className="size-4" />, action: () => navigate('/settings'), keywords: 'profile theme', shortcut: 'G S' },
-      { id: 'job-analyzer', label: 'Analyze a Job Description', section: 'AI Tools', icon: <Sparkles className="size-4" />, action: () => navigate('/ai'), keywords: 'match score ats' },
-      { id: 'cover-letter', label: 'Generate Cover Letter', section: 'AI Tools', icon: <FileText className="size-4" />, action: () => navigate('/ai'), keywords: 'draft write' },
-      { id: 'interview-prep', label: 'Interview Prep Questions', section: 'AI Tools', icon: <MessageSquare className="size-4" />, action: () => navigate('/ai'), keywords: 'practice coach' },
     ],
     [navigate],
   );
 
+  const actionItems: PaletteItem[] = useMemo(
+    () => [
+      {
+        id: 'new-app', label: 'New Application', section: 'Actions', icon: <Plus className="size-4" />,
+        action: () => { navigate('/applications'); setTimeout(() => window.dispatchEvent(new Event('rys:new-application')), 100); },
+        keywords: 'add create job',
+      },
+      {
+        id: 'toggle-theme', label: theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+        section: 'Actions', icon: theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />,
+        action: () => toggleWithTransition(window.innerWidth / 2, window.innerHeight / 2),
+        keywords: 'dark light mode appearance',
+      },
+      { id: 'job-analyzer', label: 'Analyze a Job Description', section: 'AI Tools', icon: <Sparkles className="size-4" />, action: () => navigate('/ai'), keywords: 'match score ats' },
+      { id: 'cover-letter', label: 'Generate Cover Letter', section: 'AI Tools', icon: <FileText className="size-4" />, action: () => navigate('/ai'), keywords: 'draft write' },
+      { id: 'interview-prep', label: 'Interview Prep Questions', section: 'AI Tools', icon: <MessageSquare className="size-4" />, action: () => navigate('/ai'), keywords: 'practice coach' },
+    ],
+    [navigate, theme, toggleWithTransition],
+  );
+
+  const appItems: PaletteItem[] = useMemo(() => {
+    if (!applications) return [];
+    return applications.map((a) => ({
+      id: `app-${a.id}`,
+      label: a.company,
+      subtitle: a.role,
+      section: 'Applications',
+      icon: <Building2 className="size-4" />,
+      action: () => navigate('/applications'),
+      keywords: `${a.role} ${a.location ?? ''} ${a.tags.join(' ')} ${a.stage}`,
+    }));
+  }, [applications, navigate]);
+
+  const allItems = useMemo(
+    () => [...navItems, ...actionItems, ...appItems],
+    [navItems, actionItems, appItems],
+  );
+
   const filtered = useMemo(() => {
-    if (!query.trim()) return items;
+    if (!query.trim()) return [...navItems, ...actionItems];
     const q = query.toLowerCase();
-    return items.filter(
+    return allItems.filter(
       (item) =>
         item.label.toLowerCase().includes(q) ||
+        item.subtitle?.toLowerCase().includes(q) ||
         item.section.toLowerCase().includes(q) ||
         item.keywords?.toLowerCase().includes(q),
     );
-  }, [items, query]);
+  }, [allItems, navItems, actionItems, query]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, PaletteItem[]>();
@@ -195,7 +240,12 @@ export function CommandPalette() {
                         <span className="flex size-7 items-center justify-center rounded-md bg-secondary">
                           {item.icon}
                         </span>
-                        <span className="flex-1 text-left">{item.label}</span>
+                        <span className="min-w-0 flex-1 text-left">
+                          <span className="block truncate">{item.label}</span>
+                          {item.subtitle && (
+                            <span className="block truncate text-xs text-muted-foreground/60">{item.subtitle}</span>
+                          )}
+                        </span>
                         {item.shortcut && (
                           <span className="flex items-center gap-0.5">
                             {item.shortcut.split(' ').map((k, ki) => (
@@ -204,7 +254,7 @@ export function CommandPalette() {
                           </span>
                         )}
                         {globalIndex === selected && !item.shortcut && (
-                          <ArrowRight className="size-3.5 text-muted-foreground" />
+                          <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
                         )}
                       </button>
                     );
