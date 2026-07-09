@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Kanban, Sparkles, MessageSquare, BarChart3, CheckCircle2 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
-import { Starfield } from '@/components/Starfield';
 
 const features = [
   { icon: Kanban, label: 'Kanban application tracker', desc: 'Drag-and-drop pipeline from saved to offer' },
@@ -14,8 +13,8 @@ const features = [
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Form side */}
-      <div className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20">
+      {/* Form side — translucent so global starfield peeks through */}
+      <div className="flex flex-col justify-center bg-background/80 backdrop-blur-xl px-6 py-12 sm:px-12 lg:px-20">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -27,12 +26,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </motion.div>
       </div>
 
-      {/* Marketing panel — deep-space monochrome */}
-      <div className="relative hidden overflow-hidden bg-[#050506] lg:block">
-        {/* Starfield */}
-        <div className="absolute inset-0">
-          <Starfield mode="dark" density={1.2} />
-        </div>
+      {/* Marketing panel — deep-space, global starfield visible through translucent overlay */}
+      <div className="relative hidden overflow-hidden lg:block">
+        {/* Dark tinted overlay so text is readable, but stars show through */}
+        <div className="absolute inset-0 bg-[#050506]/85" />
 
         {/* Soft monochrome glows — a distant light source, not color */}
         <div className="absolute inset-0">

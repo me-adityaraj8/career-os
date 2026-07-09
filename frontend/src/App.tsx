@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { CommandPalette } from '@/components/CommandPalette';
+import { Starfield } from '@/components/Starfield';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthStore } from '@/stores/authStore';
 import LoginPage from '@/pages/auth/LoginPage';
@@ -25,6 +26,12 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      {/* Global starfield — one instance behind the entire app */}
+      <div className="fixed inset-0 -z-20" aria-hidden>
+        <Starfield density={1} />
+      </div>
+      <div className="noise ambient fixed inset-0 -z-10 pointer-events-none" aria-hidden />
+
       <Routes>
         <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
         <Route path="/register" element={<PublicOnly><RegisterPage /></PublicOnly>} />

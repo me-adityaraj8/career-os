@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, Moon, Sun, LogOut, User as UserIcon, X, Search } from 'lucide-react';
+import { Menu, Moon, Sun, LogOut, User as UserIcon, X, Search, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { Sidebar } from './Sidebar';
-import { Starfield } from '@/components/Starfield';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,21 +15,34 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useSidebarStore } from '@/stores/sidebarStore';
 import { useLogout, useUpdateProfile } from '@/hooks/useAuth';
 import { cn, initials } from '@/lib/utils';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+const SIDEBAR_W = 260;
+const COLLAPSED_W = 0;
+const HOVER_ZONE = 16;
 
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { theme, toggle } = useThemeStore();
+  const [hoverReveal, setHoverReveal] = useState(false);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const { theme, toggleWithTransition } = useThemeStore();
   const user = useAuthStore((s) => s.user);
+  const { collapsed, toggle: toggleSidebar } = useSidebarStore();
   const logout = useLogout();
   const updateProfile = useUpdateProfile();
   const location = useLocation();
 
-  function onToggleTheme() {
-    toggle();
+  useKeyboardShortcuts();
+
+  function onToggleTheme(e: React.MouseEvent) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    toggleWithTransition(x, y);
     updateProfile.mutate({ darkMode: theme !== 'dark' });
   }
 
@@ -37,25 +50,84 @@ export function AppLayout() {
     window.dispatchEvent(new Event('rys:command-palette'));
   }
 
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!collapsed || mobileOpen) return;
+      if (e.clientX <= HOVER_ZONE) {
+        if (!hoverTimer.current) {
+          hoverTimer.current = setTimeout(() => setHoverReveal(true), 200);
+        }
+      } else if (hoverReveal && sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
+        setHoverReveal(false);
+        clearTimeout(hoverTimer.current);
+        hoverTimer.current = undefined;
+      } else if (!hoverReveal) {
+        clearTimeout(hoverTimer.current);
+        hoverTimer.current = undefined;
+      }
+    },
+    [collapsed, hoverReveal, mobileOpen],
+  );
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(hoverTimer.current);
+    };
+  }, [handleMouseMove]);
+
+  useEffect(() => {
+    if (!collapsed) setHoverReveal(false);
+  }, [collapsed]);
+
+  const showSidebar = !collapsed || hoverReveal;
+
   return (
-    <div className="noise ambient relative flex min-h-screen bg-background">
-      {/* Ambient starfield behind all content */}
-      <div className="absolute inset-0 -z-10" aria-hidden>
-        <Starfield density={0.7} />
-      </div>
+    <div className="relative flex min-h-screen">
+      {/* Desktop sidebar — animated width for collapse */}
+      <motion.aside
+        className="hidden shrink-0 lg:block"
+        initial={false}
+        animate={{ width: collapsed ? COLLAPSED_W : SIDEBAR_W }}
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {!collapsed && (
+          <div className="sticky top-0 h-screen w-[260px] border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl">
+            <Sidebar />
+          </div>
+        )}
+      </motion.aside>
 
-      {/* Desktop sidebar */}
-      <aside className="hidden w-[260px] shrink-0 lg:block">
-        <div className="sticky top-0 h-screen border-r border-sidebar-border bg-sidebar">
-          <Sidebar />
-        </div>
-      </aside>
+      {/* Hover-reveal overlay sidebar when collapsed */}
+      {collapsed && (
+        <>
+          <motion.div
+            initial={false}
+            animate={{ opacity: hoverReveal ? 1 : 0 }}
+            transition={{ duration: 0.15 }}
+            className={cn(
+              'fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] hidden lg:block',
+              hoverReveal ? 'pointer-events-auto' : 'pointer-events-none',
+            )}
+            onClick={() => setHoverReveal(false)}
+          />
+          <motion.div
+            ref={sidebarRef}
+            initial={false}
+            animate={{ x: hoverReveal ? 0 : -SIDEBAR_W }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className={cn(
+              'fixed left-0 top-0 z-40 hidden h-full w-[260px] border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl lg:block',
+              !hoverReveal && 'pointer-events-none',
+            )}
+          >
+            <Sidebar />
+          </motion.div>
+        </>
+      )}
 
-      {/* Mobile drawer. Kept mounted and driven by the `animate` prop instead
-          of AnimatePresence exit — a stuck exit here previously left an
-          invisible full-screen backdrop that swallowed every click and drag.
-          pointer-events is gated on state, so the closed drawer can never
-          block the app even if an animation misbehaves. */}
+      {/* Mobile drawer */}
       <motion.div
         initial={false}
         animate={{ opacity: mobileOpen ? 1 : 0 }}
@@ -73,7 +145,7 @@ export function AppLayout() {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         aria-hidden={!mobileOpen}
         className={cn(
-          'fixed left-0 top-0 z-50 h-full w-[260px] border-r border-sidebar-border bg-sidebar lg:hidden',
+          'fixed left-0 top-0 z-50 h-full w-[260px] border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl lg:hidden',
           !mobileOpen && 'pointer-events-none',
         )}
       >
@@ -87,15 +159,27 @@ export function AppLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b bg-background/70 px-4 backdrop-blur-xl lg:px-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setMobileOpen(true)}
-          >
-            <Menu className="size-5" />
-          </Button>
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border/60 bg-background/60 px-4 backdrop-blur-xl lg:px-6">
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setMobileOpen(true)}
+            >
+              <Menu className="size-5" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:inline-flex text-muted-foreground"
+              onClick={toggleSidebar}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {collapsed ? <PanelLeft className="size-4" /> : <PanelLeftClose className="size-4" />}
+            </Button>
+          </div>
 
           <button
             onClick={openPalette}
