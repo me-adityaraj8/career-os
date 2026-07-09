@@ -13,7 +13,6 @@ import {
   Lightbulb,
   AlertTriangle,
   Clock,
-  ArrowRight,
   Sparkles,
   ListChecks,
 } from 'lucide-react';
