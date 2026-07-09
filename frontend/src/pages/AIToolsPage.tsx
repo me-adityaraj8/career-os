@@ -20,7 +20,7 @@ import {
   useGenerateInterviewQuestions,
 } from '@/hooks/useAI';
 import { toast } from '@/stores/toastStore';
-import { apiErrorMessage } from '@/lib/api';
+import { apiErrorMessage, isDemoReadonly } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { CoverLetter, InterviewQuestionSet, JobAnalysis } from '@/types';
 
@@ -173,7 +173,7 @@ function JobAnalyzer() {
       });
       setResult(r);
     } catch (e) {
-      toast({ title: apiErrorMessage(e), variant: 'error' });
+      if (!isDemoReadonly(e)) toast({ title: apiErrorMessage(e), variant: 'error' });
     }
   }
 
@@ -293,7 +293,7 @@ function CoverLetterGenerator() {
       setResult(r);
       setDraft(r.content);
     } catch (e) {
-      toast({ title: apiErrorMessage(e), variant: 'error' });
+      if (!isDemoReadonly(e)) toast({ title: apiErrorMessage(e), variant: 'error' });
     }
   }
 
@@ -385,7 +385,7 @@ function InterviewCoach() {
       const r = await generate.mutateAsync({ company, role, jobDescription: jd || null });
       setResult(r);
     } catch (e) {
-      toast({ title: apiErrorMessage(e), variant: 'error' });
+      if (!isDemoReadonly(e)) toast({ title: apiErrorMessage(e), variant: 'error' });
     }
   }
 

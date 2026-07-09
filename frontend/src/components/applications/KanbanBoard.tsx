@@ -33,7 +33,7 @@ import { STAGES } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useReorderApplications, type ReorderItem } from '@/hooks/useApplications';
 import { toast } from '@/stores/toastStore';
-import { apiErrorMessage } from '@/lib/api';
+import { apiErrorMessage, isDemoReadonly } from '@/lib/api';
 import type { Application, Stage } from '@/types';
 
 interface Props {
@@ -439,7 +439,7 @@ export function KanbanBoard({ applications, onEdit, onDelete, onView, onAdd }: P
     }
 
     reorder.mutate(items, {
-      onError: (err) => toast({ title: apiErrorMessage(err, 'Could not move card'), variant: 'error' }),
+      onError: (err) => { if (!isDemoReadonly(err)) toast({ title: apiErrorMessage(err, 'Could not move card'), variant: 'error' }); },
     });
     cleanup();
   }

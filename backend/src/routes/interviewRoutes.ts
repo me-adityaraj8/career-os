@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../controllers/interviewController';
 import { requireAuth } from '../middleware/auth';
+import { demoGuard } from '../middleware/demoGuard';
 import { validate, idParamSchema } from '../middleware/validate';
 import { asyncHandler } from '../utils/asyncHandler';
 import {
@@ -12,6 +13,7 @@ import {
 export const interviewRouter = Router();
 
 interviewRouter.use(requireAuth);
+interviewRouter.use(demoGuard);
 
 interviewRouter.get('/', validate({ query: listInterviewsQuerySchema }), asyncHandler(controller.list));
 interviewRouter.post('/', validate({ body: createInterviewSchema }), asyncHandler(controller.create));

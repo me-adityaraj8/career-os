@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RELATIONSHIPS } from '@/lib/constants';
 import { useCreateContact, useUpdateContact } from '@/hooks/useContacts';
 import { toast } from '@/stores/toastStore';
-import { apiErrorMessage } from '@/lib/api';
+import { apiErrorMessage, isDemoReadonly } from '@/lib/api';
 import type { Contact, Relationship } from '@/types';
 
 export function ContactDialog({
@@ -85,7 +85,7 @@ export function ContactDialog({
       }
       onOpenChange(false);
     } catch (err) {
-      toast({ title: apiErrorMessage(err), variant: 'error' });
+      if (!isDemoReadonly(err)) toast({ title: apiErrorMessage(err), variant: 'error' });
     }
   }
 

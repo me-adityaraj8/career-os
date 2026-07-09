@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as missionService from '../services/missionService';
 import { requireAuth, AuthedRequest, getUserId } from '../middleware/auth';
+import { demoGuard } from '../middleware/demoGuard';
 import { validate, idParamSchema } from '../middleware/validate';
 import { asyncHandler } from '../utils/asyncHandler';
 import {
@@ -12,6 +13,7 @@ import {
 export const missionRouter = Router();
 
 missionRouter.use(requireAuth);
+missionRouter.use(demoGuard);
 
 missionRouter.get(
   '/',

@@ -16,7 +16,7 @@ import { STAGES, PRIORITIES } from '@/lib/constants';
 import { useResumes } from '@/hooks/useResumes';
 import { useCreateApplication, useUpdateApplication } from '@/hooks/useApplications';
 import { toast } from '@/stores/toastStore';
-import { apiErrorMessage } from '@/lib/api';
+import { apiErrorMessage, isDemoReadonly } from '@/lib/api';
 import type { Application, Priority, Stage } from '@/types';
 
 interface Props {
@@ -113,7 +113,7 @@ export function ApplicationDialog({ open, onOpenChange, application, defaultStag
       }
       onOpenChange(false);
     } catch (err) {
-      toast({ title: apiErrorMessage(err), variant: 'error' });
+      if (!isDemoReadonly(err)) toast({ title: apiErrorMessage(err), variant: 'error' });
     }
   }
 

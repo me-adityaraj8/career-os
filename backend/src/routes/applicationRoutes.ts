@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../controllers/applicationController';
 import { requireAuth } from '../middleware/auth';
+import { demoGuard } from '../middleware/demoGuard';
 import { validate, idParamSchema } from '../middleware/validate';
 import { asyncHandler } from '../utils/asyncHandler';
 import {
@@ -14,6 +15,7 @@ export const applicationRouter = Router();
 
 // All application routes require authentication.
 applicationRouter.use(requireAuth);
+applicationRouter.use(demoGuard);
 
 applicationRouter.get(
   '/',

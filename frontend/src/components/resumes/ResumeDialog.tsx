@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUploadResume, useUpdateResume } from '@/hooks/useResumes';
 import { toast } from '@/stores/toastStore';
-import { apiErrorMessage } from '@/lib/api';
+import { apiErrorMessage, isDemoReadonly } from '@/lib/api';
 import type { Resume } from '@/types';
 
 /** Upload a new resume version, or edit an existing one's metadata. */
@@ -63,7 +63,7 @@ export function ResumeDialog({
       }
       onOpenChange(false);
     } catch (err) {
-      toast({ title: apiErrorMessage(err), variant: 'error' });
+      if (!isDemoReadonly(err)) toast({ title: apiErrorMessage(err), variant: 'error' });
     }
   }
 
