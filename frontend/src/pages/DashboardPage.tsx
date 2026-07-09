@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Send,
@@ -13,10 +13,8 @@ import {
   Sparkles,
   CheckCircle2,
   Clock,
-  Building2,
   Flame,
   Zap,
-  ListChecks,
 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/StatCard';
@@ -25,20 +23,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MissionList } from '@/components/missions/MissionList';
 import { useAuthStore } from '@/stores/authStore';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useGoals } from '@/hooks/useGoals';
 import { useInterviews } from '@/hooks/useInterviews';
 import { useContacts } from '@/hooks/useContacts';
 import { useApplications } from '@/hooks/useApplications';
-import { cn, formatDate, timeAgo } from '@/lib/utils';
+import { useMissions } from '@/hooks/useMissions';
+import { cn, formatDate } from '@/lib/utils';
 import { INTERVIEW_TYPE_COLORS, INTERVIEW_TYPE_LABEL } from '@/lib/constants';
 import {
   buildDailyActivity,
+  buildTimeline,
   computeStreaks,
   computeXP,
-  buildMissions,
 } from '@/lib/gamification';
+import { CareerTimeline } from '@/components/CareerTimeline';
 import type { InterviewType } from '@/types';
 
 const stagger = {
@@ -51,18 +52,22 @@ const fadeUp = {
 };
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const { data: analytics, isLoading } = useAnalytics();
   const { data: goals } = useGoals();
   const { data: interviews } = useInterviews();
   const { data: contacts } = useContacts();
   const { data: applications } = useApplications();
+  const { data: missionData } = useMissions();
 
   const apps = applications ?? [];
   const daily = buildDailyActivity(apps);
   const streaks = computeStreaks(daily);
   const xp = computeXP(apps);
-  const missions = buildMissions(goals ?? []);
+
+  const timeline = buildTimeline(apps);
+  const missionStreak = missionData?.streak;
 
   const upcomingInterviews = (interviews ?? [])
     .filter((r) => r.scheduledAt && new Date(r.scheduledAt) >= new Date() && r.outcome === 'pending')
@@ -71,10 +76,6 @@ export default function DashboardPage() {
 
   const followUps = (contacts ?? []).filter((c) => c.followUp).slice(0, 4);
   const appById = new Map((applications ?? []).map((a) => [a.id, a]));
-
-  const recentApps = [...(applications ?? [])]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
 
   const empty = !isLoading && analytics && analytics.totals.applications === 0;
 
@@ -130,19 +131,25 @@ export default function DashboardPage() {
             )}
           </motion.div>
 
-          {/* Streak + XP compact strip */}
+          {/* Streak + XP compact strip — clickable → Goals page */}
           <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2 rounded-xl border bg-secondary/30 px-4 py-2.5 text-sm">
+            <button
+              onClick={() => navigate('/goals')}
+              className="flex items-center gap-2 rounded-xl border bg-secondary/30 px-4 py-2.5 text-sm transition-all hover:-translate-y-0.5 hover:shadow-elev-1"
+            >
               <Flame className="size-4 text-orange-500" />
-              <span className="font-semibold tabular-nums">{streaks.current}</span>
+              <span className="font-semibold tabular-nums">{missionStreak?.current ?? streaks.current}</span>
               <span className="text-muted-foreground">day streak</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-xl border bg-secondary/30 px-4 py-2.5 text-sm">
+            </button>
+            <button
+              onClick={() => navigate('/goals')}
+              className="flex items-center gap-2 rounded-xl border bg-secondary/30 px-4 py-2.5 text-sm transition-all hover:-translate-y-0.5 hover:shadow-elev-1"
+            >
               <Zap className="size-4 text-violet-500" />
               <span className="font-semibold tabular-nums">{xp.total.toLocaleString()}</span>
               <span className="text-muted-foreground">XP · {xp.levelName}</span>
-            </div>
-            {streaks.todayActive && (
+            </button>
+            {(missionStreak?.todayCompleted || streaks.todayActive) && (
               <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-2.5 text-sm text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="size-4" />
                 Active today
@@ -150,37 +157,10 @@ export default function DashboardPage() {
             )}
           </motion.div>
 
-          {/* Today's Mission */}
-          {missions.length > 0 && (
-            <motion.div variants={fadeUp}>
-              <Card>
-                <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
-                    <ListChecks className="size-4 text-muted-foreground" />
-                    Today's Mission
-                  </CardTitle>
-                  <Link to="/goals" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
-                    Goals <ArrowRight className="ml-0.5 inline size-3" />
-                  </Link>
-                </CardHeader>
-                <CardContent className="pt-1">
-                  <div className="flex flex-wrap gap-3">
-                    {missions.map((m) => (
-                      <div
-                        key={m.id}
-                        className="flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/30 px-3.5 py-2.5 text-sm"
-                      >
-                        <div className="flex size-5 items-center justify-center rounded-full border border-border">
-                          {m.done && <CheckCircle2 className="size-3 text-emerald-500" />}
-                        </div>
-                        <span className="font-medium">{m.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+          {/* Today's Mission — full interactive component */}
+          <motion.div variants={fadeUp}>
+            <MissionList compact />
+          </motion.div>
 
           {/* Two-column layout: Goals + Upcoming */}
           <div className="grid gap-6 lg:grid-cols-2">
@@ -272,50 +252,20 @@ export default function DashboardPage() {
             </motion.div>
           </div>
 
-          {/* Recent activity — full width */}
+          {/* Career Timeline — full width */}
           <motion.div variants={fadeUp}>
             <Card>
               <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
                   <Clock className="size-4 text-muted-foreground" />
-                  Recent Activity
+                  Career Timeline
                 </CardTitle>
                 <Link to="/applications" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
                   View all <ArrowRight className="ml-0.5 inline size-3" />
                 </Link>
               </CardHeader>
               <CardContent className="pt-2">
-                <div className="space-y-1">
-                  {recentApps.map((a: any, i: number) => (
-                    <motion.div
-                      key={a.id}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                      className="flex items-center gap-4 rounded-xl p-3.5 text-sm transition-all hover:bg-secondary/40"
-                    >
-                      <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
-                        <Building2 className="size-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{a.company}</p>
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">{a.role}</p>
-                      </div>
-                      <Badge
-                        variant="secondary"
-                        className={cn('shrink-0 capitalize text-[11px] font-medium', {
-                          'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400': a.stage === 'offer',
-                          'bg-blue-500/10 text-blue-600 dark:text-blue-400': a.stage === 'interview',
-                          'bg-violet-500/10 text-violet-600 dark:text-violet-400': a.stage === 'online_assessment',
-                          'bg-muted text-muted-foreground': a.stage === 'rejected',
-                        })}
-                      >
-                        {a.stage.replace('_', ' ')}
-                      </Badge>
-                      <span className="shrink-0 text-xs text-muted-foreground/60">{timeAgo(a.createdAt)}</span>
-                    </motion.div>
-                  ))}
-                </div>
+                <CareerTimeline events={timeline} limit={6} onViewAll={() => navigate('/applications')} />
               </CardContent>
             </Card>
           </motion.div>

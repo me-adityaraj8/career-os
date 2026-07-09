@@ -10,8 +10,10 @@ import {
   Settings,
   Target,
   Sparkles,
+  Flame,
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
+import { useMissions } from '@/hooks/useMissions';
 import { cn } from '@/lib/utils';
 
 const mainNav = [
@@ -78,6 +80,36 @@ function NavItem({
   );
 }
 
+function StreakWidget() {
+  const { data } = useMissions();
+  const streak = data?.streak;
+  if (!streak) return null;
+
+  const todayDone = streak.todayCompleted;
+  return (
+    <div className="mx-1 mb-2 rounded-lg border border-sidebar-border bg-sidebar-accent/30 px-3 py-2.5">
+      <div className="flex items-center gap-2">
+        <motion.div
+          animate={todayDone ? { scale: [1, 1.2, 1] } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <Flame className={cn('size-4', todayDone ? 'text-orange-500' : 'text-muted-foreground/40')} />
+        </motion.div>
+        <span className="text-xs font-semibold tabular-nums">{streak.current}</span>
+        <span className="text-[11px] text-muted-foreground/60">day streak</span>
+      </div>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-sidebar-accent">
+        <motion.div
+          className={cn('h-full rounded-full', todayDone ? 'bg-orange-500' : 'bg-muted-foreground/20')}
+          initial={{ width: 0 }}
+          animate={{ width: todayDone ? '100%' : '0%' }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function Sidebar({
   onNavigate,
 }: {
@@ -109,7 +141,8 @@ export function Sidebar({
           ))}
         </div>
 
-        <div className="mt-auto space-y-0.5 border-t border-sidebar-border pt-4">
+        <div className="mt-auto space-y-2 border-t border-sidebar-border pt-4">
+          <StreakWidget />
           {bottomNav.map((item) => (
             <NavItem key={item.to} item={item} onNavigate={onNavigate} />
           ))}
