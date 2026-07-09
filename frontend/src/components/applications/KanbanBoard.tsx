@@ -238,13 +238,22 @@ export function KanbanBoard({ applications, onEdit, onDelete, onView, onAdd }: P
           />
         ))}
       </div>
-      <DragOverlay>
+      <DragOverlay dropAnimation={{
+        duration: 280,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      }}>
         {activeApp && (
-          <ApplicationCard
-            application={activeApp}
-            className="rotate-[2deg] shadow-2xl ring-2 ring-primary/10"
-            style={{ width: 'auto', minWidth: 200 }}
-          />
+          <motion.div
+            initial={{ scale: 1, rotate: 0 }}
+            animate={{ scale: 1.04, rotate: 2 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+          >
+            <ApplicationCard
+              application={activeApp}
+              className="shadow-2xl ring-2 ring-primary/10 backdrop-blur-sm"
+              style={{ width: 'auto', minWidth: 200 }}
+            />
+          </motion.div>
         )}
       </DragOverlay>
     </DndContext>

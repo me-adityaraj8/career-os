@@ -14,6 +14,9 @@ import {
   CheckCircle2,
   Clock,
   Building2,
+  Flame,
+  Zap,
+  ListChecks,
 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/StatCard';
@@ -30,6 +33,12 @@ import { useContacts } from '@/hooks/useContacts';
 import { useApplications } from '@/hooks/useApplications';
 import { cn, formatDate, timeAgo } from '@/lib/utils';
 import { INTERVIEW_TYPE_COLORS, INTERVIEW_TYPE_LABEL } from '@/lib/constants';
+import {
+  buildDailyActivity,
+  computeStreaks,
+  computeXP,
+  buildMissions,
+} from '@/lib/gamification';
 import type { InterviewType } from '@/types';
 
 const stagger = {
@@ -48,6 +57,12 @@ export default function DashboardPage() {
   const { data: interviews } = useInterviews();
   const { data: contacts } = useContacts();
   const { data: applications } = useApplications();
+
+  const apps = applications ?? [];
+  const daily = buildDailyActivity(apps);
+  const streaks = computeStreaks(daily);
+  const xp = computeXP(apps);
+  const missions = buildMissions(goals ?? []);
 
   const upcomingInterviews = (interviews ?? [])
     .filter((r) => r.scheduledAt && new Date(r.scheduledAt) >= new Date() && r.outcome === 'pending')
@@ -115,6 +130,58 @@ export default function DashboardPage() {
             )}
           </motion.div>
 
+          {/* Streak + XP compact strip */}
+          <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2 rounded-xl border bg-secondary/30 px-4 py-2.5 text-sm">
+              <Flame className="size-4 text-orange-500" />
+              <span className="font-semibold tabular-nums">{streaks.current}</span>
+              <span className="text-muted-foreground">day streak</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border bg-secondary/30 px-4 py-2.5 text-sm">
+              <Zap className="size-4 text-violet-500" />
+              <span className="font-semibold tabular-nums">{xp.total.toLocaleString()}</span>
+              <span className="text-muted-foreground">XP · {xp.levelName}</span>
+            </div>
+            {streaks.todayActive && (
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-2.5 text-sm text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="size-4" />
+                Active today
+              </div>
+            )}
+          </motion.div>
+
+          {/* Today's Mission */}
+          {missions.length > 0 && (
+            <motion.div variants={fadeUp}>
+              <Card>
+                <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
+                    <ListChecks className="size-4 text-muted-foreground" />
+                    Today's Mission
+                  </CardTitle>
+                  <Link to="/goals" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    Goals <ArrowRight className="ml-0.5 inline size-3" />
+                  </Link>
+                </CardHeader>
+                <CardContent className="pt-1">
+                  <div className="flex flex-wrap gap-3">
+                    {missions.map((m) => (
+                      <div
+                        key={m.id}
+                        className="flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/30 px-3.5 py-2.5 text-sm"
+                      >
+                        <div className="flex size-5 items-center justify-center rounded-full border border-border">
+                          {m.done && <CheckCircle2 className="size-3 text-emerald-500" />}
+                        </div>
+                        <span className="font-medium">{m.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
           {/* Two-column layout: Goals + Upcoming */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Goals */}
@@ -138,7 +205,7 @@ export default function DashboardPage() {
                         <div key={g.id}>
                           <div className="mb-2 flex items-center justify-between">
                             <span className="flex items-center gap-2 truncate pr-2 text-sm font-medium">
-                              {done && <CheckCircle2 className="size-3.5 shrink-0 text-foreground" />}
+                              {done && <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />}
                               <span className="truncate">{g.title}</span>
                             </span>
                             <span className="shrink-0 text-xs tabular-nums text-muted-foreground">

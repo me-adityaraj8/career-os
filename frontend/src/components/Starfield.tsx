@@ -2,24 +2,18 @@ import { useEffect, useRef } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 
 interface Star {
-  x: number; // 0..1 normalized
+  x: number;
   y: number;
-  r: number; // radius px
-  layer: number; // 0 = far/slow, 1 = near/faster
-  tw: number; // twinkle phase offset
+  r: number;
+  layer: number; // 0 = deep/slowest, 1 = mid, 2 = near/fastest
+  tw: number;
 }
 
-/**
- * Very subtle animated starfield: tiny dots on two parallax layers drifting
- * slowly, with a faint twinkle. Renders behind all content, never intercepts
- * pointer events, and pauses entirely for prefers-reduced-motion users.
- */
 export function Starfield({
   density = 1,
   mode,
 }: {
   density?: number;
-  /** Force star color regardless of app theme (e.g. always-dark panels). */
   mode?: 'light' | 'dark';
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,14 +34,20 @@ export function Starfield({
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     function seed() {
-      const count = Math.round(((w * h) / 18000) * density);
-      stars = Array.from({ length: count }, () => ({
-        x: Math.random(),
-        y: Math.random(),
-        r: Math.random() * 0.9 + 0.4,
-        layer: Math.random() < 0.65 ? 0 : 1,
-        tw: Math.random() * Math.PI * 2,
-      }));
+      const count = Math.round(((w * h) / 9000) * density);
+      stars = Array.from({ length: count }, () => {
+        const rand = Math.random();
+        const layer = rand < 0.5 ? 0 : rand < 0.82 ? 1 : 2;
+        return {
+          x: Math.random(),
+          y: Math.random(),
+          r: layer === 0 ? Math.random() * 0.5 + 0.2
+           : layer === 1 ? Math.random() * 0.7 + 0.3
+           : Math.random() * 0.9 + 0.5,
+          layer,
+          tw: Math.random() * Math.PI * 2,
+        };
+      });
     }
 
     function resize() {
@@ -60,22 +60,24 @@ export function Starfield({
       seed();
     }
 
-    // Stars are near-white in dark mode, near-black in light mode.
     const starColor = theme === 'dark' ? '255, 255, 255' : '10, 10, 12';
-    const baseAlpha = theme === 'dark' ? 0.35 : 0.18;
+    const baseAlpha = theme === 'dark' ? 0.4 : 0.18;
+
+    const speeds = [0.001, 0.003, 0.006];
+    const alphaScale = [0.4, 0.7, 1.0];
+    const sizeScale = [0.7, 0.9, 1.15];
 
     function draw(t: number) {
       ctx!.clearRect(0, 0, w, h);
       const time = t / 1000;
       for (const s of stars) {
-        // Slow horizontal drift; near layer moves slightly faster (parallax).
-        const speed = s.layer === 0 ? 0.0022 : 0.005;
+        const speed = speeds[s.layer];
         const x = ((s.x + time * speed) % 1) * w;
         const y = s.y * h;
-        const twinkle = reduced ? 1 : 0.75 + 0.25 * Math.sin(time * 0.8 + s.tw);
-        const alpha = baseAlpha * twinkle * (s.layer === 0 ? 0.6 : 1);
+        const twinkle = reduced ? 1 : 0.7 + 0.3 * Math.sin(time * 0.6 + s.tw);
+        const alpha = baseAlpha * twinkle * alphaScale[s.layer];
         ctx!.beginPath();
-        ctx!.arc(x, y, s.r * (s.layer === 0 ? 0.8 : 1.1), 0, Math.PI * 2);
+        ctx!.arc(x, y, s.r * sizeScale[s.layer], 0, Math.PI * 2);
         ctx!.fillStyle = `rgba(${starColor}, ${alpha})`;
         ctx!.fill();
       }
@@ -85,7 +87,7 @@ export function Starfield({
     resize();
     window.addEventListener('resize', resize);
     if (reduced) {
-      draw(0); // single static frame
+      draw(0);
     } else {
       raf = requestAnimationFrame(draw);
     }
