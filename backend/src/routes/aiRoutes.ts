@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../controllers/aiController';
 import { requireAuth } from '../middleware/auth';
+import { demoGuard } from '../middleware/demoGuard';
 import { validate, idParamSchema } from '../middleware/validate';
 import { asyncHandler } from '../utils/asyncHandler';
 import {
@@ -14,6 +15,7 @@ import {
 export const aiRouter = Router();
 
 aiRouter.use(requireAuth);
+aiRouter.use(demoGuard);
 
 aiRouter.get('/status', asyncHandler(controller.status));
 

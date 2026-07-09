@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateGoal, useUpdateGoal } from '@/hooks/useGoals';
 import { toast } from '@/stores/toastStore';
-import { apiErrorMessage } from '@/lib/api';
+import { apiErrorMessage, isDemoReadonly } from '@/lib/api';
 import { GOAL_TEMPLATES } from '@/lib/gamification';
 import type { Goal, GoalMetric, GoalPeriod } from '@/types';
 
@@ -77,7 +77,7 @@ export function GoalDialog({
       }
       onOpenChange(false);
     } catch (err) {
-      toast({ title: apiErrorMessage(err), variant: 'error' });
+      if (!isDemoReadonly(err)) toast({ title: apiErrorMessage(err), variant: 'error' });
     }
   }
 

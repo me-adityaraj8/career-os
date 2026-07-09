@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as goalService from '../services/goalService';
 import { requireAuth, AuthedRequest, getUserId } from '../middleware/auth';
+import { demoGuard } from '../middleware/demoGuard';
 import { validate, idParamSchema } from '../middleware/validate';
 import { asyncHandler } from '../utils/asyncHandler';
 import { createGoalSchema, updateGoalSchema } from '../validation/goalSchemas';
@@ -8,6 +9,7 @@ import { createGoalSchema, updateGoalSchema } from '../validation/goalSchemas';
 export const goalRouter = Router();
 
 goalRouter.use(requireAuth);
+goalRouter.use(demoGuard);
 
 goalRouter.get(
   '/',

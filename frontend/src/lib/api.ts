@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '@/stores/authStore';
+import { toast } from '@/stores/toastStore';
 
 /**
  * Shared axios instance for the API. Reads the base URL from Vite env
@@ -21,13 +22,27 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (error: AxiosError) => {
+    const data = error.response?.data as { error?: { code?: string } } | undefined;
+    if (error.response?.status === 403 && data?.error?.code === 'demo_readonly') {
+      toast({
+        title: 'Demo account is read-only',
+        description: 'Sign up for a free account to start tracking your applications.',
+        variant: 'error',
+      });
+      (error as any)._demoReadonly = true;
+      return Promise.reject(error);
+    }
     if (error.response?.status === 401) {
-      // Token invalid/expired — clear it. Route guards will redirect to /login.
       useAuthStore.getState().clear();
     }
     return Promise.reject(error);
   },
 );
+
+/** True when the axios interceptor already showed a toast for this error. */
+export function isDemoReadonly(err: unknown): boolean {
+  return Boolean((err as any)?._demoReadonly);
+}
 
 /** Extract a human-readable message from an axios error's API envelope. */
 export function apiErrorMessage(err: unknown, fallback = 'Something went wrong'): string {
