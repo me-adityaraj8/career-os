@@ -267,7 +267,7 @@ interface MissionListProps {
   compact?: boolean;
 }
 
-export function MissionList({ compact }: MissionListProps) {
+export function MissionList(_props: MissionListProps) {
   const { data, isLoading } = useMissions();
   const createMission = useCreateMission();
   const updateMission = useUpdateMission();
