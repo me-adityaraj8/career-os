@@ -8,6 +8,7 @@ import { contactRouter } from './contactRoutes';
 import { aiRouter } from './aiRoutes';
 import { analyticsRouter } from './analyticsRoutes';
 import { goalRouter } from './goalRoutes';
+import { missionRouter } from './missionRoutes';
 
 /**
  * API v1 router. Feature routers are mounted here as each phase is built.
@@ -32,4 +33,4 @@ apiRouter.use('/contacts', contactRouter);
 apiRouter.use('/ai', aiRouter);
 apiRouter.use('/analytics', analyticsRouter);
 apiRouter.use('/goals', goalRouter);
-// ...
+apiRouter.use('/missions', missionRouter);

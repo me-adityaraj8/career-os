@@ -1,12 +1,14 @@
+import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, ExternalLink, Circle, Calendar, FileText, Clock,
-  Briefcase, Tag, DollarSign, X, StickyNote, BarChart3,
+  Briefcase, Tag, DollarSign, X, StickyNote, BarChart3, Gauge,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PRIORITIES, STAGE_LABEL } from '@/lib/constants';
+import { computeOpportunityScore } from '@/lib/gamification';
 import { cn, formatDate } from '@/lib/utils';
 import { useInterviews } from '@/hooks/useInterviews';
 import type { Application } from '@/types';
@@ -29,8 +31,9 @@ const STAGE_COLORS: Record<string, string> = {
 
 export function ApplicationDetailModal({ application, open, onClose, onEdit }: Props) {
   const { data: allInterviews } = useInterviews();
+  const opp = useMemo(() => application ? computeOpportunityScore(application) : null, [application]);
 
-  if (!application) return null;
+  if (!application || !opp) return null;
 
   const priority = PRIORITIES.find((p) => p.value === application.priority);
   const interviews = allInterviews?.filter((i) => i.applicationId === application.id) ?? [];
@@ -108,6 +111,54 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
                     <DetailItem icon={Calendar} label="Applied" value={formatDate(application.appliedDate)} />
                   )}
                   <DetailItem icon={Clock} label="Added" value={formatDate(application.createdAt)} />
+                </div>
+
+                {/* Opportunity Score */}
+                <div>
+                  <SectionLabel icon={Gauge} label="Opportunity Score" />
+                  <div className="mt-2 rounded-xl border p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex size-12 items-center justify-center">
+                        <svg viewBox="0 0 48 48" className="size-12 -rotate-90">
+                          <circle cx="24" cy="24" r="20" fill="none" strokeWidth="3" className="stroke-muted/30" />
+                          <motion.circle
+                            cx="24" cy="24" r="20" fill="none" strokeWidth="3.5" strokeLinecap="round"
+                            className={opp.color.replace('text-', 'stroke-')}
+                            initial={{ strokeDashoffset: 125.66 }}
+                            animate={{ strokeDashoffset: 125.66 * (1 - opp.score / 100) }}
+                            style={{ strokeDasharray: 125.66 }}
+                            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                          />
+                        </svg>
+                        <span className={cn('absolute text-sm font-bold tabular-nums', opp.color)}>{opp.score}</span>
+                      </div>
+                      <div>
+                        <p className={cn('text-sm font-semibold', opp.color)}>{opp.label}</p>
+                        <p className="text-xs text-muted-foreground">Based on stage, priority, recency, and details</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-5 gap-1">
+                      {[
+                        { label: 'Stage', val: opp.breakdown.stage },
+                        { label: 'Priority', val: opp.breakdown.priority },
+                        { label: 'Recency', val: opp.breakdown.recency },
+                        { label: 'Details', val: opp.breakdown.completeness },
+                        { label: 'Tags', val: opp.breakdown.tags },
+                      ].map(({ label, val }) => (
+                        <div key={label} className="text-center">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-muted/50">
+                            <motion.div
+                              className={cn('h-full rounded-full', opp.color.replace('text-', 'bg-'))}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(100, (val / 20) * 100)}%` }}
+                              transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+                            />
+                          </div>
+                          <span className="mt-1 block text-[9px] text-muted-foreground/60">{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Tags */}

@@ -97,6 +97,7 @@ export interface Contact {
 
 export type GoalMetric = 'applications' | 'interviews' | 'offers';
 export type GoalPeriod = 'week' | 'month' | 'all_time';
+export type MissionMetric = 'applications' | 'interviews' | 'offers' | 'networking' | 'custom';
 
 export interface Goal {
   id: string;

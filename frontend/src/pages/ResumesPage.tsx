@@ -60,7 +60,24 @@ export default function ResumesPage() {
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full" />
+            <div key={i} className="space-y-3 rounded-xl border p-4" style={{ opacity: 1 - i * 0.15 }}>
+              <div className="flex items-start justify-between">
+                <Skeleton className="size-10 rounded-lg" />
+                <Skeleton className="size-6 rounded" />
+              </div>
+              <div className="space-y-1.5">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-44" />
+              </div>
+              <div className="flex gap-1.5">
+                <Skeleton className="h-5 w-14 rounded-md" />
+                <Skeleton className="h-5 w-14 rounded-md" />
+              </div>
+              <div className="flex justify-between pt-2">
+                <Skeleton className="h-3 w-12" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -87,11 +104,12 @@ export default function ResumesPage() {
           {resumes.map((r, i) => (
             <motion.div
               key={r.id}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
+              transition={{ delay: i * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
+              whileHover={{ y: -2 }}
             >
-              <Card className="h-full">
+              <Card className="h-full transition-shadow duration-300 hover:shadow-elev-2">
                 <CardContent className="flex h-full flex-col gap-3 p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex size-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground">

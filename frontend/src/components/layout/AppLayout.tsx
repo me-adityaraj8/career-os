@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, Moon, Sun, LogOut, User as UserIcon, X, Search, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { SmartReminders } from '@/components/SmartReminders';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Button } from '@/components/ui/button';
 import {
@@ -191,6 +192,7 @@ export function AppLayout() {
           </button>
 
           <div className="flex flex-1 items-center justify-end gap-1.5 sm:flex-none">
+            <SmartReminders />
             <Button
               variant="ghost"
               size="icon"

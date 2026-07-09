@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Target,
@@ -14,7 +15,6 @@ import {
   AlertTriangle,
   Clock,
   Sparkles,
-  ListChecks,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/PageHeader';
@@ -31,21 +31,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { GoalDialog } from '@/components/goals/GoalDialog';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { MissionList } from '@/components/missions/MissionList';
 import { useGoals, useDeleteGoal } from '@/hooks/useGoals';
 import { useApplications } from '@/hooks/useApplications';
+import { useMissions } from '@/hooks/useMissions';
 import { toast } from '@/stores/toastStore';
 import type { Goal } from '@/types';
+import { ActivityHeatmap } from '@/components/ActivityHeatmap';
 import {
   buildDailyActivity,
-  buildHeatmap,
+  buildDetailedDailyActivity,
+  buildDetailedHeatmap,
   computeStreaks,
   computeXP,
   enrichGoals,
-  buildMissions,
   generateCoachTips,
   computeWeeklyInsights,
   HEALTH_CONFIG,
-  type HeatmapCell,
   type CoachTip,
 } from '@/lib/gamification';
 import { fireConfetti } from '@/lib/confetti';
@@ -65,46 +67,6 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
-const HEATMAP_COLORS = [
-  'bg-muted/60',
-  'bg-[var(--viz-seq-1)]/40',
-  'bg-[var(--viz-seq-2)]/60',
-  'bg-[var(--viz-seq-3)]/80',
-  'bg-[var(--viz-1)]',
-];
-
-function HeatmapGrid({ grid }: { grid: HeatmapCell[][] }) {
-  const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
-  return (
-    <div className="flex gap-1 overflow-x-auto pb-1">
-      <div className="flex shrink-0 flex-col gap-1 pr-1 pt-5">
-        {dayLabels.map((l, i) => (
-          <div key={i} className="flex h-[13px] items-center text-[9px] text-muted-foreground/60">
-            {l}
-          </div>
-        ))}
-      </div>
-      {grid.map((week, wi) => (
-        <div key={wi} className="flex flex-col gap-1">
-          {wi % 4 === 0 ? (
-            <div className="mb-0.5 text-[9px] text-muted-foreground/50">
-              {new Date(week[0].date).toLocaleDateString('en-US', { month: 'short' })}
-            </div>
-          ) : (
-            <div className="mb-0.5 h-[13px]" />
-          )}
-          {week.map((cell) => (
-            <div
-              key={cell.date}
-              className={cn('size-[13px] rounded-[3px] transition-colors', HEATMAP_COLORS[cell.level])}
-              title={`${cell.date}: ${cell.count} ${cell.count === 1 ? 'activity' : 'activities'}`}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function CoachCard({ tips }: { tips: CoachTip[] }) {
   if (tips.length === 0) return null;
@@ -144,8 +106,10 @@ function CoachCard({ tips }: { tips: CoachTip[] }) {
 }
 
 export default function GoalsPage() {
+  const navigate = useNavigate();
   const { data: goals, isLoading: goalsLoading, isError } = useGoals();
   const { data: applications } = useApplications();
+  const { data: missionData } = useMissions();
   const del = useDeleteGoal();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -154,14 +118,19 @@ export default function GoalsPage() {
 
   const apps = applications ?? [];
   const daily = buildDailyActivity(apps);
-  const heatmap = buildHeatmap(daily);
+  const detailed = buildDetailedDailyActivity(apps);
+  const streakDays = new Set(daily.keys());
+  const heatmap = buildDetailedHeatmap(detailed, streakDays);
   const streaks = computeStreaks(daily);
   const xp = computeXP(apps);
   const enriched = enrichGoals(goals ?? []);
-  const missions = buildMissions(goals ?? []);
   const coachTips = generateCoachTips(enriched, streaks, xp, apps);
   const insights = computeWeeklyInsights(apps);
   const completedCount = enriched.filter((g) => g.health === 'completed').length;
+
+  const missionStreak = missionData?.streak;
+  const missionXP = (missionData?.missions ?? []).filter((m) => m.completed).length * 15 +
+    ((missionData?.missions ?? []).every((m) => m.completed) && (missionData?.missions ?? []).length > 0 ? 50 : 0);
 
   const prevCompleted = useRef(completedCount);
   useEffect(() => {
@@ -209,25 +178,33 @@ export default function GoalsPage() {
         <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-8">
           {/* ── Stat tiles ── */}
           <motion.div variants={fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="group hover:-translate-y-0.5 hover:shadow-elev-2">
+            <Card
+              className="group cursor-pointer hover:-translate-y-0.5 hover:shadow-elev-2"
+              onClick={() => navigate('/goals')}
+            >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-[13px] font-medium text-muted-foreground">Streak</p>
+                  <p className="text-[13px] font-medium text-muted-foreground">Mission Streak</p>
                   <div className="flex size-8 items-center justify-center rounded-lg border bg-secondary/50 text-orange-500">
                     <Flame className="size-4" />
                   </div>
                 </div>
                 <p className="mt-3 text-[28px] font-semibold leading-none tracking-tight tabular-nums">
-                  {streaks.current}
+                  {missionStreak?.current ?? streaks.current}
                   <span className="ml-1.5 text-sm font-normal text-muted-foreground">days</span>
                 </p>
-                {streaks.longest > 0 && (
-                  <p className="mt-2 text-xs text-muted-foreground">Best: {streaks.longest} days</p>
+                {(missionStreak?.longest ?? streaks.longest) > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Best: {missionStreak?.longest ?? streaks.longest} days
+                  </p>
                 )}
               </CardContent>
             </Card>
 
-            <Card className="group hover:-translate-y-0.5 hover:shadow-elev-2">
+            <Card
+              className="group cursor-pointer hover:-translate-y-0.5 hover:shadow-elev-2"
+              onClick={() => navigate('/goals')}
+            >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <p className="text-[13px] font-medium text-muted-foreground">Career XP</p>
@@ -236,7 +213,7 @@ export default function GoalsPage() {
                   </div>
                 </div>
                 <p className="mt-3 text-[28px] font-semibold leading-none tracking-tight tabular-nums">
-                  {xp.total.toLocaleString()}
+                  {(xp.total + missionXP).toLocaleString()}
                 </p>
                 <div className="mt-2 flex items-center gap-2">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
@@ -295,41 +272,9 @@ export default function GoalsPage() {
           </motion.div>
 
           {/* ── Today's Mission ── */}
-          {missions.length > 0 && (
-            <motion.div variants={fadeUp}>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
-                    <ListChecks className="size-4 text-muted-foreground" />
-                    Today's Mission
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-1">
-                  <div className="flex flex-wrap gap-3">
-                    {missions.map((m) => (
-                      <div
-                        key={m.id}
-                        className={cn(
-                          'flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-sm transition-colors',
-                          m.done
-                            ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400'
-                            : 'border-border/60 bg-secondary/30 text-foreground',
-                        )}
-                      >
-                        <div className={cn(
-                          'flex size-5 items-center justify-center rounded-full border',
-                          m.done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-border'
-                        )}>
-                          {m.done && <CheckCircle2 className="size-3" />}
-                        </div>
-                        <span className="font-medium">{m.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+          <motion.div variants={fadeUp}>
+            <MissionList />
+          </motion.div>
 
           {/* ── Heatmap + AI Coach ── */}
           <div className="grid gap-6 lg:grid-cols-5">
@@ -343,14 +288,7 @@ export default function GoalsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-1">
-                  <HeatmapGrid grid={heatmap} />
-                  <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground/60">
-                    <span>Less</span>
-                    {HEATMAP_COLORS.map((c, i) => (
-                      <div key={i} className={cn('size-[11px] rounded-[2px]', c)} />
-                    ))}
-                    <span>More</span>
-                  </div>
+                  <ActivityHeatmap grid={heatmap} />
                 </CardContent>
               </Card>
             </motion.div>

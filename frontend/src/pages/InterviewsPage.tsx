@@ -74,9 +74,21 @@ export default function InterviewsPage() {
       />
 
       {isLoading && (
-        <div className="space-y-4">
+        <div className="space-y-8">
           {Array.from({ length: 2 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full" />
+            <div key={i} className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-9 rounded-lg" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </div>
+              <div className="ml-4 space-y-3 border-l-2 border-border pl-6">
+                <Skeleton className="h-24 w-full rounded-xl" />
+                <Skeleton className="h-24 w-full rounded-xl" style={{ opacity: 0.6 }} />
+              </div>
+            </div>
           ))}
         </div>
       )}

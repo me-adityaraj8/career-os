@@ -1,4 +1,5 @@
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { MoreVertical, MapPin, ExternalLink, Circle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -8,8 +9,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PRIORITIES } from '@/lib/constants';
+import { computeOpportunityScore } from '@/lib/gamification';
 import { cn, formatDate } from '@/lib/utils';
 import type { Application } from '@/types';
+
+function ScoreRing({ score, color }: { score: number; color: string }) {
+  const r = 11;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - score / 100);
+
+  return (
+    <div className="relative flex size-8 items-center justify-center" title={`Score: ${score}`}>
+      <svg viewBox="0 0 28 28" className="size-8 -rotate-90">
+        <circle cx="14" cy="14" r={r} fill="none" strokeWidth="2" className="stroke-muted/40" />
+        <motion.circle
+          cx="14" cy="14" r={r} fill="none" strokeWidth="2.5" strokeLinecap="round"
+          className={color.replace('text-', 'stroke-')}
+          initial={{ strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: offset }}
+          style={{ strokeDasharray: circ }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        />
+      </svg>
+      <span className={cn('absolute text-[9px] font-bold tabular-nums', color)}>{score}</span>
+    </div>
+  );
+}
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   application: Application;
@@ -22,6 +47,8 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 export const ApplicationCard = forwardRef<HTMLDivElement, Props>(
   ({ application, onEdit, onDelete, onView, dragging, className, ...props }, ref) => {
     const priority = PRIORITIES.find((p) => p.value === application.priority);
+    const opp = useMemo(() => computeOpportunityScore(application), [application]);
+
     return (
       <div
         ref={ref}
@@ -42,31 +69,34 @@ export const ApplicationCard = forwardRef<HTMLDivElement, Props>(
         {...props}
       >
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-[15px] font-semibold leading-snug tracking-tight">{application.company}</p>
             <p className="mt-0.5 text-[13px] leading-snug text-muted-foreground">{application.role}</p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              onPointerDown={(e) => e.stopPropagation()}
-              className="shrink-0 rounded-lg p-1.5 text-muted-foreground/50 opacity-0 transition-all hover:bg-secondary hover:text-foreground group-hover:opacity-100 data-[state=open]:opacity-100"
-            >
-              <MoreVertical className="size-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
-              {application.jobUrl && (
-                <DropdownMenuItem asChild>
-                  <a href={application.jobUrl} target="_blank" rel="noreferrer">
-                    <ExternalLink className="size-4" /> Open job
-                  </a>
+          <div className="flex items-center gap-1">
+            <ScoreRing score={opp.score} color={opp.color} />
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                onPointerDown={(e) => e.stopPropagation()}
+                className="shrink-0 rounded-lg p-1.5 text-muted-foreground/50 opacity-0 transition-all hover:bg-secondary hover:text-foreground group-hover:opacity-100 data-[state=open]:opacity-100"
+              >
+                <MoreVertical className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
+                {application.jobUrl && (
+                  <DropdownMenuItem asChild>
+                    <a href={application.jobUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="size-4" /> Open job
+                    </a>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                  Delete
                 </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         {(application.location || application.tags.length > 0) && (
@@ -92,10 +122,12 @@ export const ApplicationCard = forwardRef<HTMLDivElement, Props>(
           </span>
           {application.appliedDate && (
             <>
-              <span className="text-muted-foreground/30">·</span>
+              <span className="text-muted-foreground/30">&middot;</span>
               <span className="truncate text-muted-foreground/70">{formatDate(application.appliedDate)}</span>
             </>
           )}
+          <span className="text-muted-foreground/30">&middot;</span>
+          <span className={cn('font-medium', opp.color)}>{opp.label}</span>
         </div>
       </div>
     );
