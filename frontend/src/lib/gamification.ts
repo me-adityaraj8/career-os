@@ -315,7 +315,7 @@ export interface CoachTip {
 export function generateCoachTips(
   goals: GoalWithHealth[],
   streaks: StreakInfo,
-  xp: XPInfo,
+  _xp: XPInfo,
   applications: Application[],
 ): CoachTip[] {
   const tips: CoachTip[] = [];

@@ -81,8 +81,6 @@ export function AppLayout() {
     if (!collapsed) setHoverReveal(false);
   }, [collapsed]);
 
-  const showSidebar = !collapsed || hoverReveal;
-
   return (
     <div className="relative flex min-h-screen">
       {/* Desktop sidebar — animated width for collapse */}
