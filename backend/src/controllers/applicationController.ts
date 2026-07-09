@@ -31,3 +31,9 @@ export async function remove(req: AuthedRequest, res: Response): Promise<void> {
   await applicationService.remove(getUserId(req), req.params.id);
   res.status(204).send();
 }
+
+export async function reorder(req: AuthedRequest, res: Response): Promise<void> {
+  const { items } = req.body as { items: { id: string; stage: never; position: number }[] };
+  const applications = await applicationService.reorder(getUserId(req), items);
+  res.json({ applications });
+}
