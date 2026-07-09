@@ -41,4 +41,4 @@ ENV PORT=4000
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "node dist/db/migrate.js && node dist/index.js"]
+CMD ["sh", "-c", "node dist/db/migrate.js && node dist/db/seed.js && node dist/index.js"]
