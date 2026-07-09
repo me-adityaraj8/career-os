@@ -7,19 +7,45 @@ interface ThemeState {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggle: () => void;
+  toggleWithTransition: (x: number, y: number) => void;
 }
 
-/** Applies/removes the `dark` class on <html> to drive the CSS variables. */
 function applyTheme(theme: Theme): void {
   const root = document.documentElement;
   root.classList.toggle('dark', theme === 'dark');
 }
 
-/**
- * Theme preference. Persisted locally for instant application on load; also
- * synced to the user's account (dark_mode) by the settings page so it follows
- * them across devices.
- */
+function startCircularTransition(x: number, y: number, apply: () => void): void {
+  const doc = document as any;
+  if (!doc.startViewTransition) {
+    apply();
+    return;
+  }
+
+  const endRadius = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y),
+  );
+
+  const root = document.documentElement;
+  root.style.setProperty('--vt-x', `${x}px`);
+  root.style.setProperty('--vt-y', `${y}px`);
+  root.style.setProperty('--vt-r', `${endRadius}px`);
+
+  const transition = doc.startViewTransition(apply);
+
+  transition.ready.then(() => {
+    root.classList.add('vt-active');
+  });
+
+  transition.finished.then(() => {
+    root.classList.remove('vt-active');
+    root.style.removeProperty('--vt-x');
+    root.style.removeProperty('--vt-y');
+    root.style.removeProperty('--vt-r');
+  });
+}
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
@@ -29,11 +55,17 @@ export const useThemeStore = create<ThemeState>()(
         set({ theme });
       },
       toggle: () => get().setTheme(get().theme === 'dark' ? 'light' : 'dark'),
+      toggleWithTransition: (x, y) => {
+        const next = get().theme === 'dark' ? 'light' : 'dark';
+        startCircularTransition(x, y, () => {
+          applyTheme(next);
+          set({ theme: next });
+        });
+      },
     }),
     {
       name: 'careeros-theme',
       onRehydrateStorage: () => (state) => {
-        // Apply persisted theme as soon as the store hydrates.
         if (state) applyTheme(state.theme);
       },
     },

@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreateGoal, useUpdateGoal } from '@/hooks/useGoals';
 import { toast } from '@/stores/toastStore';
 import { apiErrorMessage } from '@/lib/api';
+import { GOAL_TEMPLATES } from '@/lib/gamification';
 import type { Goal, GoalMetric, GoalPeriod } from '@/types';
 
 const METRICS: { value: GoalMetric; label: string }[] = [
@@ -53,6 +54,16 @@ export function GoalDialog({
     setTarget(String(goal?.target ?? 20));
   }, [open, goal]);
 
+  function applyTemplate(templateName: string) {
+    const tpl = GOAL_TEMPLATES.find((t) => t.name === templateName);
+    if (!tpl || tpl.goals.length === 0) return;
+    const first = tpl.goals[0];
+    setTitle(first.title);
+    setMetric(first.metric);
+    setPeriod(first.period);
+    setTarget(String(first.target));
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const payload = { title: title.trim(), metric, period, target: parseInt(target, 10) || 1 };
@@ -79,6 +90,24 @@ export function GoalDialog({
           <DialogTitle>{isEdit ? 'Edit goal' : 'New goal'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
+          {!isEdit && (
+            <div className="space-y-2">
+              <Label>Template</Label>
+              <Select onValueChange={applyTemplate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Start from a template…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GOAL_TEMPLATES.map((t) => (
+                    <SelectItem key={t.name} value={t.name}>
+                      <span className="font-medium">{t.name}</span>
+                      <span className="ml-2 text-muted-foreground">— {t.description}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="gtitle">Title</Label>
             <Input id="gtitle" required placeholder="e.g. Apply to 20 roles this month" value={title} onChange={(e) => setTitle(e.target.value)} />

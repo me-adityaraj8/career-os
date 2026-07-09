@@ -23,6 +23,7 @@ interface PaletteItem {
   icon: React.ReactNode;
   action: () => void;
   keywords?: string;
+  shortcut?: string;
 }
 
 export function CommandPalette() {
@@ -35,15 +36,15 @@ export function CommandPalette() {
 
   const items: PaletteItem[] = useMemo(
     () => [
-      { id: 'dashboard', label: 'Dashboard', section: 'Navigation', icon: <LayoutDashboard className="size-4" />, action: () => navigate('/'), keywords: 'home overview' },
-      { id: 'applications', label: 'Applications', section: 'Navigation', icon: <Briefcase className="size-4" />, action: () => navigate('/applications'), keywords: 'jobs kanban board' },
-      { id: 'resumes', label: 'Resumes', section: 'Navigation', icon: <FileText className="size-4" />, action: () => navigate('/resumes'), keywords: 'cv upload' },
-      { id: 'interviews', label: 'Interviews', section: 'Navigation', icon: <MessageSquare className="size-4" />, action: () => navigate('/interviews'), keywords: 'rounds prep' },
-      { id: 'network', label: 'Network', section: 'Navigation', icon: <Users className="size-4" />, action: () => navigate('/network'), keywords: 'contacts crm recruiters' },
-      { id: 'ai', label: 'AI Tools', section: 'Navigation', icon: <Sparkles className="size-4" />, action: () => navigate('/ai'), keywords: 'analyzer cover letter coach' },
-      { id: 'goals', label: 'Goals', section: 'Navigation', icon: <Target className="size-4" />, action: () => navigate('/goals'), keywords: 'targets progress' },
-      { id: 'analytics', label: 'Analytics', section: 'Navigation', icon: <BarChart3 className="size-4" />, action: () => navigate('/analytics'), keywords: 'charts funnel stats' },
-      { id: 'settings', label: 'Settings', section: 'Navigation', icon: <Settings className="size-4" />, action: () => navigate('/settings'), keywords: 'profile theme' },
+      { id: 'dashboard', label: 'Dashboard', section: 'Navigation', icon: <LayoutDashboard className="size-4" />, action: () => navigate('/'), keywords: 'home overview', shortcut: 'G D' },
+      { id: 'applications', label: 'Applications', section: 'Navigation', icon: <Briefcase className="size-4" />, action: () => navigate('/applications'), keywords: 'jobs kanban board', shortcut: 'G A' },
+      { id: 'resumes', label: 'Resumes', section: 'Navigation', icon: <FileText className="size-4" />, action: () => navigate('/resumes'), keywords: 'cv upload', shortcut: 'G R' },
+      { id: 'interviews', label: 'Interviews', section: 'Navigation', icon: <MessageSquare className="size-4" />, action: () => navigate('/interviews'), keywords: 'rounds prep', shortcut: 'G I' },
+      { id: 'network', label: 'Network', section: 'Navigation', icon: <Users className="size-4" />, action: () => navigate('/network'), keywords: 'contacts crm recruiters', shortcut: 'G N' },
+      { id: 'ai', label: 'AI Tools', section: 'Navigation', icon: <Sparkles className="size-4" />, action: () => navigate('/ai'), keywords: 'analyzer cover letter coach', shortcut: 'G T' },
+      { id: 'goals', label: 'Goals', section: 'Navigation', icon: <Target className="size-4" />, action: () => navigate('/goals'), keywords: 'targets progress', shortcut: 'G G' },
+      { id: 'analytics', label: 'Analytics', section: 'Navigation', icon: <BarChart3 className="size-4" />, action: () => navigate('/analytics'), keywords: 'charts funnel stats', shortcut: 'G L' },
+      { id: 'settings', label: 'Settings', section: 'Navigation', icon: <Settings className="size-4" />, action: () => navigate('/settings'), keywords: 'profile theme', shortcut: 'G S' },
       { id: 'job-analyzer', label: 'Analyze a Job Description', section: 'AI Tools', icon: <Sparkles className="size-4" />, action: () => navigate('/ai'), keywords: 'match score ats' },
       { id: 'cover-letter', label: 'Generate Cover Letter', section: 'AI Tools', icon: <FileText className="size-4" />, action: () => navigate('/ai'), keywords: 'draft write' },
       { id: 'interview-prep', label: 'Interview Prep Questions', section: 'AI Tools', icon: <MessageSquare className="size-4" />, action: () => navigate('/ai'), keywords: 'practice coach' },
@@ -195,7 +196,14 @@ export function CommandPalette() {
                           {item.icon}
                         </span>
                         <span className="flex-1 text-left">{item.label}</span>
-                        {globalIndex === selected && (
+                        {item.shortcut && (
+                          <span className="flex items-center gap-0.5">
+                            {item.shortcut.split(' ').map((k, ki) => (
+                              <kbd key={ki} className="rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground/70">{k}</kbd>
+                            ))}
+                          </span>
+                        )}
+                        {globalIndex === selected && !item.shortcut && (
                           <ArrowRight className="size-3.5 text-muted-foreground" />
                         )}
                       </button>

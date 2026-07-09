@@ -78,7 +78,12 @@ function NavItem({
   );
 }
 
-export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+export function Sidebar({
+  onNavigate,
+}: {
+  onNavigate?: () => void;
+  collapsed?: boolean;
+}) {
   return (
     <div className="flex h-full flex-col px-3 py-5">
       <div className="mb-7 px-3">
