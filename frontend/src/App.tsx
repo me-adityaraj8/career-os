@@ -1,21 +1,25 @@
+import { lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { CommandPalette } from '@/components/CommandPalette';
 import { Starfield } from '@/components/Starfield';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthStore } from '@/stores/authStore';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
-import DashboardPage from '@/pages/DashboardPage';
-import SettingsPage from '@/pages/SettingsPage';
-import ApplicationsPage from '@/pages/ApplicationsPage';
-import ResumesPage from '@/pages/ResumesPage';
-import InterviewsPage from '@/pages/InterviewsPage';
-import NetworkPage from '@/pages/NetworkPage';
-import AIToolsPage from '@/pages/AIToolsPage';
-import AnalyticsPage from '@/pages/AnalyticsPage';
-import GoalsPage from '@/pages/GoalsPage';
+
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const ApplicationsPage = lazy(() => import('@/pages/ApplicationsPage'));
+const ResumesPage = lazy(() => import('@/pages/ResumesPage'));
+const InterviewsPage = lazy(() => import('@/pages/InterviewsPage'));
+const NetworkPage = lazy(() => import('@/pages/NetworkPage'));
+const AIToolsPage = lazy(() => import('@/pages/AIToolsPage'));
+const AnalyticsPage = lazy(() => import('@/pages/AnalyticsPage'));
+const GoalsPage = lazy(() => import('@/pages/GoalsPage'));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+
 
 /** Redirect authenticated users away from the auth pages. */
 function PublicOnly({ children }: { children: React.ReactNode }) {
@@ -26,6 +30,14 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      {/* Skip to content — accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg"
+      >
+        Skip to content
+      </a>
+
       {/* Global starfield — one instance behind the entire app */}
       <div className="fixed inset-0 -z-20" aria-hidden>
         <Starfield density={1} />
@@ -39,8 +51,10 @@ export default function App() {
         <Route
           element={
             <ProtectedRoute>
-              <CommandPalette />
-              <AppLayout />
+              <ErrorBoundary>
+                <CommandPalette />
+                <AppLayout />
+              </ErrorBoundary>
             </ProtectedRoute>
           }
         >

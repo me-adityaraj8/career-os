@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { PageSkeleton } from '@/components/PageSkeleton';
 import { Menu, Moon, Sun, LogOut, User as UserIcon, X, Search, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { SmartReminders } from '@/components/SmartReminders';
@@ -226,19 +227,21 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              className="mx-auto max-w-[1440px]"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+        <main id="main-content" className="flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10" role="main" tabIndex={-1}>
+          <Suspense fallback={<div className="mx-auto max-w-[1440px]"><PageSkeleton /></div>}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                className="mx-auto max-w-[1440px]"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+          </Suspense>
         </main>
       </div>
     </div>

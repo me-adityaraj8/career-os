@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, ExternalLink, Circle, Calendar, FileText, Clock,
-  Briefcase, Tag, DollarSign, X, StickyNote, BarChart3, Gauge,
+  Briefcase, Tag, DollarSign, X, StickyNote, Gauge,
+  Pencil, Check,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,8 @@ import { PRIORITIES, STAGE_LABEL } from '@/lib/constants';
 import { computeOpportunityScore } from '@/lib/gamification';
 import { cn, formatDate } from '@/lib/utils';
 import { useInterviews } from '@/hooks/useInterviews';
+import { useUpdateApplication } from '@/hooks/useApplications';
+import { toast } from '@/stores/toastStore';
 import type { Application } from '@/types';
 
 interface Props {
@@ -31,7 +34,50 @@ const STAGE_COLORS: Record<string, string> = {
 
 export function ApplicationDetailModal({ application, open, onClose, onEdit }: Props) {
   const { data: allInterviews } = useInterviews();
+  const updateApp = useUpdateApplication();
   const opp = useMemo(() => application ? computeOpportunityScore(application) : null, [application]);
+
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState('');
+  const notesRef = useRef<HTMLTextAreaElement>(null);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const lastSaved = useRef<string>('');
+
+  useEffect(() => {
+    if (editingNotes && notesRef.current) {
+      notesRef.current.focus();
+      notesRef.current.setSelectionRange(notesRef.current.value.length, notesRef.current.value.length);
+    }
+  }, [editingNotes]);
+
+  useEffect(() => {
+    if (!open) {
+      setEditingNotes(false);
+      clearTimeout(autoSaveTimer.current);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!editingNotes || !application) return;
+    clearTimeout(autoSaveTimer.current);
+    if (notesValue !== lastSaved.current) {
+      autoSaveTimer.current = setTimeout(() => {
+        updateApp.mutate({ id: application.id, notes: notesValue });
+        lastSaved.current = notesValue;
+        toast({ title: 'Auto-saved', variant: 'success' });
+      }, 2000);
+    }
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [notesValue, editingNotes, application, updateApp]);
+
+  function saveNotes() {
+    if (!application) return;
+    clearTimeout(autoSaveTimer.current);
+    updateApp.mutate({ id: application.id, notes: notesValue });
+    lastSaved.current = notesValue;
+    setEditingNotes(false);
+    toast({ title: 'Notes saved', variant: 'success' });
+  }
 
   if (!application || !opp) return null;
 
@@ -175,15 +221,68 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
                   </div>
                 )}
 
-                {/* Notes */}
-                {application.notes && (
-                  <div>
+                {/* Notes — inline editable */}
+                <div>
+                  <div className="flex items-center justify-between">
                     <SectionLabel icon={StickyNote} label="Notes" />
-                    <p className="mt-2 whitespace-pre-wrap rounded-xl bg-secondary/50 p-3.5 text-sm leading-relaxed text-muted-foreground">
+                    {!editingNotes && (
+                      <button
+                        onClick={() => {
+                          setNotesValue(application.notes ?? '');
+                          setEditingNotes(true);
+                        }}
+                        className="rounded-md p-1 text-muted-foreground/40 transition-colors hover:bg-secondary hover:text-foreground"
+                      >
+                        <Pencil className="size-3" />
+                      </button>
+                    )}
+                  </div>
+                  {editingNotes ? (
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        ref={notesRef}
+                        value={notesValue}
+                        onChange={(e) => setNotesValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') setEditingNotes(false);
+                          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) saveNotes();
+                        }}
+                        rows={4}
+                        className="w-full resize-none rounded-xl border bg-secondary/30 p-3.5 text-sm leading-relaxed outline-none transition-colors focus:border-primary focus:bg-secondary/50"
+                        placeholder="Add notes about this application…"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" onClick={saveNotes}>
+                          <Check className="size-3.5" /> Save
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setEditingNotes(false)}>
+                          Cancel
+                        </Button>
+                        <span className="ml-auto text-[10px] text-muted-foreground/40">⌘↵ to save · auto-saves after 2s</span>
+                      </div>
+                    </div>
+                  ) : application.notes ? (
+                    <p
+                      className="mt-2 cursor-pointer whitespace-pre-wrap rounded-xl bg-secondary/50 p-3.5 text-sm leading-relaxed text-muted-foreground transition-colors hover:bg-secondary/70"
+                      onClick={() => {
+                        setNotesValue(application.notes ?? '');
+                        setEditingNotes(true);
+                      }}
+                    >
                       {application.notes}
                     </p>
-                  </div>
-                )}
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setNotesValue('');
+                        setEditingNotes(true);
+                      }}
+                      className="mt-2 w-full rounded-xl border border-dashed p-3 text-center text-sm text-muted-foreground/50 transition-colors hover:border-border hover:text-muted-foreground"
+                    >
+                      Click to add notes…
+                    </button>
+                  )}
+                </div>
 
                 {/* Interviews */}
                 {interviews.length > 0 && (
@@ -223,15 +322,6 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
                   </div>
                 )}
 
-                {/* No extra details placeholder */}
-                {!application.notes && interviews.length === 0 && application.tags.length === 0 && (
-                  <div className="flex flex-col items-center gap-2 py-6 text-center">
-                    <BarChart3 className="size-8 text-muted-foreground/20" />
-                    <p className="text-sm text-muted-foreground/60">
-                      No additional details yet. Edit this application to add notes, tags, and more.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
 

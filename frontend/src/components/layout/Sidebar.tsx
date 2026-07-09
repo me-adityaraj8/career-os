@@ -122,7 +122,7 @@ export function Sidebar({
         <Logo />
       </div>
 
-      <nav className="flex flex-1 flex-col gap-8">
+      <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-8">
         <div className="space-y-0.5">
           <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/45">
             Overview

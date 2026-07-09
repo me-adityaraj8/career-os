@@ -1,6 +1,6 @@
-import { forwardRef, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { MoreVertical, MapPin, ExternalLink, Circle } from 'lucide-react';
+import { forwardRef, useCallback, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MoreVertical, MapPin, ExternalLink, Circle, Pencil, Trash2, Eye, Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
 import { PRIORITIES } from '@/lib/constants';
 import { computeOpportunityScore } from '@/lib/gamification';
 import { cn, formatDate } from '@/lib/utils';
+import { toast } from '@/stores/toastStore';
 import type { Application } from '@/types';
 
 function ScoreRing({ score, color }: { score: number; color: string }) {
@@ -48,8 +49,21 @@ export const ApplicationCard = forwardRef<HTMLDivElement, Props>(
   ({ application, onEdit, onDelete, onView, dragging, className, ...props }, ref) => {
     const priority = PRIORITIES.find((p) => p.value === application.priority);
     const opp = useMemo(() => computeOpportunityScore(application), [application]);
+    const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
+
+    const handleContextMenu = useCallback((e: React.MouseEvent) => {
+      e.preventDefault();
+      setCtxMenu({ x: e.clientX, y: e.clientY });
+    }, []);
+
+    const copyCompany = useCallback(() => {
+      navigator.clipboard.writeText(`${application.company} — ${application.role}`);
+      toast({ title: 'Copied to clipboard', variant: 'success' });
+      setCtxMenu(null);
+    }, [application]);
 
     return (
+      <>
       <div
         ref={ref}
         className={cn(
@@ -66,6 +80,7 @@ export const ApplicationCard = forwardRef<HTMLDivElement, Props>(
               (e.target as HTMLElement).closest('[data-radix-collection-item]')) return;
           onView?.();
         }}
+        onContextMenu={handleContextMenu}
         {...props}
       >
         <div className="flex items-start justify-between gap-2">
@@ -130,6 +145,51 @@ export const ApplicationCard = forwardRef<HTMLDivElement, Props>(
           <span className={cn('font-medium', opp.color)}>{opp.label}</span>
         </div>
       </div>
+
+      {/* Right-click context menu */}
+      <AnimatePresence>
+        {ctxMenu && (
+          <>
+            <div className="fixed inset-0 z-50" onClick={() => setCtxMenu(null)} onContextMenu={(e) => { e.preventDefault(); setCtxMenu(null); }} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.1 }}
+              className="fixed z-50 min-w-[180px] overflow-hidden rounded-xl border bg-popover p-1 shadow-xl"
+              style={{ left: ctxMenu.x, top: ctxMenu.y }}
+            >
+              {onView && (
+                <button onClick={() => { onView(); setCtxMenu(null); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-secondary">
+                  <Eye className="size-3.5 text-muted-foreground" /> View details
+                </button>
+              )}
+              {onEdit && (
+                <button onClick={() => { onEdit(); setCtxMenu(null); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-secondary">
+                  <Pencil className="size-3.5 text-muted-foreground" /> Edit
+                </button>
+              )}
+              <button onClick={copyCompany} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-secondary">
+                <Copy className="size-3.5 text-muted-foreground" /> Copy name
+              </button>
+              {application.jobUrl && (
+                <a href={application.jobUrl} target="_blank" rel="noreferrer" onClick={() => setCtxMenu(null)} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-secondary">
+                  <ExternalLink className="size-3.5 text-muted-foreground" /> Open job posting
+                </a>
+              )}
+              {onDelete && (
+                <>
+                  <div className="my-1 border-t" />
+                  <button onClick={() => { onDelete(); setCtxMenu(null); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10">
+                    <Trash2 className="size-3.5" /> Delete
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      </>
     );
   },
 );
