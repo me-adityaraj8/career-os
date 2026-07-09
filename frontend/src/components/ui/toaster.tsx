@@ -48,7 +48,7 @@ export function Toaster() {
       <AnimatePresence initial={false}>
         {toasts.map((t) => {
           const isSuccess = t.variant === 'success';
-          const Icon = !isSuccess ? staticIcons[t.variant] : null;
+          const Icon = !isSuccess ? staticIcons[t.variant as keyof typeof staticIcons] : null;
           return (
             <motion.div
               key={t.id}
