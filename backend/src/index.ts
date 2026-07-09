@@ -6,7 +6,7 @@ const app = createApp();
 
 const server = app.listen(env.port, () => {
   // eslint-disable-next-line no-console
-  console.log(`Career OS API listening on http://localhost:${env.port} (${env.nodeEnv})`);
+  console.log(`Rys API listening on http://localhost:${env.port} (${env.nodeEnv})`);
 });
 
 // Graceful shutdown: stop accepting connections, then drain the DB pool.

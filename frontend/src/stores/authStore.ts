@@ -25,6 +25,6 @@ export const useAuthStore = create<AuthState>()(
       clear: () => set({ token: null, user: null }),
       isAuthenticated: () => Boolean(get().token),
     }),
-    { name: 'careeros-auth' },
+    { name: 'rys-auth' },
   ),
 );

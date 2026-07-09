@@ -29,7 +29,7 @@ export default function LoginPage() {
   async function demoLogin() {
     setError(null);
     try {
-      await login.mutateAsync({ email: 'demo@careeros.dev', password: 'password123' });
+      await login.mutateAsync({ email: 'demo@rys.app', password: 'password123' });
       navigate('/');
     } catch (err) {
       setError(apiErrorMessage(err, 'Demo login failed'));

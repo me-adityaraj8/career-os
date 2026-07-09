@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { pool, withTransaction } from './pool';
 
-const DEMO_EMAIL = 'demo@careeros.dev';
+const DEMO_EMAIL = 'demo@rys.app';
 const DEMO_PASSWORD = 'password123';
 
 function daysAgo(n: number): string {

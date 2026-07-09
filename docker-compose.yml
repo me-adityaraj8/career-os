@@ -1,4 +1,4 @@
-# Career OS — local development stack
+# Rys — local development stack
 # Services: postgres (db), backend (Express API), frontend (Vite dev server)
 #
 # Usage:
@@ -11,18 +11,18 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: careeros_db
+    container_name: rys_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-careeros}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-careeros_dev_password}
-      POSTGRES_DB: ${POSTGRES_DB:-careeros}
+      POSTGRES_USER: ${POSTGRES_USER:-rys}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rys_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-rys}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - careeros_pgdata:/var/lib/postgresql/data
+      - rys_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-careeros} -d ${POSTGRES_DB:-careeros}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rys} -d ${POSTGRES_DB:-rys}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -31,7 +31,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: careeros_backend
+    container_name: rys_backend
     restart: unless-stopped
     depends_on:
       db:
@@ -39,7 +39,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4000
-      DATABASE_URL: postgres://${POSTGRES_USER:-careeros}:${POSTGRES_PASSWORD:-careeros_dev_password}@db:5432/${POSTGRES_DB:-careeros}
+      DATABASE_URL: postgres://${POSTGRES_USER:-rys}:${POSTGRES_PASSWORD:-rys_dev_password}@db:5432/${POSTGRES_DB:-rys}
       JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_me}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
@@ -50,14 +50,14 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - careeros_uploads:/app/uploads
+      - rys_uploads:/app/uploads
     command: sh -c "npm run migrate && npm run dev"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: careeros_frontend
+    container_name: rys_frontend
     restart: unless-stopped
     depends_on:
       - backend
@@ -70,5 +70,5 @@ services:
       - /app/node_modules
 
 volumes:
-  careeros_pgdata:
-  careeros_uploads:
+  rys_pgdata:
+  rys_uploads:
