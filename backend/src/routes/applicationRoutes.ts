@@ -7,6 +7,7 @@ import {
   createApplicationSchema,
   updateApplicationSchema,
   listApplicationsQuerySchema,
+  reorderApplicationsSchema,
 } from '../validation/applicationSchemas';
 
 export const applicationRouter = Router();
@@ -20,6 +21,12 @@ applicationRouter.get(
   asyncHandler(controller.list),
 );
 applicationRouter.get('/tags', asyncHandler(controller.tags));
+// Registered before '/:id' so PATCH /reorder isn't matched as id="reorder".
+applicationRouter.patch(
+  '/reorder',
+  validate({ body: reorderApplicationsSchema }),
+  asyncHandler(controller.reorder),
+);
 applicationRouter.post('/', validate({ body: createApplicationSchema }), asyncHandler(controller.create));
 applicationRouter.get('/:id', validate({ params: idParamSchema }), asyncHandler(controller.get));
 applicationRouter.patch(

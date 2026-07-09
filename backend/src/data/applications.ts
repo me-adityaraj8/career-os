@@ -1,4 +1,4 @@
-import { query } from '../db/pool';
+import { query, withTransaction } from '../db/pool';
 import type { Application, Priority, Stage } from '../types';
 
 /**
@@ -171,6 +171,54 @@ export async function update(
     params,
   );
   return rows.length ? mapApplication(rows[0]) : null;
+}
+
+export interface ReorderItem {
+  id: string;
+  stage: Stage;
+  position: number;
+}
+
+/**
+ * Atomically apply a drag-and-drop reorder. Every affected card's new stage and
+ * position is written in a single transaction, so the board never observes a
+ * half-applied move or two cards sharing a position. Returns the full updated
+ * list for the user so the client can resync in one round-trip.
+ *
+ * Rows are locked FOR UPDATE up front to serialize concurrent reorders, and any
+ * id not owned by the user is rejected (the whole transaction rolls back).
+ */
+export async function reorder(userId: string, items: ReorderItem[]): Promise<Application[]> {
+  return withTransaction(async (client) => {
+    const ids = items.map((i) => i.id);
+
+    // Lock the target rows and confirm ownership before mutating anything.
+    const { rows: owned } = await client.query<{ id: string }>(
+      'SELECT id FROM applications WHERE user_id = $1 AND id = ANY($2::uuid[]) FOR UPDATE',
+      [userId, ids],
+    );
+    if (owned.length !== ids.length) {
+      const ownedSet = new Set(owned.map((r) => r.id));
+      const missing = ids.find((id) => !ownedSet.has(id));
+      throw new Error(`Application not found: ${missing}`);
+    }
+
+    // Apply every move. UPDATE ... FROM (VALUES ...) is one statement, but we
+    // keep it explicit per row for clarity and to bound the parameter count.
+    for (const item of items) {
+      await client.query(
+        'UPDATE applications SET stage = $1, position = $2 WHERE id = $3 AND user_id = $4',
+        [item.stage, item.position, item.id, userId],
+      );
+    }
+
+    const { rows } = await client.query<ApplicationRow>(
+      `SELECT * FROM applications WHERE user_id = $1
+        ORDER BY stage, position ASC, created_at DESC`,
+      [userId],
+    );
+    return rows.map(mapApplication);
+  });
 }
 
 export async function remove(userId: string, id: string): Promise<boolean> {
