@@ -36,6 +36,22 @@ export const updateApplicationSchema = createApplicationSchema
   .partial()
   .extend({ position: z.number().optional() });
 
+// Atomic drag-and-drop reorder: the client sends the full new (stage, position)
+// for every card in the affected column(s), applied in one transaction so the
+// board can never land in an inconsistent, position-colliding state.
+export const reorderApplicationsSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        stage: stageEnum,
+        position: z.number().int().min(0),
+      }),
+    )
+    .min(1)
+    .max(500),
+});
+
 export const listApplicationsQuerySchema = z.object({
   stage: stageEnum.optional(),
   tag: z.string().optional(),

@@ -41,6 +41,20 @@ export async function remove(userId: string, id: string): Promise<void> {
   if (!ok) throw ApiError.notFound('Application not found');
 }
 
+export async function reorder(
+  userId: string,
+  items: applicationsData.ReorderItem[],
+): Promise<Application[]> {
+  try {
+    return await applicationsData.reorder(userId, items);
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith('Application not found')) {
+      throw ApiError.notFound(err.message);
+    }
+    throw err;
+  }
+}
+
 export function tags(userId: string): Promise<string[]> {
   return applicationsData.allTags(userId);
 }
