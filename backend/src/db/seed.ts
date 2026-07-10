@@ -21,7 +21,7 @@ async function seed(): Promise<void> {
     } = await client.query<{ id: string }>(
       `INSERT INTO users (email, password_hash, name, dark_mode)
        VALUES ($1, $2, $3, true) RETURNING id`,
-      [DEMO_EMAIL, passwordHash, 'Demo User'],
+      [DEMO_EMAIL, passwordHash, 'Aarav Sharma'],
     );
 
     // ── Resumes ──
@@ -29,8 +29,8 @@ async function seed(): Promise<void> {
       rows: [resumeBackend],
     } = await client.query<{ id: string }>(
       `INSERT INTO resumes (user_id, label, original_name, storage_name, mime_type, size_bytes, tags, skills, is_default)
-       VALUES ($1, 'SWE — Backend Focus', 'resume_backend_2026.pdf', 'seed-backend.pdf', 'application/pdf', 124928,
-               ARRAY['backend','swe','2026'], ARRAY['TypeScript','Node.js','PostgreSQL','Docker','REST APIs','Redis','Kafka','AWS'], true)
+       VALUES ($1, 'SDE — Backend Focus', 'aarav_sharma_backend_2026.pdf', 'seed-backend.pdf', 'application/pdf', 124928,
+               ARRAY['backend','sde','2026'], ARRAY['Java','Spring Boot','TypeScript','Node.js','PostgreSQL','Redis','Kafka','AWS'], true)
        RETURNING id`,
       [user.id],
     );
@@ -38,7 +38,7 @@ async function seed(): Promise<void> {
       rows: [resumeFullstack],
     } = await client.query<{ id: string }>(
       `INSERT INTO resumes (user_id, label, original_name, storage_name, mime_type, size_bytes, tags, skills, is_default)
-       VALUES ($1, 'Full-Stack Engineer', 'resume_fullstack.pdf', 'seed-fullstack.pdf', 'application/pdf', 98304,
+       VALUES ($1, 'Full-Stack Engineer', 'aarav_sharma_fullstack.pdf', 'seed-fullstack.pdf', 'application/pdf', 98304,
                ARRAY['fullstack','react','2026'], ARRAY['React','TypeScript','Node.js','PostgreSQL','Tailwind','GraphQL','Docker'], false)
        RETURNING id`,
       [user.id],
@@ -47,7 +47,7 @@ async function seed(): Promise<void> {
       rows: [resumeFrontend],
     } = await client.query<{ id: string }>(
       `INSERT INTO resumes (user_id, label, original_name, storage_name, mime_type, size_bytes, tags, skills, is_default)
-       VALUES ($1, 'Frontend Specialist', 'resume_frontend.pdf', 'seed-frontend.pdf', 'application/pdf', 87040,
+       VALUES ($1, 'Frontend Specialist', 'aarav_sharma_frontend.pdf', 'seed-frontend.pdf', 'application/pdf', 87040,
                ARRAY['frontend','react','design-systems'], ARRAY['React','TypeScript','Tailwind','Framer Motion','Figma','Next.js','Storybook'], false)
        RETURNING id`,
       [user.id],
@@ -67,22 +67,22 @@ async function seed(): Promise<void> {
       jobUrl?: string;
       salary?: string;
     }> = [
-      { company: 'Stripe', role: 'Backend Engineer', stage: 'interview', priority: 'high', location: 'San Francisco, CA', daysAgo: 22, resumeId: resumeBackend.id, tags: ['dream-company', 'fintech'], notes: 'Passed recruiter screen and coding round. System design next week.', jobUrl: 'https://stripe.com/jobs/backend-engineer', salary: '$180k–$220k' },
-      { company: 'Vercel', role: 'Full-Stack Engineer', stage: 'applied', priority: 'high', location: 'Remote', daysAgo: 14, resumeId: resumeFullstack.id, tags: ['dream-company', 'remote'], notes: 'Applied via referral from Sam. Strong Next.js experience should be a plus.', salary: '$160k–$200k' },
-      { company: 'Linear', role: 'Product Engineer', stage: 'online_assessment', priority: 'high', location: 'Remote', daysAgo: 10, resumeId: resumeFullstack.id, tags: ['dream-company', 'startup'], notes: 'Take-home assignment due in 3 days. Build a mini project management tool.' },
-      { company: 'Notion', role: 'Software Engineer', stage: 'applied', priority: 'medium', location: 'New York, NY', daysAgo: 8, resumeId: resumeBackend.id, tags: ['productivity'], notes: 'Applied through careers page. Team is working on real-time collaboration.' },
-      { company: 'Anthropic', role: 'Software Engineer, API Platform', stage: 'interview', priority: 'high', location: 'San Francisco, CA', daysAgo: 18, resumeId: resumeBackend.id, tags: ['dream-company', 'ai'], notes: 'Phone screen went great. They loved the distributed systems experience. On-site scheduled.', salary: '$200k–$280k' },
-      { company: 'Datadog', role: 'Platform Engineer', stage: 'rejected', priority: 'medium', location: 'New York, NY', daysAgo: 30, resumeId: resumeBackend.id, tags: ['observability'], notes: 'Rejected after final round. Feedback: needed more Kubernetes experience.' },
-      { company: 'Figma', role: 'Frontend Engineer', stage: 'saved', priority: 'medium', location: 'San Francisco, CA', daysAgo: 3, resumeId: resumeFrontend.id, tags: ['design-tools'], notes: 'Interesting role in the design systems team. Need to tailor resume.' },
-      { company: 'Ramp', role: 'Software Engineer', stage: 'saved', priority: 'medium', location: 'New York, NY', daysAgo: 1, resumeId: resumeBackend.id, tags: ['fintech', 'startup'], notes: 'Fast-growing fintech. Could be a good culture fit.' },
-      { company: 'Cloudflare', role: 'Systems Engineer', stage: 'applied', priority: 'medium', location: 'Austin, TX', daysAgo: 6, resumeId: resumeBackend.id, tags: ['infrastructure'], notes: 'Working on Workers runtime. TypeScript + Rust stack.' },
-      { company: 'GitHub', role: 'Staff Engineer, Actions', stage: 'interview', priority: 'high', location: 'Remote', daysAgo: 25, resumeId: resumeBackend.id, tags: ['dream-company', 'remote', 'dev-tools'], notes: 'Passed coding and system design. Behavioral round with VP Engineering next.', salary: '$190k–$250k' },
-      { company: 'Netflix', role: 'Senior Software Engineer', stage: 'applied', priority: 'medium', location: 'Los Gatos, CA', daysAgo: 5, resumeId: resumeBackend.id, tags: ['big-tech'], notes: 'Applied to the studio infrastructure team. Unique culture model.' },
-      { company: 'OpenAI', role: 'Backend Engineer, API', stage: 'offer', priority: 'high', location: 'San Francisco, CA', daysAgo: 35, resumeId: resumeBackend.id, tags: ['ai', 'dream-company'], notes: 'Offer received! $225k base + equity. Need to respond by end of week.', salary: '$225k + equity' },
-      { company: 'Meta', role: 'Production Engineer', stage: 'rejected', priority: 'medium', location: 'Menlo Park, CA', daysAgo: 40, resumeId: resumeBackend.id, tags: ['big-tech'], notes: 'Made it to final round but rejected. Good practice for system design.' },
-      { company: 'Airtable', role: 'Backend Engineer', stage: 'offer', priority: 'high', location: 'San Francisco, CA', daysAgo: 32, resumeId: resumeBackend.id, tags: ['productivity', 'startup'], notes: 'Offer: $195k + RSUs. Great team, but evaluating against other options.', salary: '$195k + RSUs' },
-      { company: 'Supabase', role: 'Full-Stack Engineer', stage: 'applied', priority: 'medium', location: 'Remote', daysAgo: 4, resumeId: resumeFullstack.id, tags: ['open-source', 'remote', 'startup'], notes: 'Open-source Postgres platform. Would love to work on the dashboard.' },
-      { company: 'Planetscale', role: 'Database Engineer', stage: 'saved', priority: 'low', location: 'Remote', daysAgo: 2, resumeId: resumeBackend.id, tags: ['databases', 'remote'], notes: 'Interesting MySQL-compatible serverless DB. Low priority for now.' },
+      { company: 'Razorpay', role: 'Backend Engineer — Payments', stage: 'interview', priority: 'high', location: 'Bengaluru', daysAgo: 22, resumeId: resumeBackend.id, tags: ['dream-company', 'fintech'], notes: 'Cleared recruiter screen and DSA round. System design round next week — revise UPI flow and idempotency patterns.', jobUrl: 'https://razorpay.com/jobs/backend-engineer', salary: '₹28–35 LPA' },
+      { company: 'Flipkart', role: 'SDE-2, Full-Stack', stage: 'applied', priority: 'high', location: 'Bengaluru', daysAgo: 14, resumeId: resumeFullstack.id, tags: ['e-commerce', 'big-tech'], notes: 'Applied via referral from Rohan. Supply-chain platform team — strong React + Node fit.', salary: '₹26–32 LPA' },
+      { company: 'CRED', role: 'Product Engineer', stage: 'online_assessment', priority: 'high', location: 'Bengaluru', daysAgo: 10, resumeId: resumeFullstack.id, tags: ['dream-company', 'fintech', 'startup'], notes: 'Take-home due in 3 days — build a mini rewards ledger with clean UI. They care a lot about polish.' },
+      { company: 'Freshworks', role: 'Software Engineer', stage: 'applied', priority: 'medium', location: 'Chennai', daysAgo: 8, resumeId: resumeBackend.id, tags: ['saas', 'product-based'], notes: 'Applied through careers page. CRM platform team, hybrid from Chennai OMR office.' },
+      { company: 'Google India', role: 'Software Engineer III', stage: 'interview', priority: 'high', location: 'Hyderabad', daysAgo: 18, resumeId: resumeBackend.id, tags: ['dream-company', 'big-tech'], notes: 'Phone screen went great — interviewer liked the distributed systems depth. Onsite loop scheduled.', salary: '₹45–60 LPA' },
+      { company: 'InMobi', role: 'Platform Engineer', stage: 'rejected', priority: 'medium', location: 'Bengaluru', daysAgo: 30, resumeId: resumeBackend.id, tags: ['ad-tech'], notes: 'Rejected after final round. Feedback: needed more hands-on Kubernetes at scale.' },
+      { company: 'Postman', role: 'Frontend Engineer', stage: 'saved', priority: 'medium', location: 'Bengaluru', daysAgo: 3, resumeId: resumeFrontend.id, tags: ['dev-tools', 'product-based'], notes: 'Design systems team. Need to tailor resume toward component architecture and DX.' },
+      { company: 'Groww', role: 'Software Engineer', stage: 'saved', priority: 'medium', location: 'Bengaluru', daysAgo: 1, resumeId: resumeBackend.id, tags: ['fintech', 'startup'], notes: 'Fast-growing broking platform. Backend team works heavily with order-management systems.' },
+      { company: 'PhonePe', role: 'Backend Engineer — UPI', stage: 'applied', priority: 'medium', location: 'Pune', daysAgo: 6, resumeId: resumeBackend.id, tags: ['fintech', 'upi'], notes: 'UPI switch team — massive scale, Java + Kafka stack. Applied via careers portal.' },
+      { company: 'Atlassian', role: 'Senior Software Engineer', stage: 'interview', priority: 'high', location: 'Bengaluru (Remote)', daysAgo: 25, resumeId: resumeBackend.id, tags: ['dream-company', 'remote', 'dev-tools'], notes: 'Cleared craft + system design rounds. Values/behavioral round with the EM next.', salary: '₹50–70 LPA' },
+      { company: 'Amazon India', role: 'SDE-2', stage: 'applied', priority: 'medium', location: 'Hyderabad', daysAgo: 5, resumeId: resumeBackend.id, tags: ['big-tech'], notes: 'Applied to the payments org (Amazon Pay). Prepare LPs — Ownership and Dive Deep stories.' },
+      { company: 'Zerodha', role: 'Backend Engineer', stage: 'offer', priority: 'high', location: 'Bengaluru', daysAgo: 35, resumeId: resumeBackend.id, tags: ['fintech', 'dream-company'], notes: 'Offer received! ₹32 LPA flat, small team, Go + Python stack. Respond by end of week.', salary: '₹32 LPA' },
+      { company: 'Paytm', role: 'Backend Engineer', stage: 'rejected', priority: 'medium', location: 'Noida', daysAgo: 40, resumeId: resumeBackend.id, tags: ['fintech'], notes: 'Made it to the final round but rejected. Good system design practice either way.' },
+      { company: 'Juspay', role: 'Backend Engineer', stage: 'offer', priority: 'high', location: 'Bengaluru', daysAgo: 32, resumeId: resumeBackend.id, tags: ['fintech', 'startup'], notes: 'Offer: ₹30 LPA + ESOPs. Payments orchestration at serious scale — evaluating against Zerodha.', salary: '₹30 LPA + ESOPs' },
+      { company: 'Swiggy', role: 'Full-Stack Engineer', stage: 'applied', priority: 'medium', location: 'Bengaluru', daysAgo: 4, resumeId: resumeFullstack.id, tags: ['consumer', 'startup'], notes: 'Instamart storefront team. React + Node, strong growth trajectory.' },
+      { company: 'BrowserStack', role: 'Platform Engineer', stage: 'saved', priority: 'low', location: 'Mumbai', daysAgo: 2, resumeId: resumeBackend.id, tags: ['dev-tools', 'saas'], notes: 'Device-cloud infrastructure. Interesting problem space; low priority for now.' },
     ];
 
     const appIds: Record<string, string> = {};
@@ -121,28 +121,28 @@ async function seed(): Promise<void> {
       outcome: string;
       notes: string;
     }> = [
-      { company: 'Stripe', type: 'phone_screen', scheduledAt: daysFromNow(-18), outcome: 'passed', notes: 'Discussed past projects and system design approach. Interviewer was impressed with event sourcing experience.' },
-      { company: 'Stripe', type: 'coding', scheduledAt: daysFromNow(-12), outcome: 'passed', notes: 'Two coding problems: graph traversal and rate limiter. Solved both optimally.' },
-      { company: 'Stripe', type: 'system_design', scheduledAt: daysFromNow(3), outcome: 'pending', notes: 'Design a payment processing pipeline. Need to review CAP theorem and eventual consistency.' },
-      { company: 'Anthropic', type: 'phone_screen', scheduledAt: daysFromNow(-14), outcome: 'passed', notes: 'Great conversation about distributed systems. They asked about my experience with message queues.' },
-      { company: 'Anthropic', type: 'coding', scheduledAt: daysFromNow(-8), outcome: 'passed', notes: 'API design problem + algorithm. Used TypeScript. Clean solution with good error handling.' },
-      { company: 'Anthropic', type: 'system_design', scheduledAt: daysFromNow(5), outcome: 'pending', notes: 'Design a scalable API gateway. Review load balancing strategies.' },
-      { company: 'GitHub', type: 'phone_screen', scheduledAt: daysFromNow(-20), outcome: 'passed', notes: 'Discussed GitHub Actions architecture and CI/CD pipelines.' },
-      { company: 'GitHub', type: 'coding', scheduledAt: daysFromNow(-15), outcome: 'passed', notes: 'Built a workflow orchestration system. Used DAG for task dependencies.' },
-      { company: 'GitHub', type: 'system_design', scheduledAt: daysFromNow(-10), outcome: 'passed', notes: 'Designed a distributed job runner. Great discussion about fault tolerance.' },
-      { company: 'GitHub', type: 'behavioral', scheduledAt: daysFromNow(2), outcome: 'pending', notes: 'Final round with VP Engineering. Prepare STAR stories about leadership and conflict resolution.' },
-      { company: 'OpenAI', type: 'phone_screen', scheduledAt: daysFromNow(-30), outcome: 'passed', notes: 'Quick intro call. Team is scaling the API platform.' },
-      { company: 'OpenAI', type: 'coding', scheduledAt: daysFromNow(-25), outcome: 'passed', notes: 'Implemented a token bucket rate limiter and a streaming response handler.' },
-      { company: 'OpenAI', type: 'system_design', scheduledAt: daysFromNow(-20), outcome: 'passed', notes: 'Designed a model serving infrastructure. Discussed batching and queuing strategies.' },
-      { company: 'OpenAI', type: 'behavioral', scheduledAt: daysFromNow(-15), outcome: 'passed', notes: 'Culture fit interview. Discussed AI safety and responsible deployment.' },
-      { company: 'Airtable', type: 'phone_screen', scheduledAt: daysFromNow(-28), outcome: 'passed', notes: 'Introductory call with hiring manager.' },
-      { company: 'Airtable', type: 'coding', scheduledAt: daysFromNow(-22), outcome: 'passed', notes: 'Built a simplified spreadsheet formula parser.' },
-      { company: 'Datadog', type: 'phone_screen', scheduledAt: daysFromNow(-26), outcome: 'passed', notes: 'Discussed observability and monitoring systems.' },
-      { company: 'Datadog', type: 'coding', scheduledAt: daysFromNow(-20), outcome: 'passed', notes: 'Time series data aggregation problem. Clean solution.' },
-      { company: 'Datadog', type: 'system_design', scheduledAt: daysFromNow(-14), outcome: 'failed', notes: 'Designed a metrics ingestion pipeline. Struggled with Kubernetes-specific questions.' },
-      { company: 'Meta', type: 'phone_screen', scheduledAt: daysFromNow(-35), outcome: 'passed', notes: 'Standard Meta screen. Two coding problems.' },
-      { company: 'Meta', type: 'coding', scheduledAt: daysFromNow(-28), outcome: 'passed', notes: 'Dynamic programming and graph problems. Passed both.' },
-      { company: 'Meta', type: 'system_design', scheduledAt: daysFromNow(-22), outcome: 'failed', notes: 'Design Facebook Messenger. Got stuck on the presence system.' },
+      { company: 'Razorpay', type: 'phone_screen', scheduledAt: daysFromNow(-18), outcome: 'passed', notes: 'Walked through past projects and payment-gateway architecture. Interviewer liked the event-sourcing experience.' },
+      { company: 'Razorpay', type: 'coding', scheduledAt: daysFromNow(-12), outcome: 'passed', notes: 'Two problems: graph traversal and a sliding-window rate limiter. Solved both optimally in Java.' },
+      { company: 'Razorpay', type: 'system_design', scheduledAt: daysFromNow(3), outcome: 'pending', notes: 'Design a UPI payment pipeline. Revise idempotency keys, retries, and reconciliation flows.' },
+      { company: 'Google India', type: 'phone_screen', scheduledAt: daysFromNow(-14), outcome: 'passed', notes: 'Standard Google screen — one medium-hard DSA problem on intervals. Clean O(n log n) solution.' },
+      { company: 'Google India', type: 'coding', scheduledAt: daysFromNow(-8), outcome: 'passed', notes: 'Two coding rounds back-to-back: trie-based autocomplete and a scheduling problem. Communicated well.' },
+      { company: 'Google India', type: 'system_design', scheduledAt: daysFromNow(5), outcome: 'pending', notes: 'Googleyness + design round. Review load balancing, sharding, and quota systems.' },
+      { company: 'Atlassian', type: 'phone_screen', scheduledAt: daysFromNow(-20), outcome: 'passed', notes: 'Karat screen — data structures plus a short design discussion on Jira-scale webhooks.' },
+      { company: 'Atlassian', type: 'coding', scheduledAt: daysFromNow(-15), outcome: 'passed', notes: 'Craft round: built a task-dependency resolver with cycle detection (DAG).' },
+      { company: 'Atlassian', type: 'system_design', scheduledAt: daysFromNow(-10), outcome: 'passed', notes: 'Designed a distributed job runner for CI. Strong discussion on fault tolerance and retries.' },
+      { company: 'Atlassian', type: 'behavioral', scheduledAt: daysFromNow(2), outcome: 'pending', notes: 'Values round with the EM. Prepare STAR stories — mentoring juniors and disagreeing respectfully.' },
+      { company: 'Zerodha', type: 'phone_screen', scheduledAt: daysFromNow(-30), outcome: 'passed', notes: 'Intro call with the tech lead. Small team, deep ownership, Go/Python/Postgres stack.' },
+      { company: 'Zerodha', type: 'coding', scheduledAt: daysFromNow(-25), outcome: 'passed', notes: 'Built a token-bucket rate limiter and a streaming order-book diff handler.' },
+      { company: 'Zerodha', type: 'system_design', scheduledAt: daysFromNow(-20), outcome: 'passed', notes: 'Designed an order-management system for market-hours burst traffic. Discussed queuing and backpressure.' },
+      { company: 'Zerodha', type: 'behavioral', scheduledAt: daysFromNow(-15), outcome: 'passed', notes: 'Culture chat with founders’ office. They value calm, self-directed engineers.' },
+      { company: 'Juspay', type: 'phone_screen', scheduledAt: daysFromNow(-28), outcome: 'passed', notes: 'Intro call with hiring manager. Payments orchestration layer, Haskell + functional core.' },
+      { company: 'Juspay', type: 'coding', scheduledAt: daysFromNow(-22), outcome: 'passed', notes: 'Built a simplified transaction-routing engine with pluggable gateway adapters.' },
+      { company: 'InMobi', type: 'phone_screen', scheduledAt: daysFromNow(-26), outcome: 'passed', notes: 'Discussed ad-serving infrastructure and real-time bidding latency budgets.' },
+      { company: 'InMobi', type: 'coding', scheduledAt: daysFromNow(-20), outcome: 'passed', notes: 'Time-series aggregation problem over campaign metrics. Clean solution.' },
+      { company: 'InMobi', type: 'system_design', scheduledAt: daysFromNow(-14), outcome: 'failed', notes: 'Designed a metrics ingestion pipeline. Struggled on Kubernetes autoscaling specifics.' },
+      { company: 'Paytm', type: 'phone_screen', scheduledAt: daysFromNow(-35), outcome: 'passed', notes: 'Standard screen — arrays and strings, plus a short wallet-ledger discussion.' },
+      { company: 'Paytm', type: 'coding', scheduledAt: daysFromNow(-28), outcome: 'passed', notes: 'DP + graph problems. Passed both comfortably.' },
+      { company: 'Paytm', type: 'system_design', scheduledAt: daysFromNow(-22), outcome: 'failed', notes: 'Design a wallet with concurrent debits. Got stuck on the double-spend prevention deep dive.' },
     ];
 
     for (const iv of interviews) {
@@ -167,14 +167,14 @@ async function seed(): Promise<void> {
       notes: string;
       lastContactDate: string | null;
     }> = [
-      { name: 'Jordan Lee', company: 'Stripe', role: 'Engineering Manager', relationship: 'referral', email: 'jordan@stripe.com', followUp: true, followUpDate: daysAgo(-3), notes: 'Met at a Systems Design meetup in SF. Offered to refer me. Check in after the system design round.', lastContactDate: daysAgo(5) },
-      { name: 'Sam Patel', company: 'Vercel', role: 'Senior Recruiter', relationship: 'recruiter', email: 'sam.p@vercel.com', followUp: false, followUpDate: null, notes: 'Reached out on LinkedIn. Very responsive. Submitted my application through the internal referral link.', lastContactDate: daysAgo(14) },
-      { name: 'Maria Chen', company: 'Anthropic', role: 'Staff Engineer', relationship: 'alumni', email: 'maria.c@anthropic.com', followUp: true, followUpDate: daysAgo(-5), notes: 'College alumni (CS 2018). Works on the API platform team. Gave insider tips about the interview process.', lastContactDate: daysAgo(10) },
-      { name: 'Alex Rivera', company: 'GitHub', role: 'Director of Engineering', relationship: 'mentor', email: null, followUp: false, followUpDate: null, notes: 'Former manager at my last job. Now leads the Actions team at GitHub. Instrumental in getting me the interview.', lastContactDate: daysAgo(20) },
-      { name: 'Priya Sharma', company: 'Linear', role: 'Founding Engineer', relationship: 'referral', email: 'priya@linear.app', followUp: true, followUpDate: daysAgo(-2), notes: 'Met at ReactConf 2025. Very passionate about the product. Can share insights about the take-home.', lastContactDate: daysAgo(8) },
-      { name: 'David Kim', company: 'OpenAI', role: 'Technical Recruiter', relationship: 'recruiter', email: 'david.kim@openai.com', followUp: true, followUpDate: daysAgo(-1), notes: 'Handling my offer negotiation. Very helpful. Need to discuss equity package details.', lastContactDate: daysAgo(2) },
-      { name: 'Sarah Thompson', company: 'Netflix', role: 'Senior Engineer', relationship: 'colleague', email: null, followUp: false, followUpDate: null, notes: 'Former colleague from previous job. Now at Netflix. Offered to do a mock system design interview.', lastContactDate: daysAgo(30) },
-      { name: 'Chris Wu', company: 'Cloudflare', role: 'Recruiter', relationship: 'recruiter', email: 'cwu@cloudflare.com', followUp: false, followUpDate: null, notes: 'Reached out after seeing my open-source contributions. Seems like a good fit.', lastContactDate: daysAgo(6) },
+      { name: 'Ananya Iyer', company: 'Razorpay', role: 'Engineering Manager', relationship: 'referral', email: 'ananya.iyer@razorpay.com', followUp: true, followUpDate: daysAgo(-3), notes: 'Met at a fintech meetup in Koramangala. Offered to refer me. Check in after the system design round.', lastContactDate: daysAgo(5) },
+      { name: 'Rohan Mehta', company: 'Flipkart', role: 'Senior Technical Recruiter', relationship: 'recruiter', email: 'rohan.m@flipkart.com', followUp: false, followUpDate: null, notes: 'Reached out on LinkedIn. Very responsive — pushed my profile through the internal referral track.', lastContactDate: daysAgo(14) },
+      { name: 'Kavya Nair', company: 'Google India', role: 'Senior Software Engineer', relationship: 'alumni', email: 'kavya.nair@google.com', followUp: true, followUpDate: daysAgo(-5), notes: 'College senior (NIT Trichy, CSE 2019). On the Hyderabad Cloud team — shared great onsite prep tips.', lastContactDate: daysAgo(10) },
+      { name: 'Arjun Malhotra', company: 'Atlassian', role: 'Engineering Manager', relationship: 'mentor', email: null, followUp: false, followUpDate: null, notes: 'Former manager at my last company. Now leads a platform team at Atlassian Bengaluru — got me the interview.', lastContactDate: daysAgo(20) },
+      { name: 'Sneha Kulkarni', company: 'CRED', role: 'Founding Engineer', relationship: 'referral', email: 'sneha@cred.club', followUp: true, followUpDate: daysAgo(-2), notes: 'Met at React India, Goa. Very passionate about craft — can share pointers on the take-home rubric.', lastContactDate: daysAgo(8) },
+      { name: 'Vikram Singh', company: 'Zerodha', role: 'Tech Lead', relationship: 'recruiter', email: 'vikram@zerodha.com', followUp: true, followUpDate: daysAgo(-1), notes: 'Handling my offer discussion. Need to close the compensation + joining date conversation this week.', lastContactDate: daysAgo(2) },
+      { name: 'Deepika Reddy', company: 'Swiggy', role: 'Senior Engineer', relationship: 'colleague', email: null, followUp: false, followUpDate: null, notes: 'Former teammate, now on Instamart. Offered to run a mock system design round over the weekend.', lastContactDate: daysAgo(30) },
+      { name: 'Aditya Verma', company: 'PhonePe', role: 'Talent Acquisition', relationship: 'recruiter', email: 'aditya.verma@phonepe.com', followUp: false, followUpDate: null, notes: 'Reached out after seeing my open-source work. UPI switch team is hiring aggressively in Pune.', lastContactDate: daysAgo(6) },
     ];
 
     for (const c of contacts) {
@@ -196,16 +196,16 @@ async function seed(): Promise<void> {
     );
 
     // ── AI: Job Analyses ──
-    const stripeJD = 'We are looking for a Backend Engineer to join our Payments Infrastructure team. You will design, build, and operate the systems that process billions of dollars in payments. Requirements: 3+ years with TypeScript/Node.js, PostgreSQL, Redis, distributed systems, event-driven architectures. Nice to have: Kafka, AWS, payment processing experience.';
-    const anthropicJD = 'Software Engineer, API Platform — Build infrastructure for serving large language models at scale. Focus on low-latency serving, rate limiting, and developer experience. Requirements: Python or TypeScript, distributed systems, Docker, Kubernetes, load balancing.';
-    const githubJD = 'Staff Engineer, Actions — Lead the next generation of CI/CD workflows. Design and implement distributed job runners, manage a team, drive technical strategy. Requirements: TypeScript, Node.js, Docker, Kubernetes, CI/CD, distributed systems.';
+    const razorpayJD = 'We are looking for a Backend Engineer to join our Payments Infrastructure team in Bengaluru. You will design, build, and operate systems that process millions of UPI, card, and netbanking transactions daily. Requirements: 3+ years with Java/Spring Boot or Node.js, PostgreSQL, Redis, distributed systems, event-driven architectures. Nice to have: Kafka, AWS, payment gateway or UPI switch experience.';
+    const googleJD = 'Software Engineer III, Google Cloud (Hyderabad) — Build planet-scale infrastructure for Google Cloud services. Focus on low-latency serving, reliability, and developer experience. Requirements: strong CS fundamentals, one of C++/Java/Go/Python, distributed systems, testing discipline. Nice to have: Kubernetes, gRPC, SRE exposure.';
+    const atlassianJD = 'Senior Software Engineer, Bengaluru (Remote-friendly) — Lead the next generation of CI/CD and developer-experience tooling for Jira and Bitbucket. Design distributed job runners, mentor engineers, drive technical strategy. Requirements: TypeScript or Java, Docker, Kubernetes, CI/CD, distributed systems.';
 
     await client.query(
       `INSERT INTO job_analyses (user_id, application_id, job_description, summary, required_skills, ats_keywords, match_score, model, is_mock) VALUES
-        ($1, $2, $5, 'Stripe is looking for a backend engineer to build and scale payment infrastructure. The role requires deep expertise in distributed systems, API design, and financial technology. Strong emphasis on reliability and performance at scale.', ARRAY['TypeScript','Node.js','PostgreSQL','Redis','Kafka','AWS','Distributed Systems','API Design'], ARRAY['payment processing','microservices','event-driven','high availability','idempotency','PCI compliance','REST API','gRPC'], 82, 'mock', true),
-        ($1, $3, $6, 'Anthropic seeks a software engineer for their API platform team. The role involves building infrastructure for serving large language models at scale, with focus on low-latency serving, rate limiting, and developer experience.', ARRAY['Python','TypeScript','Distributed Systems','API Design','Docker','Kubernetes','Load Balancing'], ARRAY['LLM serving','API gateway','rate limiting','streaming','token management','model serving','inference optimization'], 75, 'mock', true),
-        ($1, $4, $7, 'GitHub is hiring a Staff Engineer to lead the Actions platform. The role involves designing and implementing the next generation of CI/CD workflows, managing a team of engineers, and driving technical strategy.', ARRAY['TypeScript','Node.js','Docker','Kubernetes','CI/CD','Distributed Systems','Technical Leadership'], ARRAY['workflow orchestration','job runner','containerization','DAG','fault tolerance','developer tools','platform engineering'], 88, 'mock', true)`,
-      [user.id, appIds['Stripe'], appIds['Anthropic'], appIds['GitHub'], stripeJD, anthropicJD, githubJD],
+        ($1, $2, $5, 'Razorpay is hiring a backend engineer to build and scale payment infrastructure handling millions of daily UPI and card transactions. The role demands deep expertise in distributed systems, API design, and fintech-grade reliability.', ARRAY['Java','Spring Boot','Node.js','PostgreSQL','Redis','Kafka','AWS','Distributed Systems'], ARRAY['UPI','payment gateway','microservices','event-driven','high availability','idempotency','PCI DSS','reconciliation'], 84, 'mock', true),
+        ($1, $3, $6, 'Google Cloud Hyderabad seeks an SWE III for planet-scale infrastructure. The role emphasizes strong CS fundamentals, low-latency serving, reliability engineering, and crisp code health practices.', ARRAY['Java','Go','C++','Distributed Systems','Testing','gRPC','Kubernetes'], ARRAY['planet-scale','SRE','load balancing','sharding','quota systems','borg','monitoring','code health'], 76, 'mock', true),
+        ($1, $4, $7, 'Atlassian is hiring a Senior Engineer in Bengaluru to lead CI/CD and developer-experience tooling across Jira and Bitbucket. The role blends distributed-systems design with mentorship and technical strategy.', ARRAY['TypeScript','Java','Docker','Kubernetes','CI/CD','Distributed Systems','Technical Leadership'], ARRAY['workflow orchestration','job runner','containerization','DAG','fault tolerance','developer tools','platform engineering'], 88, 'mock', true)`,
+      [user.id, appIds['Razorpay'], appIds['Google India'], appIds['Atlassian'], razorpayJD, googleJD, atlassianJD],
     );
 
     // ── AI: Cover Letters ──
@@ -214,45 +214,45 @@ async function seed(): Promise<void> {
         ($1, $2, $3, 'mock', true)`,
       [
         user.id,
-        appIds['Stripe'],
-        `Dear Hiring Team at Stripe,
+        appIds['Razorpay'],
+        `Dear Hiring Team at Razorpay,
 
-I am writing to express my strong interest in the Backend Engineer position. With over 4 years of experience building high-throughput distributed systems and a deep passion for financial infrastructure, I believe I would be an excellent addition to your engineering team.
+I am writing to express my strong interest in the Backend Engineer position on the Payments Infrastructure team. With over 4 years of experience building high-throughput distributed systems and a genuine passion for India's digital payments ecosystem, I believe I would be a strong addition to your engineering team.
 
-In my current role, I architected and deployed a real-time event processing pipeline handling 50,000+ events per second with sub-100ms latency. This system uses event sourcing patterns similar to those employed in payment processing, ensuring data consistency and auditability — core requirements in fintech.
+In my current role, I architected and deployed a real-time event processing pipeline handling 50,000+ events per second with sub-100ms latency. The system uses event-sourcing patterns similar to those in payment processing, ensuring consistency and auditability — non-negotiables in fintech.
 
 Key highlights of my experience:
-• Built and maintained RESTful APIs serving 10M+ daily requests with 99.99% uptime
-• Designed idempotent payment workflows that prevented duplicate charges across distributed services
-• Led the migration from a monolithic architecture to microservices, reducing deployment time by 80%
-• Deep expertise in TypeScript, Node.js, PostgreSQL, Redis, and Kafka
+• Built and maintained REST APIs serving 10M+ daily requests at 99.99% uptime
+• Designed idempotent payment workflows that prevented duplicate debits across distributed services
+• Led a monolith-to-microservices migration that cut deployment time by 80%
+• Deep expertise in Java, Spring Boot, TypeScript, PostgreSQL, Redis, and Kafka
 
-What excites me most about Stripe is your commitment to increasing the GDP of the internet. I've been a Stripe user and advocate for years, and the opportunity to contribute to the platform that powers millions of businesses would be incredibly meaningful.
+What excites me most about Razorpay is the scale and reliability bar of powering payments for millions of Indian businesses — from kirana stores to unicorns. I have been a Razorpay user and admirer for years, and contributing to that rails-level infrastructure would be incredibly meaningful.
 
 I look forward to discussing how my experience aligns with your team's goals.
 
 Best regards,
-Demo User`,
+Aarav Sharma`,
       ],
     );
 
     // ── AI: Interview Questions ──
     await client.query(
       `INSERT INTO interview_questions (user_id, application_id, company, role, questions, model, is_mock) VALUES
-        ($1, $2, 'Stripe', 'Backend Engineer', $3, 'mock', true)`,
+        ($1, $2, 'Razorpay', 'Backend Engineer — Payments', $3, 'mock', true)`,
       [
         user.id,
-        appIds['Stripe'],
+        appIds['Razorpay'],
         JSON.stringify([
-          { category: 'technical', question: 'Design a payment processing system that handles idempotency across distributed services. How would you ensure exactly-once processing?' },
-          { category: 'technical', question: 'How would you implement a rate limiter for an API that needs to handle both per-user and global rate limits?' },
-          { category: 'technical', question: 'Explain the trade-offs between synchronous and asynchronous payment processing. When would you choose each?' },
-          { category: 'behavioral', question: 'Tell me about a time you had to make a critical decision under time pressure in production.' },
+          { category: 'technical', question: 'Design a UPI payment flow that guarantees idempotency across retries from the PSP, bank, and merchant sides. How do you prevent double debits?' },
+          { category: 'technical', question: 'How would you implement a rate limiter that enforces both per-merchant and global limits on a payment API?' },
+          { category: 'technical', question: 'Explain the trade-offs between synchronous and asynchronous payment capture. When would you choose each?' },
+          { category: 'behavioral', question: 'Tell me about a time you had to make a critical decision during a production incident under time pressure.' },
           { category: 'behavioral', question: 'Describe a situation where you disagreed with your team on a technical approach. How did you resolve it?' },
-          { category: 'behavioral', question: 'How do you prioritize between shipping new features and addressing technical debt?' },
-          { category: 'company', question: 'What aspects of Stripe\'s developer experience do you think could be improved?' },
-          { category: 'company', question: 'How would you approach building a new payment method integration from scratch?' },
-          { category: 'company', question: 'Stripe processes billions in payments. How would you approach testing changes to critical payment flows?' },
+          { category: 'behavioral', question: 'How do you balance shipping features against paying down technical debt?' },
+          { category: 'company', question: 'What parts of Razorpay\'s developer experience (docs, SDKs, dashboard) would you improve, and how?' },
+          { category: 'company', question: 'How would you approach building a new payment-method integration (e.g., a new UPI app or BNPL provider) from scratch?' },
+          { category: 'company', question: 'Razorpay processes millions of transactions daily. How would you test changes to a critical payment path safely?' },
         ]),
       ],
     );

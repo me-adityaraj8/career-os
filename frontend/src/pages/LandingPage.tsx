@@ -86,23 +86,23 @@ const initialColumns: { title: string; count: number; cards: PreviewCard[] }[] =
     title: 'Applied',
     count: 5,
     cards: [
-      { id: 'vercel', company: 'Vercel', role: 'Full-Stack Engineer', heat: 'hot' },
-      { id: 'notion', company: 'Notion', role: 'Software Engineer', heat: 'warm' },
-      { id: 'supabase', company: 'Supabase', role: 'Product Engineer', heat: 'warm' },
+      { id: 'flipkart', company: 'Flipkart', role: 'SDE-2, Full-Stack', heat: 'hot' },
+      { id: 'swiggy', company: 'Swiggy', role: 'Full-Stack Engineer', heat: 'warm' },
+      { id: 'cred', company: 'CRED', role: 'Product Engineer', heat: 'warm' },
     ],
   },
   {
     title: 'Interview',
     count: 3,
     cards: [
-      { id: 'github', company: 'GitHub', role: 'Staff Engineer', heat: 'hot' },
-      { id: 'stripe', company: 'Stripe', role: 'Backend Engineer', heat: 'hot' },
+      { id: 'razorpay', company: 'Razorpay', role: 'Backend Engineer', heat: 'hot' },
+      { id: 'google', company: 'Google India', role: 'Software Engineer III', heat: 'hot' },
     ],
   },
   {
     title: 'Offer',
     count: 2,
-    cards: [{ id: 'openai', company: 'OpenAI', role: 'API Engineer', heat: 'hot' }],
+    cards: [{ id: 'zerodha', company: 'Zerodha', role: 'Backend Engineer', heat: 'hot' }],
   },
 ];
 
@@ -360,7 +360,7 @@ function Hero() {
 }
 
 function LogoStrip() {
-  const companies = ['Stripe', 'Vercel', 'Anthropic', 'Linear', 'Notion', 'Datadog'];
+  const companies = ['Google India', 'Flipkart', 'Razorpay', 'CRED', 'Atlassian', 'Zerodha'];
   return (
     <section className="border-y bg-card/40 px-5 py-10">
       <Reveal className="mx-auto max-w-5xl">
@@ -457,9 +457,9 @@ function StoryVisual({ index }: { index: number }) {
     return (
       <div className="w-full max-w-sm space-y-2">
         {[
-          { company: 'GitHub', stage: 'Interview', width: 'w-[88%]' },
-          { company: 'Stripe', stage: 'Interview', width: 'w-full' },
-          { company: 'OpenAI', stage: 'Offer', width: 'w-[92%]' },
+          { company: 'Razorpay', stage: 'Interview', width: 'w-[88%]' },
+          { company: 'Google India', stage: 'Interview', width: 'w-full' },
+          { company: 'Zerodha', stage: 'Offer', width: 'w-[92%]' },
         ].map((row) => (
           <div key={row.company} className={cn('surface rounded-xl border bg-background p-3.5', row.width)}>
             <div className="flex items-center justify-between">
@@ -574,19 +574,19 @@ function BentoGrid() {
 
 const testimonials = [
   {
-    quote: 'I went from a chaotic spreadsheet with 40 rows to seeing my whole pipeline at a glance. Got two offers in six weeks.',
-    name: 'Sarah K.',
-    role: 'Software Engineer · accepted at a Series B startup',
+    quote: 'I went from a chaotic spreadsheet with 40 rows to seeing my whole pipeline at a glance. Two offers in six weeks — Bengaluru fintech and a big-tech role.',
+    name: 'Ananya S.',
+    role: 'SDE-2 · accepted a fintech offer in Bengaluru',
   },
   {
-    quote: 'The AI job analyzer told me exactly which keywords my resume was missing. My response rate doubled.',
-    name: 'Marcus T.',
+    quote: 'The AI job analyzer told me exactly which ATS keywords my resume was missing. My response rate doubled in three weeks.',
+    name: 'Rohit M.',
     role: 'Product Manager · 3 final rounds in one month',
   },
   {
     quote: 'The streaks sound silly until they work. I applied every single day for a month because I refused to break the chain.',
     name: 'Priya R.',
-    role: 'New grad · landed a backend role',
+    role: 'New grad · landed a backend role in Hyderabad',
   },
 ];
 
