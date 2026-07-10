@@ -17,7 +17,7 @@ import { useMissions } from '@/hooks/useMissions';
 import { cn } from '@/lib/utils';
 
 const mainNav = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/applications', label: 'Applications', icon: Kanban },
   { to: '/resumes', label: 'Resumes', icon: FileText },
   { to: '/interviews', label: 'Interviews', icon: MessageSquare },

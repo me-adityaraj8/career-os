@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /applications
+Disallow: /resumes
+Disallow: /interviews
+Disallow: /network
+Disallow: /ai
+Disallow: /goals
+Disallow: /analytics
+Disallow: /settings

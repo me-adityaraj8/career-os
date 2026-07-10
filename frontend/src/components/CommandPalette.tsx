@@ -45,7 +45,7 @@ export function CommandPalette() {
 
   const navItems: PaletteItem[] = useMemo(
     () => [
-      { id: 'dashboard', label: 'Dashboard', section: 'Navigation', icon: <LayoutDashboard className="size-4" />, action: () => navigate('/'), keywords: 'home overview', shortcut: 'G D' },
+      { id: 'dashboard', label: 'Dashboard', section: 'Navigation', icon: <LayoutDashboard className="size-4" />, action: () => navigate('/dashboard'), keywords: 'home overview', shortcut: 'G D' },
       { id: 'applications', label: 'Applications', section: 'Navigation', icon: <Briefcase className="size-4" />, action: () => navigate('/applications'), keywords: 'jobs kanban board', shortcut: 'G A' },
       { id: 'resumes', label: 'Resumes', section: 'Navigation', icon: <FileText className="size-4" />, action: () => navigate('/resumes'), keywords: 'cv upload', shortcut: 'G R' },
       { id: 'interviews', label: 'Interviews', section: 'Navigation', icon: <MessageSquare className="size-4" />, action: () => navigate('/interviews'), keywords: 'rounds prep', shortcut: 'G I' },

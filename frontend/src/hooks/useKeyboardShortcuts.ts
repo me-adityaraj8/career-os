@@ -33,7 +33,7 @@ export function useKeyboardShortcuts() {
         pending.current = null;
 
         const routes: Record<string, string> = {
-          d: '/',
+          d: '/dashboard',
           a: '/applications',
           r: '/resumes',
           i: '/interviews',

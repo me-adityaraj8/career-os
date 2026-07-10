@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/authStore';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 
+const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const ApplicationsPage = lazy(() => import('@/pages/ApplicationsPage'));
 const ResumesPage = lazy(() => import('@/pages/ResumesPage'));
@@ -24,7 +25,19 @@ const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 /** Redirect authenticated users away from the auth pages. */
 function PublicOnly({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
-  return token ? <Navigate to="/" replace /> : <>{children}</>;
+  return token ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+}
+
+/** Marketing landing for visitors; straight into the app for users. */
+function HomeGate() {
+  const token = useAuthStore((s) => s.token);
+  return token ? (
+    <Navigate to="/dashboard" replace />
+  ) : (
+    <Suspense fallback={null}>
+      <LandingPage />
+    </Suspense>
+  );
 }
 
 export default function App() {
@@ -45,6 +58,7 @@ export default function App() {
       <div className="noise ambient fixed inset-0 -z-10 pointer-events-none" aria-hidden />
 
       <Routes>
+        <Route path="/" element={<HomeGate />} />
         <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
         <Route path="/register" element={<PublicOnly><RegisterPage /></PublicOnly>} />
 
@@ -58,7 +72,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/applications" element={<ApplicationsPage />} />
           <Route path="/resumes" element={<ResumesPage />} />
           <Route path="/interviews" element={<InterviewsPage />} />
