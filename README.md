@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/me-adityaraj8/rys?style=flat-square" alt="License: MIT" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-000000?style=flat-square" alt="License: MIT" /></a>
   <img src="https://img.shields.io/badge/TypeScript-100%25-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18" />
   <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js 22" />
@@ -36,16 +36,17 @@
 
 <br/>
 
-<!--
-  Screenshots. Replace these placeholders with real captures before wide release:
-  docs/screenshots/board-dark.png   — Kanban board, dark mode, ~1600px wide
-  docs/screenshots/dashboard.png    — Dashboard with stats + missions
-  docs/screenshots/ai-tools.png     — Job analyzer with a match score
--->
 <p align="center">
-  <img src="docs/screenshots/board-dark.png" alt="Rys Kanban board (dark mode)" width="800" />
+  <img src="docs/screenshots/board-dark.png" alt="Rys Kanban board (dark mode)" width="820" />
 </p>
 <p align="center"><sub>The board — six stages from saved to offer, drag-and-drop, opportunity scores on every card.</sub></p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Rys dashboard" width="410" />
+  &nbsp;
+  <img src="docs/screenshots/ai-tools.png" alt="Rys AI job analyzer" width="410" />
+</p>
+<p align="center"><sub>Dashboard with live stats, streaks, and daily missions · the AI job analyzer with a resume-match score.</sub></p>
 
 ---
 
