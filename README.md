@@ -1,161 +1,111 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Rys-000000?style=for-the-badge&logoColor=white" alt="Rys" height="40" />
+  <picture>
+    <img src="https://img.shields.io/badge/Rys-000000?style=for-the-badge&logoColor=white" alt="Rys" height="42" />
+  </picture>
 </p>
 
 <h1 align="center">Rys</h1>
 
 <p align="center">
   <strong>Your job search, unified.</strong><br/>
-  Track applications, manage resumes, prep for interviews, run a networking CRM,<br/>and get AI-powered insights — all in one workspace.
+  One keyboard-first workspace for applications, resumes, interviews, and your network —<br/>
+  with AI that helps you land the offer.
 </p>
 
 <p align="center">
-  <a href="#-quick-start"><img src="https://img.shields.io/badge/Get_Started-000?style=for-the-badge" alt="Get Started" /></a>
-  <a href="https://rys-app-production.up.railway.app"><img src="https://img.shields.io/badge/Live_Demo-4F46E5?style=for-the-badge" alt="Live Demo" /></a>
+  <a href="https://rys-app-production.up.railway.app">Live demo</a>
+  ·
+  <a href="#-quick-start">Quick start</a>
+  ·
+  <a href="#-architecture">Architecture</a>
+  ·
+  <a href="#-roadmap">Roadmap</a>
+  ·
+  <a href="https://github.com/me-adityaraj8/rys/issues/new">Report a bug</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/me-adityaraj8/rys?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/github/license/me-adityaraj8/rys?style=flat-square" alt="License: MIT" />
   <img src="https://img.shields.io/badge/TypeScript-100%25-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
-  <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Claude_AI-Anthropic-D97757?style=flat-square" alt="Claude AI" />
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18" />
+  <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js 22" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL 16" />
+  <img src="https://img.shields.io/badge/AI-Claude-D97757?style=flat-square" alt="Claude AI" />
   <img src="https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white" alt="Railway" />
 </p>
 
+<br/>
+
+<!--
+  Screenshots. Replace these placeholders with real captures before wide release:
+  docs/screenshots/board-dark.png   — Kanban board, dark mode, ~1600px wide
+  docs/screenshots/dashboard.png    — Dashboard with stats + missions
+  docs/screenshots/ai-tools.png     — Job analyzer with a match score
+-->
+<p align="center">
+  <img src="docs/screenshots/board-dark.png" alt="Rys Kanban board (dark mode)" width="800" />
+</p>
+<p align="center"><sub>The board — six stages from saved to offer, drag-and-drop, opportunity scores on every card.</sub></p>
+
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
+- [Why Rys](#why-rys)
 - [Features](#-features)
-- [Architecture](#-architecture)
 - [Tech Stack](#-tech-stack)
 - [Quick Start](#-quick-start)
 - [Environment Variables](#-environment-variables)
+- [Project Structure](#-project-structure)
+- [Architecture](#-architecture)
+  - [System overview](#system-overview)
+  - [Request lifecycle](#request-lifecycle)
+  - [Authentication flow](#authentication-flow)
+  - [State management](#state-management)
+  - [Kanban state machine](#kanban-state-machine)
+  - [Database schema](#database-schema)
 - [API Reference](#-api-reference)
 - [AI Configuration](#-ai-configuration)
+- [User Journey](#-user-journey)
 - [Deployment](#-deployment)
-- [Project Structure](#-project-structure)
-- [Scripts](#-scripts)
+- [Performance & Scalability](#-performance--scalability)
+- [Security](#-security)
 - [Testing](#-testing)
+- [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
 - [License](#-license)
 
 ---
 
-## ✨ Features
+## Why Rys
 
-| Module | Description |
-|--------|-------------|
-| **Kanban Board** | Drag-and-drop application tracker with 6 stages, grid layout, card detail modals, search, and tag filters |
-| **Resume Manager** | Upload multiple PDF versions, tag them, mark a default, and link resumes to specific applications |
-| **Interview Prep** | Track rounds per application with type, schedule, outcome, and prep/feedback notes |
-| **Networking CRM** | Contact management with relationship types, follow-up flags, and date tracking |
-| **AI Tools** | Job analyzer (ATS keywords, skill matching), cover letter generator, and interview coach — powered by Claude |
-| **Analytics** | Applications-per-week trends, conversion funnel, response/interview/offer rates via Recharts |
-| **Goal Tracker** | Set weekly/monthly targets with live progress bars computed from real application data |
-| **Dark Mode** | System-aware theme toggle, persisted per account |
-| **Demo Mode** | One-click demo login with pre-seeded data — no signup required |
+A serious job search generates a surprising amount of state: which resume went to which company, who referred you where, what the recruiter said three weeks ago, when the follow-up is due, and how your funnel is actually converting. Most people manage this in a spreadsheet until the spreadsheet collapses under its own weight.
+
+Rys replaces that spreadsheet with a purpose-built workspace:
+
+- **A pipeline, not a list.** Applications move through a six-stage Kanban board with drag-and-drop that persists atomically — no lost cards, no stale state.
+- **Context lives on the card.** Salary, location, tags, notes, the exact resume version you sent, and every interview round are one click away.
+- **AI where it earns its keep.** Paste a job description and get ATS keywords, a resume match score, a tailored cover letter draft, and role-specific interview prep — powered by Claude, with a deterministic mock mode for development.
+- **Momentum is a feature.** Goals, streaks, daily missions, and a conversion funnel keep the search moving when motivation dips.
+
+Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), themed for light and dark, and free during early access.
 
 ---
 
-## 🏗 Architecture
+## ✨ Features
 
-### System Overview
-
-```mermaid
-graph TB
-    subgraph Client["Frontend · React + Vite"]
-        UI[UI Components]
-        RQ[React Query Cache]
-        ZS[Zustand Stores]
-        Router[React Router]
-    end
-
-    subgraph Server["Backend · Express + TypeScript"]
-        MW[Middleware<br/>Auth · CORS · Validation]
-        API[REST API<br/>/api/v1/*]
-        SVC[Services<br/>Auth · AI · Analytics]
-        DAL[Data Access Layer<br/>Raw SQL Queries]
-    end
-
-    subgraph Data["Data Layer"]
-        PG[(PostgreSQL 16)]
-        FS[File Storage<br/>Resume PDFs]
-    end
-
-    subgraph External["External Services"]
-        Claude[Claude API<br/>Anthropic SDK]
-    end
-
-    UI --> RQ
-    RQ -->|HTTP + JWT| API
-    ZS -->|Auth State| UI
-    Router --> UI
-
-    API --> MW --> SVC
-    SVC --> DAL --> PG
-    SVC --> Claude
-    SVC --> FS
-
-    style Client fill:#1e1e2e,stroke:#6c7086,color:#cdd6f4
-    style Server fill:#1e1e2e,stroke:#6c7086,color:#cdd6f4
-    style Data fill:#1e1e2e,stroke:#6c7086,color:#cdd6f4
-    style External fill:#1e1e2e,stroke:#6c7086,color:#cdd6f4
-```
-
-### Request Flow
-
-```mermaid
-sequenceDiagram
-    participant B as Browser
-    participant R as Router
-    participant V as Zod Validator
-    participant C as Controller
-    participant S as Service
-    participant D as Data Layer
-    participant DB as PostgreSQL
-
-    B->>R: HTTP Request + JWT
-    R->>R: Auth Middleware (verify JWT)
-    R->>V: Validate body/params
-    V-->>R: Validation error (400)
-    V->>C: Validated request
-    C->>S: Business logic
-    S->>D: SQL query
-    D->>DB: Execute
-    DB-->>D: Rows
-    D-->>S: Typed result
-    S-->>C: Domain object
-    C-->>B: JSON response
-
-    Note over R,V: All errors normalize to<br/>{ error: { code, message, details? } }
-```
-
-### Authentication Flow
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant F as Frontend
-    participant A as /api/v1/auth
-    participant DB as PostgreSQL
-
-    U->>F: Enter email + password
-    F->>A: POST /register or /login
-    A->>DB: Check/create user (bcrypt hash)
-    DB-->>A: User record
-    A-->>F: { token: JWT, user: {...} }
-    F->>F: Store token in Zustand
-    F->>F: Redirect to Dashboard
-
-    Note over F,A: Subsequent requests include<br/>Authorization: Bearer <token>
-
-    U->>F: Click "Try with demo account"
-    F->>A: POST /login (demo@rys.app)
-    A-->>F: { token, user } with seeded data
-```
+| | Feature | Description |
+|---|---------|-------------|
+| 📋 | **Kanban board** | Six-stage drag-and-drop tracker (saved → applied → OA → interview → offer / rejected) with atomic reordering, search, smart filters, and a list view |
+| 📄 | **Resume manager** | Upload multiple PDF versions, tag them, set a default, and link each application to the exact version you sent |
+| 🎤 | **Interview prep** | Track rounds per application — type, schedule, outcome, prep notes, and feedback |
+| 🤝 | **Networking CRM** | Recruiters, referrals, alumni, and mentors with relationship context, last-contact dates, and follow-up flags |
+| 🤖 | **AI tools** | Job analyzer (ATS keywords + skill match), cover letter generator, and interview coach — Claude-powered with a mock fallback |
+| 📊 | **Analytics** | Applications-per-week trends, conversion funnel, response/interview/offer rates |
+| 🎯 | **Goals & streaks** | Weekly/monthly targets computed from live data, XP, daily missions, and streak tracking |
+| ⌨️ | **Command palette** | `⌘K` to jump anywhere, create applications, or search — plus `g d`/`g a`-style shortcuts throughout |
+| 🌙 | **Dark mode** | System-aware theme with a view-transition ripple toggle, persisted per account |
+| 🔒 | **Read-only demo** | One-click demo login with realistic seeded data; a server-side guard keeps the demo account immutable |
 
 ---
 
@@ -163,11 +113,13 @@ sequenceDiagram
 
 | Layer | Technologies |
 |-------|-------------|
-| **Frontend** | React 18, Vite 5, TypeScript, Tailwind CSS, Framer Motion, dnd-kit, Radix UI, React Query, Zustand, React Router, Recharts, Lucide Icons |
+| **Frontend** | React 18, Vite 5, TypeScript, Tailwind CSS, Framer Motion, dnd-kit, Radix UI, TanStack Query, Zustand, React Router, Recharts, Lucide |
 | **Backend** | Node.js 22, Express 4, TypeScript, Zod, JWT + bcrypt, Multer |
-| **Database** | PostgreSQL 16, raw SQL with forward-only migrations |
-| **AI** | Anthropic SDK (Claude), deterministic fallback mock mode |
-| **Infrastructure** | Docker Compose (dev), Railway (prod), multi-stage Dockerfile |
+| **Database** | PostgreSQL 16 — raw SQL, forward-only migrations, no ORM |
+| **AI** | Anthropic SDK (Claude) with a deterministic mock mode |
+| **Infra** | Docker Compose for local dev, single-container Railway deploy, multi-stage Dockerfile |
+
+The no-ORM choice is deliberate: the data layer is a thin module of typed, parameterized SQL per feature, which keeps queries inspectable and makes the migration story trivial.
 
 ---
 
@@ -175,54 +127,58 @@ sequenceDiagram
 
 ### Prerequisites
 
-- **Docker** (recommended) — or Node.js 22+ and PostgreSQL 13+
+- **Docker** (recommended), or Node.js 22+ with PostgreSQL 13+
 - Git
 
-### Option A: Docker (recommended)
+### Option A — Docker (recommended)
 
 ```bash
-# Clone the repository
 git clone https://github.com/me-adityaraj8/rys.git
 cd rys
 
-# Create environment files
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 
-# Start the full stack (Postgres + Backend + Frontend)
+# Postgres + backend + frontend
 docker compose up --build
 
-# In another terminal, run migrations and seed demo data
+# In another terminal — run migrations and seed the demo account
 docker compose exec backend npm run migrate
 docker compose exec backend npm run seed
 ```
 
-### Option B: Local development
+Frontend: `http://localhost:5173` · API: `http://localhost:4000/api/v1`
+
+> **macOS note:** Docker bind mounts don't propagate file-watch events, so the backend's `tsx watch` won't pick up route changes automatically — run `docker compose restart backend` after editing backend files.
+
+### Option B — Local processes
 
 ```bash
 # Backend
 cd backend
-cp .env.example .env          # Set DATABASE_URL to your local Postgres
+cp .env.example .env           # point DATABASE_URL at your Postgres
 npm install
 npm run migrate
-npm run seed                   # Seeds demo account
+npm run seed
 npm run dev                    # → http://localhost:4000
 
-# Frontend (new terminal)
+# Frontend (second terminal)
 cd frontend
 cp .env.example .env
 npm install
 npm run dev                    # → http://localhost:5173
 ```
 
-### 🔑 Demo Login
+### Demo login
 
-After seeding, use the **"Try with demo account"** button on the login page, or:
+Use the **“Try with demo account”** button on the login page, or sign in manually:
 
 | Field | Value |
 |-------|-------|
 | Email | `demo@rys.app` |
 | Password | `password123` |
+
+The demo account is **read-only** — a backend guard rejects every write so shared demo data stays pristine. Sign up to get a full workspace.
 
 ---
 
@@ -233,11 +189,11 @@ After seeding, use the **"Try with demo account"** button on the login page, or:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | Yes | — | PostgreSQL connection string |
-| `JWT_SECRET` | Yes | `dev_jwt_secret_change_me` | Secret for signing JWTs |
+| `JWT_SECRET` | Yes | `dev_jwt_secret_change_me` | Secret for signing JWTs — change it in production |
 | `JWT_EXPIRES_IN` | No | `7d` | Token lifetime |
-| `ANTHROPIC_API_KEY` | No | — | Anthropic key. Blank = mock mode |
+| `ANTHROPIC_API_KEY` | No | — | Anthropic API key; leave blank for mock mode |
 | `ANTHROPIC_MODEL` | No | `claude-opus-4-8` | Claude model ID |
-| `CORS_ORIGIN` | No | `http://localhost:5173` | Allowed frontend origin |
+| `CORS_ORIGIN` | No | `http://localhost:5173` | Allowed frontend origin (enforced in production) |
 | `UPLOAD_DIR` | No | `uploads` | Resume PDF storage directory |
 | `PORT` | No | `4000` | Server port |
 | `NODE_ENV` | No | `development` | Environment mode |
@@ -246,100 +202,7 @@ After seeding, use the **"Try with demo account"** button on the login page, or:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `VITE_API_URL` | No | `http://localhost:4000/api/v1` | Backend API base URL |
-
----
-
-## 📡 API Reference
-
-All endpoints are prefixed with `/api/v1`. Protected routes require `Authorization: Bearer <token>`.
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/health` | No | Health check + AI mode status |
-| `POST` | `/auth/register` | No | Create account |
-| `POST` | `/auth/login` | No | Authenticate and receive JWT |
-| `GET` | `/auth/me` | Yes | Current user profile |
-| `PATCH` | `/auth/me` | Yes | Update profile (name, dark mode) |
-| `GET` | `/applications` | Yes | List all applications |
-| `POST` | `/applications` | Yes | Create application |
-| `PATCH` | `/applications/:id` | Yes | Update application |
-| `DELETE` | `/applications/:id` | Yes | Delete application |
-| `GET` | `/applications/tags` | Yes | Distinct tag list |
-| `GET` | `/resumes` | Yes | List resumes |
-| `POST` | `/resumes` | Yes | Upload resume PDF |
-| `DELETE` | `/resumes/:id` | Yes | Delete resume |
-| `GET` | `/interviews` | Yes | List interview rounds |
-| `POST` | `/interviews` | Yes | Create interview round |
-| `PATCH` | `/interviews/:id` | Yes | Update interview |
-| `DELETE` | `/interviews/:id` | Yes | Delete interview |
-| `GET` | `/contacts` | Yes | List contacts |
-| `POST` | `/contacts` | Yes | Create contact |
-| `PATCH` | `/contacts/:id` | Yes | Update contact |
-| `DELETE` | `/contacts/:id` | Yes | Delete contact |
-| `POST` | `/ai/analyze-job` | Yes | AI job description analysis |
-| `POST` | `/ai/cover-letter` | Yes | AI cover letter generation |
-| `POST` | `/ai/interview-questions` | Yes | AI interview question generation |
-| `GET` | `/analytics/summary` | Yes | Dashboard analytics |
-| `GET` | `/goals` | Yes | List goals with live progress |
-| `POST` | `/goals` | Yes | Create goal |
-| `PATCH` | `/goals/:id` | Yes | Update goal |
-| `DELETE` | `/goals/:id` | Yes | Delete goal |
-
----
-
-## 🤖 AI Configuration
-
-Rys supports two AI modes:
-
-| Mode | When | Behavior |
-|------|------|----------|
-| **Mock** | `ANTHROPIC_API_KEY` is empty | Returns realistic placeholder responses, labeled as mock in UI. Stored with `is_mock = true`. |
-| **Live** | `ANTHROPIC_API_KEY` is set | Real Claude API calls for job analysis, cover letters, and interview prep. |
-
-> **Note:** The resume-match score is always computed deterministically in code (`computeMatchScore`), independent of the AI model.
-
-The `/health` endpoint reports the current mode:
-
-```json
-{
-  "status": "ok",
-  "aiMode": "mock",
-  "model": "claude-opus-4-8",
-  "time": "2026-07-07T12:00:00.000Z"
-}
-```
-
----
-
-## 🚢 Deployment
-
-Rys is deployed on [Railway](https://railway.app) as a single container serving both the API and the static frontend.
-
-### Production Architecture
-
-```mermaid
-graph LR
-    User([User]) -->|HTTPS| RW[Railway<br/>rys-app]
-    RW -->|Static files| FE[Frontend<br/>Vite build]
-    RW -->|/api/v1/*| BE[Express<br/>Backend]
-    BE --> PG[(Railway<br/>PostgreSQL)]
-    BE -.->|Optional| AI[Claude API]
-
-    style RW fill:#0B0D0E,stroke:#6c7086,color:#cdd6f4
-    style PG fill:#4169E1,stroke:#6c7086,color:#fff
-```
-
-### Deploy Your Own
-
-1. Fork this repo
-2. Create a [Railway](https://railway.app) project
-3. Add a **PostgreSQL** database
-4. Add a **service** linked to your GitHub repo
-5. Set environment variables: `DATABASE_URL` (Railway reference), `JWT_SECRET`, `NODE_ENV=production`
-6. Railway auto-deploys on every push to `main`
-
-The root `Dockerfile` handles everything: multi-stage build for frontend (Vite) and backend (TypeScript), migrations run on startup.
+| `VITE_API_URL` | No | `http://localhost:4000/api/v1` | API base URL (`/api/v1` in the production container) |
 
 ---
 
@@ -347,95 +210,482 @@ The root `Dockerfile` handles everything: multi-stage build for frontend (Vite) 
 
 ```
 rys/
-├── Dockerfile                  # Production multi-stage build
-├── docker-compose.yml          # Local dev stack
+├── Dockerfile                  # Production multi-stage build (frontend + backend in one image)
+├── docker-compose.yml          # Local dev stack: Postgres 16 + backend + frontend
 ├── backend/
-│   ├── migrations/             # Versioned SQL (001_init → 006_missions)
+│   ├── migrations/             # Forward-only SQL, 001_init → 006_missions
 │   └── src/
-│       ├── config/             # Environment validation
-│       ├── db/                 # Pool, migrate runner, seed
-│       ├── routes/             # Express routers (thin)
-│       ├── controllers/        # Request/response handling
-│       ├── services/           # Business logic (AI, analytics, auth)
-│       ├── data/               # Raw SQL queries (data-access layer)
+│       ├── config/             # Env parsing & validation (fail fast on boot)
+│       ├── db/                 # pg pool, migration runner, demo seed
+│       ├── routes/             # Express routers — thin, one per feature
+│       ├── controllers/        # Request/response mapping, no business logic
+│       ├── services/           # Business logic (auth, AI, analytics, reorder…)
+│       ├── data/               # Typed raw-SQL queries, one module per table
 │       ├── validation/         # Zod schemas per feature
-│       ├── middleware/         # Auth, validation, error handler
+│       ├── middleware/         # requireAuth, demoGuard, validate, errorHandler
 │       └── types/              # Shared domain types
 └── frontend/
     └── src/
+        ├── pages/              # Route-level components (lazy-loaded)
         ├── components/
-        │   ├── ui/             # Base components (shadcn-style)
-        │   ├── applications/   # Kanban, cards, detail modal
-        │   └── layout/         # Sidebar, AppLayout
-        ├── pages/              # Route pages (10 pages)
-        ├── stores/             # Zustand (auth, theme, toast)
-        ├── hooks/              # React Query hooks per feature
-        ├── lib/                # API client, utils, constants
+        │   ├── ui/             # Base primitives (button, dialog, select…)
+        │   ├── applications/   # KanbanBoard, cards, detail modal
+        │   ├── goals/ missions/ network/ resumes/ interviews/
+        │   └── layout/         # Sidebar, AppLayout, top bar
+        ├── hooks/              # TanStack Query hooks, one module per feature
+        ├── stores/             # Zustand: auth, theme, toasts
+        ├── lib/                # API client, utils, constants, gamification math
         └── types/              # API types (mirrors backend)
+```
+
+The dependency direction is strict on both sides:
+
+```mermaid
+flowchart LR
+    subgraph Backend
+        R[routes] --> C[controllers] --> S[services] --> D[data] --> DB[(PostgreSQL)]
+        V[validation] -.-> R
+        M[middleware] -.-> R
+    end
+    subgraph Frontend
+        P[pages] --> CO[components] --> H[hooks] --> A[lib/api]
+        ST[stores] -.-> P
+        ST -.-> A
+    end
+    A -->|HTTP + JWT| R
+```
+
+Routes never touch the database; components never call axios directly. Every feature follows the same path, which is what keeps sixteen endpoints and ten pages navigable.
+
+---
+
+## 🏗 Architecture
+
+### System overview
+
+Rys is a classic three-tier app with an optional AI sidecar. In production, one container serves both the static frontend and the API.
+
+```mermaid
+graph TB
+    subgraph Client["Frontend — React 18 + Vite"]
+        UI[Pages & Components]
+        RQ[TanStack Query cache]
+        ZS[Zustand stores]
+    end
+
+    subgraph Server["Backend — Express + TypeScript"]
+        MW[Middleware<br/>auth · demo guard · zod validation]
+        API[REST API /api/v1]
+        SVC[Services<br/>auth · AI · analytics · reorder]
+        DAL[Data layer — typed raw SQL]
+    end
+
+    subgraph Data["Persistence"]
+        PG[(PostgreSQL 16)]
+        FS[/Resume PDFs on disk/]
+    end
+
+    Claude[Claude API<br/>optional — mock mode without a key]
+
+    UI --> RQ
+    ZS --> UI
+    RQ -->|HTTP + Bearer JWT| API
+    API --> MW --> SVC --> DAL --> PG
+    SVC --> FS
+    SVC -.-> Claude
+```
+
+### Request lifecycle
+
+Every request passes through the same gauntlet. Errors at any layer normalize to a single JSON envelope: `{ error: { code, message, details? } }`.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant AX as Axios interceptors
+    participant R as Router
+    participant MW as requireAuth + demoGuard
+    participant V as Zod validator
+    participant C as Controller
+    participant S as Service
+    participant D as Data layer
+    participant DB as PostgreSQL
+
+    B->>AX: mutation / query
+    AX->>R: request + Authorization: Bearer <JWT>
+    R->>MW: verify token, attach userId
+    MW-->>AX: 401 invalid token / 403 demo write
+    MW->>V: validate params · query · body
+    V-->>AX: 400 with field-level details
+    V->>C: typed, validated request
+    C->>S: business logic
+    S->>D: parameterized SQL (scoped by user_id)
+    D->>DB: execute
+    DB-->>D: rows
+    D-->>C: typed domain objects
+    C-->>B: JSON response
+    Note over AX: 401 → clear auth store, redirect to login<br/>403 demo_readonly → toast, no duplicate errors
+```
+
+### Authentication flow
+
+Stateless JWT auth. Passwords are hashed with bcrypt; tokens live in a persisted Zustand store and ride along on every request via an axios interceptor.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant A as /api/v1/auth
+    participant DB as PostgreSQL
+
+    U->>F: email + password
+    F->>A: POST /register or /login
+    A->>DB: bcrypt hash / compare
+    DB-->>A: user row
+    A-->>F: { token: JWT (7d), user }
+    F->>F: persist in Zustand (localStorage: rys-auth)
+    F->>F: redirect → /dashboard
+
+    Note over F,A: every request: Authorization: Bearer <token>
+
+    U->>F: "Try with demo account"
+    F->>A: POST /login (demo@rys.app)
+    A-->>F: token for seeded, read-only workspace
+```
+
+On any `401`, the axios response interceptor clears the store and the route guard bounces to `/login` — expired tokens never leave the app in a half-authenticated limbo.
+
+### State management
+
+Two kinds of state, two tools, no overlap:
+
+| State | Tool | Notes |
+|-------|------|-------|
+| **Server state** (applications, contacts, goals…) | TanStack Query | One hook module per feature; optimistic updates with rollback for mutations; the reorder mutation trusts the server's authoritative response over the cache |
+| **Client state** (auth token, theme, toasts) | Zustand | `rys-auth` and `rys-theme` persist to localStorage; toasts are ephemeral |
+
+There is no global app store. Pages compose hooks; hooks own their cache keys; invalidation happens next to the mutation that caused it.
+
+### Kanban state machine
+
+An application's `stage` is a free state machine — any stage can move to any other, because real job searches are messy (an offer can be rescinded; a rejection can be revived by a recruiter).
+
+```mermaid
+stateDiagram-v2
+    [*] --> saved: bookmarked
+    saved --> applied: submitted
+    applied --> online_assessment: OA received
+    online_assessment --> interview: passed OA
+    applied --> interview: direct to interview
+    interview --> offer: 🎉
+    interview --> rejected
+    applied --> rejected
+    online_assessment --> rejected
+    offer --> [*]: accepted
+    rejected --> saved: reapply later
+
+    note right of interview
+        Rounds tracked per application:
+        phone screen · coding ·
+        system design · behavioral
+    end note
+```
+
+Drag-and-drop persistence is atomic. Dropping a card sends the full changed set to `PATCH /applications/reorder`; the service locks the affected rows (`SELECT … FOR UPDATE` inside a transaction), verifies ownership, renumbers positions to a clean `0..n`, and returns the authoritative list. Concurrent drags can't interleave into a corrupted board.
+
+### Database schema
+
+Six migrations, eleven tables, every row scoped to a user. Constraints are `CHECK`-based rather than native enums so allowed values can evolve without `ALTER TYPE` friction. A shared trigger bumps `updated_at` on every update.
+
+```mermaid
+erDiagram
+    users ||--o{ applications : owns
+    users ||--o{ resumes : owns
+    users ||--o{ interview_rounds : owns
+    users ||--o{ contacts : owns
+    users ||--o{ goals : owns
+    users ||--o{ daily_missions : owns
+    users ||--|| mission_streaks : tracks
+    applications ||--o{ interview_rounds : has
+    applications ||--o{ job_analyses : analyzed_by
+    applications ||--o{ cover_letters : drafted_for
+    applications ||--o{ interview_questions : prepped_with
+    resumes ||--o{ applications : attached_to
+
+    users {
+        uuid id PK
+        text email UK
+        text password_hash
+        text name
+        boolean dark_mode
+    }
+    applications {
+        uuid id PK
+        uuid user_id FK
+        uuid resume_id FK
+        text company
+        text role
+        text stage "saved|applied|online_assessment|interview|offer|rejected"
+        text priority "low|medium|high"
+        text_array tags
+        date applied_date
+        double position "kanban ordering"
+    }
+    resumes {
+        uuid id PK
+        uuid user_id FK
+        text label
+        text storage_name
+        text_array skills
+        boolean is_default
+    }
+    interview_rounds {
+        uuid id PK
+        uuid application_id FK
+        text type "coding|behavioral|system_design|..."
+        text outcome "pending|passed|failed|cancelled"
+        timestamptz scheduled_at
+    }
+    contacts {
+        uuid id PK
+        uuid user_id FK
+        text name
+        text relationship "recruiter|alumni|referral|mentor|..."
+        boolean follow_up
+        date follow_up_date
+    }
+    goals {
+        uuid id PK
+        uuid user_id FK
+        text metric "applications|interviews|offers"
+        integer target
+        text period "week|month|all_time"
+    }
+    daily_missions {
+        uuid id PK
+        uuid user_id FK
+        text metric
+        integer target
+        integer progress
+    }
+    job_analyses {
+        uuid id PK
+        uuid application_id FK
+        text_array ats_keywords
+        integer match_score
+        boolean is_mock
+    }
+```
+
+Goal progress is never stored — it's computed live from application/interview data, so goals can't drift out of sync with reality.
+
+---
+
+## 📡 API Reference
+
+All endpoints are prefixed with `/api/v1`. Protected routes require `Authorization: Bearer <token>`. Write methods on the demo account return `403 demo_readonly`.
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/health` | — | Health check + AI mode |
+| `POST` | `/auth/register` | — | Create account |
+| `POST` | `/auth/login` | — | Authenticate, receive JWT |
+| `GET` / `PATCH` | `/auth/me` | ✅ | Read / update profile (name, dark mode) |
+| `GET` / `POST` | `/applications` | ✅ | List / create applications |
+| `PATCH` / `DELETE` | `/applications/:id` | ✅ | Update / delete one |
+| `PATCH` | `/applications/reorder` | ✅ | Atomic Kanban reorder (stage + position batch) |
+| `GET` | `/applications/tags` | ✅ | Distinct tag list |
+| `GET` / `POST` | `/resumes` | ✅ | List / upload (PDF, multipart) |
+| `PATCH` / `DELETE` | `/resumes/:id` | ✅ | Update metadata / delete |
+| `POST` | `/resumes/:id/default` | ✅ | Set default resume |
+| `GET` | `/resumes/:id/download` | ✅ | Download the PDF |
+| `GET` / `POST` | `/interviews` | ✅ | List / create rounds |
+| `PATCH` / `DELETE` | `/interviews/:id` | ✅ | Update / delete a round |
+| `GET` / `POST` | `/contacts` | ✅ | List / create contacts |
+| `PATCH` / `DELETE` | `/contacts/:id` | ✅ | Update / delete a contact |
+| `POST` | `/ai/analyze-job` | ✅ | ATS keywords, skills, match score |
+| `POST` | `/ai/cover-letter` | ✅ | Generate a cover letter draft |
+| `POST` | `/ai/interview-questions` | ✅ | Role-specific prep questions |
+| `GET` | `/ai/analyses` · `/ai/cover-letters` · `/ai/interview-questions` | ✅ | History per tool |
+| `GET` | `/analytics/summary` | ✅ | Funnel, rates, weekly trends |
+| `GET` / `POST` | `/goals` | ✅ | List (with live progress) / create |
+| `PATCH` / `DELETE` | `/goals/:id` | ✅ | Update / delete a goal |
+| `GET` / `POST` | `/missions` | ✅ | Today's missions + streak / create |
+| `PATCH` / `DELETE` | `/missions/:id` | ✅ | Update / delete a mission |
+| `PUT` | `/missions/reorder` | ✅ | Reorder today's missions |
+| `GET` | `/missions/streak` | ✅ | Streak info + history |
+
+---
+
+## 🤖 AI Configuration
+
+Two modes, switched by the presence of `ANTHROPIC_API_KEY`:
+
+| Mode | When | Behavior |
+|------|------|----------|
+| **Mock** | Key is empty | Deterministic, realistic placeholder responses — labeled as mock in the UI and stored with `is_mock = true`. Zero cost, works offline. |
+| **Live** | Key is set | Real Claude calls for job analysis, cover letters, and interview prep. |
+
+The resume **match score is always computed deterministically in code** (`computeMatchScore`) regardless of mode — it's an explainable overlap metric, not model output, so it never hallucinates.
+
+`GET /health` reports the active mode:
+
+```json
+{
+  "status": "ok",
+  "aiMode": "mock",
+  "model": "claude-opus-4-8",
+  "time": "2026-07-10T12:00:00.000Z"
+}
 ```
 
 ---
 
-## 📜 Scripts
+## 🧭 User Journey
 
-### Backend (`cd backend`)
+```mermaid
+journey
+    title From visitor to offer
+    section Discover
+      Land on marketing page: 4: Visitor
+      Explore live demo (1 click, no signup): 5: Visitor
+    section Commit
+      Sign up: 4: Candidate
+      Add first applications via ⌘K: 5: Candidate
+      Upload tailored resumes: 4: Candidate
+    section Grind
+      Drag cards through the pipeline: 5: Candidate
+      Analyze JDs, generate cover letters: 5: Candidate
+      Track rounds and recruiter follow-ups: 4: Candidate
+      Keep the streak alive with daily missions: 4: Candidate
+    section Win
+      Watch the funnel convert: 5: Candidate
+      Accept the offer: 5: Candidate
+```
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server with hot reload (tsx watch) |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm start` | Run compiled production server |
-| `npm run migrate` | Run forward-only SQL migrations |
-| `npm run seed` | Seed demo account with sample data |
-| `npm test` | Run unit tests (Vitest) |
-| `npm run typecheck` | Type-check without emitting |
-
-### Frontend (`cd frontend`)
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server with HMR |
-| `npm run build` | Production build (type-check + bundle) |
-| `npm run preview` | Preview production build locally |
-| `npm run typecheck` | Type-check without building |
+The unauthenticated root (`/`) serves the marketing page; authenticated users are routed straight to `/dashboard`. The demo CTA logs into the seeded workspace in one click.
 
 ---
 
+## 🚢 Deployment
+
+Rys ships as a single container: a multi-stage Dockerfile builds the Vite frontend and compiled backend, and Express serves the static bundle alongside the API. Migrations and the demo seed run automatically on boot.
+
+```mermaid
+graph LR
+    Dev[git push main] --> GH[GitHub]
+    GH -->|auto deploy| RW[Railway]
+    subgraph C[Container]
+        direction TB
+        MIG[migrate] --> SEED[seed demo] --> SRV[Express :4000]
+        SRV --> ST[static frontend build]
+        SRV --> API[REST API /api/v1]
+    end
+    RW --> C
+    API --> PG[(Railway PostgreSQL)]
+    API -.-> AI[Claude API]
+    User([User]) -->|HTTPS| C
+```
+
+### Deploy your own
+
+1. Fork this repo
+2. Create a [Railway](https://railway.app) project and add a **PostgreSQL** database
+3. Add a **service** linked to your fork — Railway detects the root `Dockerfile`
+4. Set `DATABASE_URL` (reference the Railway DB), `JWT_SECRET`, and `NODE_ENV=production`; optionally `ANTHROPIC_API_KEY`
+5. Push to `main` — every push deploys, migrates, and reseeds the demo
+
+Nothing in the image is Railway-specific; any host that runs a container next to Postgres (Fly.io, Render, a VPS) works the same way.
+
+---
+
+## ⚡ Performance & Scalability
+
+- **Code-split by route.** Every page is `React.lazy`-loaded behind a suspense boundary in the layout.
+- **Vendor chunking.** React, data, motion, chart, and dnd libraries are split into long-cached chunks; the app shell is ~54 kB gzipped, and Recharts (~103 kB) loads only on routes that chart.
+- **Optimistic UI.** Mutations update the TanStack Query cache immediately and roll back on failure; drag-and-drop feels local while persistence happens in the background.
+- **Indexed access paths.** Every table is indexed on `user_id` (and `(user_id, stage)` for the board query). All queries are scoped to the authenticated user, so working sets stay small as the user base grows.
+- **Row-locked reordering.** The reorder transaction locks only the rows it touches — board writes scale with board size, not table size.
+- **Stateless API.** JWT auth means horizontal scaling is a replica count away; the only sticky state is uploaded PDFs (`UPLOAD_DIR`), which maps cleanly to a volume or object storage.
+
+## 🛡 Security
+
+- **Password storage:** bcrypt with per-user salts; emails unique case-insensitively.
+- **Transport of identity:** short-form JWTs (7-day default), verified on every request; invalid tokens clear client state immediately.
+- **Input validation:** every body, param, and query is parsed by a Zod schema before reaching a controller — unknown fields don't survive.
+- **SQL injection:** all queries are parameterized; there is no string-built SQL anywhere in the data layer.
+- **Tenant isolation:** every query filters by the authenticated `user_id`; ownership is re-verified inside multi-row transactions (e.g. reorder).
+- **Demo hardening:** a dedicated middleware rejects all non-GET requests from the demo account with `403 demo_readonly`.
+- **CORS:** locked to the configured origin in production; permissive only for localhost in development.
+- **Uploads:** restricted to PDF mime types via Multer, stored outside the web root, served through an auth-checked download route.
+
+Found a vulnerability? Please open a private security advisory rather than a public issue.
+
 ## 🧪 Testing
 
-Backend business logic is unit-tested with **Vitest**:
+Backend business logic is unit-tested with **Vitest** — auth (hashing, JWT issue/verify, error paths), the resume match scorer, and analytics calculations:
 
 ```bash
 cd backend && npm test
 ```
 
-Covers auth (hashing, JWT, error paths), resume-match scoring, and analytics calculations.
+Type safety is enforced end-to-end; both projects compile with strict settings and `noUnusedLocals`:
+
+```bash
+cd backend && npm run typecheck
+cd frontend && npm run typecheck
+```
+
+### Scripts
+
+| Command | Backend | Frontend |
+|---------|---------|----------|
+| `npm run dev` | Hot-reload API (tsx watch) | Vite dev server with HMR |
+| `npm run build` | Compile to `dist/` | Type-check + production bundle |
+| `npm start` / `preview` | Run compiled server | Preview the production build |
+| `npm run migrate` | Apply pending SQL migrations | — |
+| `npm run seed` | Reseed the demo account | — |
+| `npm test` | Vitest unit tests | — |
+| `npm run typecheck` | `tsc --noEmit` | `tsc --noEmit` |
+
+---
+
+## 🗺 Roadmap
+
+Near-term, roughly in order:
+
+- [ ] **Email & calendar integrations** — capture applications from your inbox, sync interview schedules
+- [ ] **Notification digests** — follow-up and interview reminders by email, not just in-app
+- [ ] **Browser extension** — one-click capture from LinkedIn/job boards into the Saved column
+- [ ] **Shared boards** — read-only board links for coaches, mentors, and placement cells
+- [ ] **Advanced AI** — longer-context analysis across your whole pipeline, offer-comparison assistant
+- [ ] **Mobile-first pass** — the layout is responsive today; a dedicated mobile experience is next
+
+Have an idea? [Open a discussion](https://github.com/me-adityaraj8/rys/issues) — roadmap items get promoted from real usage, not guesses.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how to get started:
+Contributions are welcome. The codebase is deliberately boring in the best way — one pattern per layer, no magic.
 
-1. **Fork** the repository
-2. **Clone** your fork: `git clone https://github.com/<you>/rys.git`
-3. **Create a branch**: `git checkout -b feature/your-feature`
-4. **Make changes** and ensure tests pass: `npm test`
-5. **Commit** with a descriptive message
-6. **Push** and open a Pull Request
+1. **Fork** and clone: `git clone https://github.com/<you>/rys.git`
+2. **Branch:** `git checkout -b feature/your-feature`
+3. **Develop** against the Docker stack (`docker compose up`)
+4. **Verify:** `npm test` and `npm run typecheck` in both `backend/` and `frontend/`
+5. **Open a PR** — keep it focused, one change per PR
 
-### Guidelines
+House rules:
 
-- Follow existing code patterns and naming conventions
-- Add tests for new business logic
-- Keep PRs focused — one feature or fix per PR
-- Run `npm run typecheck` in both `backend/` and `frontend/` before pushing
+- Follow the existing layer boundaries (routes → controllers → services → data; pages → components → hooks → api)
+- New business logic gets a unit test; new endpoints get a Zod schema
+- Match the existing naming and comment style — comments explain *why*, not *what*
 
 ---
 
 ## 📄 License
 
-This project is open source under the [MIT License](LICENSE).
+Released under the [MIT License](LICENSE).
 
 ---
 
