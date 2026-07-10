@@ -21,7 +21,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await register.mutateAsync({ name, email, password });
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(apiErrorMessage(err, 'Registration failed'));
     }

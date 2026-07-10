@@ -20,7 +20,7 @@ export default function LoginPage() {
     setError(null);
     try {
       await login.mutateAsync({ email, password });
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(apiErrorMessage(err, 'Login failed'));
     }
@@ -30,7 +30,7 @@ export default function LoginPage() {
     setError(null);
     try {
       await login.mutateAsync({ email: 'demo@rys.app', password: 'password123' });
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(apiErrorMessage(err, 'Demo login failed'));
     }
