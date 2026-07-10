@@ -14,6 +14,7 @@ import {
   Loader2,
   Moon,
   Sparkles,
+  Sun,
   Target,
   Users,
   Zap,
@@ -21,6 +22,7 @@ import {
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { useLogin } from '@/hooks/useAuth';
+import { useThemeStore } from '@/stores/themeStore';
 import { toast } from '@/stores/toastStore';
 import { apiErrorMessage } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -223,6 +225,8 @@ function ProductPreview() {
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const theme = useThemeStore((s) => s.theme);
+  const toggleWithTransition = useThemeStore((s) => s.toggleWithTransition);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
@@ -247,6 +251,13 @@ function Nav() {
           <a href="#faq" className="transition-colors hover:text-foreground">FAQ</a>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            onClick={(e) => toggleWithTransition(e.clientX, e.clientY)}
+            className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </button>
           <Button asChild variant="ghost" size="sm">
             <Link to="/login">Log in</Link>
           </Button>
@@ -365,7 +376,7 @@ function LogoStrip() {
     <section className="border-y bg-card/40 px-5 py-10">
       <Reveal className="mx-auto max-w-5xl">
         <p className="text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
-          Built for candidates interviewing at
+          One pipeline — from startups to big tech
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
           {companies.map((c) => (
@@ -374,6 +385,9 @@ function LogoStrip() {
             </span>
           ))}
         </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground/70">
+          Straight from the live demo pipeline — explore it with one click, no signup.
+        </p>
       </Reveal>
     </section>
   );
