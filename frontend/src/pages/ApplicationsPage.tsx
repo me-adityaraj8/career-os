@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Search, Kanban as KanbanIcon, List, Briefcase, Filter, X } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
@@ -49,6 +50,17 @@ export default function ApplicationsPage() {
     window.addEventListener('rys:new-application', onNewApp);
     return () => window.removeEventListener('rys:new-application', onNewApp);
   }, []);
+
+  // Deep link: /applications?open=<id> opens that application's detail modal.
+  // Reminders and dashboard attention items land on the exact record.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const openId = searchParams.get('open');
+    if (!openId || !applications) return;
+    const app = applications.find((a) => a.id === openId);
+    if (app) setViewing(app);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, applications, setSearchParams]);
 
   const activeFilterCount = [stageFilter, priorityFilter, tag].filter((f) => f !== 'all').length;
 

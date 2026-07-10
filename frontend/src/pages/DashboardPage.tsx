@@ -5,7 +5,6 @@ import {
   MessageSquare,
   Trophy,
   Target,
-  Bell,
   Calendar,
   ArrowRight,
   Plus,
@@ -24,11 +23,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MissionList } from '@/components/missions/MissionList';
+import { AttentionPanel } from '@/components/AttentionPanel';
 import { useAuthStore } from '@/stores/authStore';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useGoals } from '@/hooks/useGoals';
 import { useInterviews } from '@/hooks/useInterviews';
-import { useContacts } from '@/hooks/useContacts';
 import { useApplications } from '@/hooks/useApplications';
 import { useMissions } from '@/hooks/useMissions';
 import { cn, formatDate } from '@/lib/utils';
@@ -57,7 +56,6 @@ export default function DashboardPage() {
   const { data: analytics, isLoading } = useAnalytics();
   const { data: goals } = useGoals();
   const { data: interviews } = useInterviews();
-  const { data: contacts } = useContacts();
   const { data: applications } = useApplications();
   const { data: missionData } = useMissions();
 
@@ -74,7 +72,6 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime())
     .slice(0, 4);
 
-  const followUps = (contacts ?? []).filter((c) => c.followUp).slice(0, 4);
   const appById = new Map((applications ?? []).map((a) => [a.id, a]));
 
   const empty = !isLoading && analytics && analytics.totals.applications === 0;
@@ -155,6 +152,11 @@ export default function DashboardPage() {
                 Active today
               </div>
             )}
+          </motion.div>
+
+          {/* Needs attention — the day's action queue, deep-linked */}
+          <motion.div variants={fadeUp}>
+            <AttentionPanel />
           </motion.div>
 
           {/* Today's Mission — full interactive component */}
@@ -269,41 +271,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </motion.div>
-
-          {/* Follow-ups */}
-          {followUps.length > 0 && (
-            <motion.div variants={fadeUp}>
-              <Card>
-                <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="flex items-center gap-2.5 text-[15px] font-semibold">
-                    <Bell className="size-4 text-muted-foreground" />
-                    Follow-ups
-                  </CardTitle>
-                  <Link to="/network" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
-                    View all <ArrowRight className="ml-0.5 inline size-3" />
-                  </Link>
-                </CardHeader>
-                <CardContent className="pt-2">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {followUps.map((c: any) => (
-                      <div key={c.id} className="flex items-center gap-4 rounded-xl border border-border/50 p-4 transition-colors hover:bg-secondary/30">
-                        <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
-                          <Bell className="size-4" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">{c.name}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{c.company ?? '—'}</p>
-                        </div>
-                        {c.followUpDate && (
-                          <span className="shrink-0 text-xs text-muted-foreground/60">{formatDate(c.followUpDate)}</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
 
           {/* AI CTA */}
           <motion.div variants={fadeUp}>
