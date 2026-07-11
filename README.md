@@ -256,7 +256,7 @@ flowchart LR
     A -->|HTTP + JWT| R
 ```
 
-Routes never touch the database; components never call axios directly. Every feature follows the same path, which is what keeps sixteen endpoints and ten pages navigable.
+Routes never touch the database; components never call axios directly. Every feature follows the same path — the reason a REST surface of forty-odd endpoints across a dozen pages stays navigable.
 
 ---
 
@@ -351,7 +351,8 @@ sequenceDiagram
 
     U->>F: "Try with demo account"
     F->>A: POST /login (demo@rys.app)
-    A-->>F: token for seeded, read-only workspace
+    A-->>F: token for a seeded workspace
+    Note over F,DB: Demo is read-only — the demoGuard middleware<br/>rejects every write with 403 demo_readonly
 ```
 
 On any `401`, the axios response interceptor clears the store and the route guard bounces to `/login` — expired tokens never leave the app in a half-authenticated limbo.
@@ -406,7 +407,7 @@ erDiagram
     users ||--o{ contacts : owns
     users ||--o{ goals : owns
     users ||--o{ daily_missions : owns
-    users ||--|| mission_streaks : tracks
+    users ||--o{ mission_streaks : logs
     applications ||--o{ interview_rounds : has
     applications ||--o{ job_analyses : analyzed_by
     applications ||--o{ cover_letters : drafted_for
