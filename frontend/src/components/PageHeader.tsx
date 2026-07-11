@@ -15,13 +15,13 @@ export function PageHeader({
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="mb-9 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+      className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
     >
-      <div className="space-y-1.5">
-        <h1 className="text-[26px] font-semibold tracking-tight">{title}</h1>
-        {description && <p className="text-md text-muted-foreground">{description}</p>}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+        {description && <p className="max-w-2xl text-md text-muted-foreground">{description}</p>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </motion.div>
   );
 }

@@ -49,19 +49,19 @@ export function StatCard({
         className,
       )}
     >
-      <CardContent className="p-5">
+      <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
           {Icon && (
-            <div className="flex size-8 items-center justify-center rounded-lg border bg-secondary/50 text-muted-foreground/70 transition-colors duration-300 group-hover:text-foreground">
+            <div className="flex size-9 items-center justify-center rounded-xl border bg-secondary/50 text-muted-foreground/70 transition-colors duration-300 group-hover:text-foreground">
               <Icon className="size-4" />
             </div>
           )}
         </div>
-        <p className="mt-3 text-[28px] font-semibold leading-none tracking-tight tabular-nums">
+        <p className="mt-4 text-[34px] font-semibold leading-none tracking-tight tabular-nums">
           {numeric ? <CountUp value={numeric.n} suffix={numeric.suffix} /> : value}
         </p>
-        {sublabel && <p className="mt-2 text-xs text-muted-foreground">{sublabel}</p>}
+        {sublabel && <p className="mt-2.5 text-xs text-muted-foreground">{sublabel}</p>}
       </CardContent>
     </Card>
   );

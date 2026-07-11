@@ -159,7 +159,7 @@ export function AppLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border/60 bg-background/60 px-4 backdrop-blur-xl lg:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl lg:px-8">
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
@@ -183,9 +183,9 @@ export function AppLayout() {
 
           <button
             onClick={openPalette}
-            className="group hidden h-9 w-full max-w-[280px] items-center gap-2 rounded-lg border bg-secondary/40 px-3 text-[13px] text-muted-foreground/70 transition-all duration-200 ease-premium hover:border-border-strong hover:bg-secondary sm:flex"
+            className="group hidden h-10 w-full max-w-[340px] items-center gap-2.5 rounded-xl border bg-secondary/40 px-3.5 text-[13.5px] text-muted-foreground/70 transition-all duration-200 ease-premium hover:border-border-strong hover:bg-secondary sm:flex"
           >
-            <Search className="size-3.5" />
+            <Search className="size-4" />
             <span>Search or jump to…</span>
             <kbd className="ml-auto rounded-md border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/60">
               {isMac ? '⌘' : 'Ctrl'} K
@@ -227,12 +227,12 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main id="main-content" className="flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10" role="main" tabIndex={-1}>
-          <Suspense fallback={<div className="mx-auto max-w-[1440px]"><PageSkeleton /></div>}>
+        <main id="main-content" className="flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-10 lg:px-12 lg:py-12" role="main" tabIndex={-1}>
+          <Suspense fallback={<div className="mx-auto max-w-[1400px]"><PageSkeleton /></div>}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={location.pathname}
-                className="mx-auto max-w-[1440px]"
+                className="mx-auto max-w-[1400px]"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}

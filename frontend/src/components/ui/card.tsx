@@ -36,7 +36,7 @@ export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
       <div
         ref={combinedRef}
         className={cn(
-          'spotlight rounded-2xl border bg-card text-card-foreground shadow-elev-1 transition-all duration-300 ease-premium',
+          'spotlight rounded-[20px] border bg-card text-card-foreground shadow-elev-1 transition-all duration-300 ease-premium',
           className,
         )}
         onMouseMove={handleMouseMove}
@@ -50,7 +50,7 @@ Card.displayName = 'Card';
 
 export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('relative z-[1] flex flex-col space-y-1.5 p-6', className)} {...props} />
+    <div ref={ref} className={cn('relative z-[1] flex flex-col space-y-1.5 p-7', className)} {...props} />
   ),
 );
 CardHeader.displayName = 'CardHeader';
@@ -76,7 +76,7 @@ CardDescription.displayName = 'CardDescription';
 
 export const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('relative z-[1] p-6 pt-0', className)} {...props} />
+    <div ref={ref} className={cn('relative z-[1] p-7 pt-0', className)} {...props} />
   ),
 );
 CardContent.displayName = 'CardContent';
