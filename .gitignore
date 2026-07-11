@@ -27,6 +27,7 @@ pnpm-debug.log*
 .DS_Store
 .idea/
 .vscode/
+.claude/
 *.swp
 
 # Test / coverage
@@ -34,6 +35,3 @@ coverage/
 
 # Uploaded files (local dev resume storage)
 backend/uploads/
-
-# Claude Code runtime state
-.claude/scheduled_tasks.lock
