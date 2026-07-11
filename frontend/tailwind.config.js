@@ -81,22 +81,28 @@ export default {
         '3xl': '22px',
         full: '9999px',
       },
+      /* Type scale — a touch larger at the body sizes for a calmer, more
+         readable rhythm, with airier line-heights and tighter display tracking. */
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.01em' }],
-        xs: ['0.75rem', { lineHeight: '1.1rem' }],
-        sm: ['0.8125rem', { lineHeight: '1.25rem' }],
-        base: ['0.875rem', { lineHeight: '1.5rem' }],
-        md: ['0.9375rem', { lineHeight: '1.5rem' }],
-        lg: ['1.0625rem', { lineHeight: '1.6rem', letterSpacing: '-0.01em' }],
-        xl: ['1.25rem', { lineHeight: '1.7rem', letterSpacing: '-0.015em' }],
-        '2xl': ['1.5rem', { lineHeight: '1.9rem', letterSpacing: '-0.02em' }],
-        '3xl': ['1.875rem', { lineHeight: '2.2rem', letterSpacing: '-0.022em' }],
-        '4xl': ['2.375rem', { lineHeight: '2.6rem', letterSpacing: '-0.025em' }],
+        xs: ['0.75rem', { lineHeight: '1.125rem' }],
+        sm: ['0.84375rem', { lineHeight: '1.3125rem' }],
+        base: ['0.9375rem', { lineHeight: '1.5625rem' }],
+        md: ['1rem', { lineHeight: '1.625rem' }],
+        lg: ['1.0625rem', { lineHeight: '1.65rem', letterSpacing: '-0.01em' }],
+        xl: ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '-0.015em' }],
+        '2xl': ['1.5rem', { lineHeight: '1.95rem', letterSpacing: '-0.02em' }],
+        '3xl': ['1.9375rem', { lineHeight: '2.3rem', letterSpacing: '-0.022em' }],
+        '4xl': ['2.5rem', { lineHeight: '2.75rem', letterSpacing: '-0.026em' }],
       },
       boxShadow: {
         'elev-1': 'var(--elev-1)',
         'elev-2': 'var(--elev-2)',
         'elev-3': 'var(--elev-3)',
+      },
+      spacing: {
+        '4.5': '1.125rem',
+        '18': '4.5rem',
       },
       transitionTimingFunction: {
         premium: 'cubic-bezier(0.16, 1, 0.3, 1)',

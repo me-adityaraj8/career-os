@@ -48,7 +48,7 @@ function NavItem({
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
-          'group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors duration-200',
+          'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium transition-colors duration-200',
           isActive
             ? 'text-foreground'
             : 'text-muted-foreground/80 hover:text-foreground',
@@ -60,7 +60,7 @@ function NavItem({
           {isActive && (
             <motion.div
               layoutId="sidebar-active"
-              className="absolute inset-0 rounded-lg border border-border/60 bg-secondary shadow-elev-1"
+              className="absolute inset-0 rounded-xl border border-border/60 bg-secondary shadow-elev-1"
               transition={{ type: 'spring', stiffness: 400, damping: 34 }}
             />
           )}
