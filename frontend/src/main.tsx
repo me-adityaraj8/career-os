@@ -5,6 +5,9 @@ import App from './App';
 import './index.css';
 // Ensure the persisted theme is applied before first paint.
 import './stores/themeStore';
+import { initAnalytics } from './lib/analytics';
+
+initAnalytics();
 
 const queryClient = new QueryClient({
   defaultOptions: {
