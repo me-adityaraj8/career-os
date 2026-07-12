@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Plus, Download, Star, MoreVertical } from 'lucide-react';
+import { FileText, Plus, Download, Star, MoreVertical, TrendingUp } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
@@ -21,9 +21,10 @@ import {
   useSetDefaultResume,
   downloadResume,
 } from '@/hooks/useResumes';
+import { useApplications } from '@/hooks/useApplications';
 import { toast } from '@/stores/toastStore';
-import { formatDate } from '@/lib/utils';
-import type { Resume } from '@/types';
+import { cn, formatDate } from '@/lib/utils';
+import type { Application, Resume } from '@/types';
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -31,10 +32,72 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+interface ResumeStats {
+  sent: number;
+  interviews: number;
+  offers: number;
+  interviewRate: number;
+}
+
+/** Per-version performance from the live pipeline: which resume converts. */
+function computeResumeStats(apps: Application[]): Map<string, ResumeStats> {
+  const map = new Map<string, ResumeStats>();
+  for (const a of apps) {
+    if (!a.resumeId || a.stage === 'saved') continue;
+    const s = map.get(a.resumeId) ?? { sent: 0, interviews: 0, offers: 0, interviewRate: 0 };
+    s.sent += 1;
+    if (a.stage === 'interview' || a.stage === 'offer') s.interviews += 1;
+    if (a.stage === 'offer') s.offers += 1;
+    map.set(a.resumeId, s);
+  }
+  for (const s of map.values()) {
+    s.interviewRate = s.sent > 0 ? Math.round((s.interviews / s.sent) * 100) : 0;
+  }
+  return map;
+}
+
+function ResumePerformance({ stats }: { stats: ResumeStats | undefined }) {
+  if (!stats || stats.sent === 0) {
+    return (
+      <p className="rounded-lg border border-dashed px-3 py-2 text-[11px] text-muted-foreground/70">
+        No applications sent with this version yet.
+      </p>
+    );
+  }
+  return (
+    <div className="rounded-lg border bg-secondary/30 px-3 py-2.5">
+      <div className="flex items-center justify-between text-[11px]">
+        <span className="flex items-center gap-1.5 font-medium text-muted-foreground">
+          <TrendingUp className="size-3" /> Performance
+        </span>
+        <span className="tabular-nums text-muted-foreground">
+          {stats.sent} sent · {stats.interviews} interview{stats.interviews === 1 ? '' : 's'}
+          {stats.offers > 0 && ` · ${stats.offers} offer${stats.offers === 1 ? '' : 's'}`}
+        </span>
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
+          <motion.div
+            className={cn('h-full rounded-full', stats.interviewRate >= 40 ? 'bg-success' : 'bg-[var(--viz-1)]')}
+            initial={{ width: 0 }}
+            animate={{ width: `${stats.interviewRate}%` }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
+        <span className="text-[11px] font-semibold tabular-nums">{stats.interviewRate}%</span>
+      </div>
+      <p className="mt-1 text-[10px] text-muted-foreground/60">interview rate with this version</p>
+    </div>
+  );
+}
+
 export default function ResumesPage() {
   const { data: resumes, isLoading, isError } = useResumes();
+  const { data: applications } = useApplications();
   const del = useDeleteResume();
   const setDefault = useSetDefaultResume();
+
+  const statsByResume = useMemo(() => computeResumeStats(applications ?? []), [applications]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Resume | null>(null);
@@ -159,6 +222,8 @@ export default function ResumesPage() {
                       ))}
                     </div>
                   )}
+
+                  <ResumePerformance stats={statsByResume.get(r.id)} />
 
                   <div className="mt-auto flex items-center justify-between pt-2 text-xs text-muted-foreground">
                     <span>{formatBytes(r.sizeBytes)}</span>

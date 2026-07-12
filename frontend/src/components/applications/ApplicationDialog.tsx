@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,8 +16,18 @@ import { STAGES, PRIORITIES } from '@/lib/constants';
 import { useResumes } from '@/hooks/useResumes';
 import { useCreateApplication, useUpdateApplication } from '@/hooks/useApplications';
 import { toast } from '@/stores/toastStore';
-import { apiErrorMessage, isDemoReadonly } from '@/lib/api';
+import { api, apiErrorMessage, isDemoReadonly } from '@/lib/api';
 import type { Application, Priority, Stage } from '@/types';
+
+interface JobImport {
+  company: string;
+  role: string;
+  location: string | null;
+  salary: string | null;
+  jobUrl: string;
+  description: string;
+  source: string;
+}
 
 interface Props {
   open: boolean;
@@ -85,6 +95,45 @@ export function ApplicationDialog({ open, onOpenChange, application, defaultStag
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  // One-click import: paste a Greenhouse/Lever/Ashby posting URL and the
+  // board's public API fills the form. The user reviews before saving.
+  const [importUrl, setImportUrl] = useState('');
+  const [importing, setImporting] = useState(false);
+
+  useEffect(() => {
+    if (open) setImportUrl('');
+  }, [open]);
+
+  async function runImport() {
+    const url = importUrl.trim();
+    if (!url) return;
+    setImporting(true);
+    try {
+      const { data } = await api.get<{ import: JobImport }>('/applications/import-preview', {
+        params: { url },
+      });
+      const job = data.import;
+      setForm((f) => ({
+        ...f,
+        company: job.company,
+        role: job.role,
+        jobUrl: job.jobUrl,
+        location: job.location ?? '',
+        salary: job.salary ?? f.salary,
+        notes: job.description,
+      }));
+      toast({
+        title: `Imported from ${job.source.charAt(0).toUpperCase()}${job.source.slice(1)}`,
+        description: 'Review the details, then save.',
+        variant: 'success',
+      });
+    } catch (err) {
+      toast({ title: apiErrorMessage(err, 'Import failed'), variant: 'error' });
+    } finally {
+      setImporting(false);
+    }
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const payload = {
@@ -127,6 +176,38 @@ export function ApplicationDialog({ open, onOpenChange, application, defaultStag
         </DialogHeader>
 
         <form onSubmit={onSubmit} className="space-y-4">
+          {!isEdit && (
+            <div className="rounded-xl border border-dashed bg-secondary/30 p-3.5">
+              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <Sparkles className="size-3.5" />
+                Paste a job posting URL — Greenhouse, Lever, or Ashby — and Rys fills this in.
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="https://boards.greenhouse.io/…"
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      runImport();
+                    }
+                  }}
+                  className="bg-background"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={runImport}
+                  disabled={importing || !importUrl.trim()}
+                  className="shrink-0"
+                >
+                  {importing ? <Loader2 className="size-4 animate-spin" /> : 'Import'}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="company">Company *</Label>

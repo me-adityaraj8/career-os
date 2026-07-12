@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import * as applicationService from '../services/applicationService';
+import * as jobImportService from '../services/jobImportService';
 import { AuthedRequest, getUserId } from '../middleware/auth';
 
 export async function list(req: AuthedRequest, res: Response): Promise<void> {
@@ -30,6 +31,11 @@ export async function update(req: AuthedRequest, res: Response): Promise<void> {
 export async function remove(req: AuthedRequest, res: Response): Promise<void> {
   await applicationService.remove(getUserId(req), req.params.id);
   res.status(204).send();
+}
+
+export async function importPreview(req: AuthedRequest, res: Response): Promise<void> {
+  const { url } = req.query as { url: string };
+  res.json({ import: await jobImportService.importFromUrl(url) });
 }
 
 export async function reorder(req: AuthedRequest, res: Response): Promise<void> {

@@ -57,3 +57,8 @@ export const listApplicationsQuerySchema = z.object({
   tag: z.string().optional(),
   search: z.string().optional(),
 });
+
+// Job-board import: the posting URL to parse into pre-filled fields.
+export const importPreviewQuerySchema = z.object({
+  url: z.string().url().max(1000),
+});
