@@ -205,6 +205,10 @@ The demo account is **read-only** — a backend guard rejects every write so sha
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `VITE_API_URL` | No | `http://localhost:4000/api/v1` | API base URL (`/api/v1` in the production container) |
+| `VITE_UMAMI_SRC` | No | — | Umami tracking script URL. Leave unset to disable analytics entirely |
+| `VITE_UMAMI_WEBSITE_ID` | No | — | Umami website ID. Both this and `VITE_UMAMI_SRC` must be set for tracking to load |
+
+Rys ships with optional [Umami](https://umami.is) page-view tracking — cookieless and privacy-friendly, no consent banner required. It's a no-op unless both variables above are set, so local dev, forks, and preview builds stay untracked by default. Self-host Umami (a [Railway template](https://railway.app/template/umami) exists) or use their hosted cloud, then point these two variables at it.
 
 ---
 
