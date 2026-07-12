@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -11,6 +11,7 @@ import {
   Target,
   Sparkles,
   Flame,
+  ChevronRight,
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { useMissions } from '@/hooks/useMissions';
@@ -80,23 +81,42 @@ function NavItem({
   );
 }
 
-function StreakWidget() {
+function StreakWidget({ onNavigate }: { onNavigate?: () => void }) {
   const { data } = useMissions();
+  const navigate = useNavigate();
   const streak = data?.streak;
   if (!streak) return null;
 
   const todayDone = streak.todayCompleted;
   return (
-    <div className="mx-1 mb-2 rounded-lg border border-sidebar-border bg-sidebar-accent/30 px-3 py-2.5">
+    <motion.button
+      type="button"
+      aria-label={`${streak.current}-day streak — open Goals`}
+      onClick={() => {
+        navigate('/goals');
+        onNavigate?.();
+      }}
+      whileHover={{ scale: 1.03, y: -1 }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+      className="group/streak mx-1 mb-2 block w-[calc(100%-0.5rem)] cursor-pointer rounded-xl border border-sidebar-border bg-sidebar-accent/30 px-3 py-2.5 text-left transition-colors hover:border-orange-500/40 hover:bg-orange-500/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40"
+    >
       <div className="flex items-center gap-2">
         <motion.div
           animate={todayDone ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.5 }}
+          className="transition-transform duration-300 group-hover/streak:scale-125 group-hover/streak:-rotate-6"
         >
-          <Flame className={cn('size-4', todayDone ? 'text-orange-500' : 'text-muted-foreground/40')} />
+          <Flame
+            className={cn(
+              'size-4 transition-colors duration-300',
+              todayDone ? 'text-orange-500' : 'text-muted-foreground/40 group-hover/streak:text-orange-500',
+            )}
+          />
         </motion.div>
         <span className="text-xs font-semibold tabular-nums">{streak.current}</span>
         <span className="text-[11px] text-muted-foreground/60">day streak</span>
+        <ChevronRight className="ml-auto size-3 text-muted-foreground/0 transition-all duration-300 group-hover/streak:translate-x-0.5 group-hover/streak:text-muted-foreground/60" />
       </div>
       <div className="mt-2 h-1 overflow-hidden rounded-full bg-sidebar-accent">
         <motion.div
@@ -106,7 +126,7 @@ function StreakWidget() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         />
       </div>
-    </div>
+    </motion.button>
   );
 }
 
@@ -142,7 +162,7 @@ export function Sidebar({
         </div>
 
         <div className="mt-auto space-y-2 border-t border-sidebar-border pt-4">
-          <StreakWidget />
+          <StreakWidget onNavigate={onNavigate} />
           {bottomNav.map((item) => (
             <NavItem key={item.to} item={item} onNavigate={onNavigate} />
           ))}
