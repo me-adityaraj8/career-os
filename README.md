@@ -98,7 +98,8 @@ Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), 
 | | Feature | Description |
 |---|---------|-------------|
 | 📋 | **Kanban board** | Six-stage drag-and-drop tracker (saved → applied → OA → interview → offer / rejected) with atomic reordering, search, smart filters, and a list view |
-| 📄 | **Resume manager** | Upload multiple PDF versions, tag them, set a default, and link each application to the exact version you sent |
+| ⚡ | **One-click job import** | Paste a Greenhouse, Lever, or Ashby posting URL and the application fills itself from the board's official public API — company, role, location, and full description |
+| 📄 | **Resume manager** | Upload multiple PDF versions, tag them, set a default, and link each application to the exact version you sent — with per-version performance (sent → interview rate) computed from your live pipeline |
 | 🎤 | **Interview prep** | Track rounds per application — type, schedule, outcome, prep notes, and feedback |
 | 🤝 | **Networking CRM** | Recruiters, referrals, alumni, and mentors with relationship context, last-contact dates, and follow-up flags |
 | 🤖 | **AI tools** | Job analyzer (ATS keywords + skill match), cover letter generator, and interview coach — Claude-powered with a mock fallback |
@@ -496,6 +497,7 @@ All endpoints are prefixed with `/api/v1`. Protected routes require `Authorizati
 | `GET` / `POST` | `/applications` | ✅ | List / create applications |
 | `PATCH` / `DELETE` | `/applications/:id` | ✅ | Update / delete one |
 | `PATCH` | `/applications/reorder` | ✅ | Atomic Kanban reorder (stage + position batch) |
+| `GET` | `/applications/import-preview` | ✅ | Parse a Greenhouse/Lever/Ashby posting URL into pre-filled fields |
 | `GET` | `/applications/tags` | ✅ | Distinct tag list |
 | `GET` / `POST` | `/resumes` | ✅ | List / upload (PDF, multipart) |
 | `PATCH` / `DELETE` | `/resumes/:id` | ✅ | Update metadata / delete |

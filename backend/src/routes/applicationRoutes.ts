@@ -9,6 +9,7 @@ import {
   updateApplicationSchema,
   listApplicationsQuerySchema,
   reorderApplicationsSchema,
+  importPreviewQuerySchema,
 } from '../validation/applicationSchemas';
 
 export const applicationRouter = Router();
@@ -23,6 +24,12 @@ applicationRouter.get(
   asyncHandler(controller.list),
 );
 applicationRouter.get('/tags', asyncHandler(controller.tags));
+// GET so the read-only demo account can try imports too (demoGuard passes GETs).
+applicationRouter.get(
+  '/import-preview',
+  validate({ query: importPreviewQuerySchema }),
+  asyncHandler(controller.importPreview),
+);
 // Registered before '/:id' so PATCH /reorder isn't matched as id="reorder".
 applicationRouter.patch(
   '/reorder',
