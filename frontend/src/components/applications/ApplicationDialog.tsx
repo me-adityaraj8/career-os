@@ -24,9 +24,31 @@ interface JobImport {
   role: string;
   location: string | null;
   salary: string | null;
-  jobUrl: string;
+  employmentType: string | null;
+  skills: string[];
   description: string;
+  deadline: string | null;
+  jobUrl: string;
   source: string;
+  partial: boolean;
+  notice?: string;
+}
+
+const SOURCE_LABEL: Record<string, string> = {
+  greenhouse: 'Greenhouse',
+  lever: 'Lever',
+  ashby: 'Ashby',
+  smartrecruiters: 'SmartRecruiters',
+  workday: 'Workday',
+  'json-ld': 'the job posting',
+  manual: 'the link',
+};
+
+function splitTags(value: string): string[] {
+  return value
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
 }
 
 interface Props {
@@ -95,8 +117,8 @@ export function ApplicationDialog({ open, onOpenChange, application, defaultStag
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  // One-click import: paste a Greenhouse/Lever/Ashby posting URL and the
-  // board's public API fills the form. The user reviews before saving.
+  // One-click import: paste a job posting URL from any supported board or
+  // career page and Rys fills the form. The user reviews before saving.
   const [importUrl, setImportUrl] = useState('');
   const [importing, setImporting] = useState(false);
 
@@ -113,20 +135,43 @@ export function ApplicationDialog({ open, onOpenChange, application, defaultStag
         params: { url },
       });
       const job = data.import;
+
+      // Fold structured extras the form has no dedicated field for into notes.
+      const extras = [
+        job.employmentType ? `Employment type: ${job.employmentType}` : null,
+        job.deadline ? `Apply by: ${job.deadline}` : null,
+      ].filter(Boolean);
+      const notes = [extras.join(' · '), job.description].filter(Boolean).join('\n\n');
+
+      // Skills become tags, merged with anything already typed.
+      const mergedTags = [
+        ...new Set([...splitTags(form.tags), ...job.skills].map((t) => t.trim()).filter(Boolean)),
+      ].join(', ');
+
       setForm((f) => ({
         ...f,
-        company: job.company,
-        role: job.role,
+        company: job.company || f.company,
+        role: job.role || f.role,
         jobUrl: job.jobUrl,
-        location: job.location ?? '',
+        location: job.location ?? f.location,
         salary: job.salary ?? f.salary,
-        notes: job.description,
+        tags: mergedTags,
+        notes: notes || f.notes,
       }));
-      toast({
-        title: `Imported from ${job.source.charAt(0).toUpperCase()}${job.source.slice(1)}`,
-        description: 'Review the details, then save.',
-        variant: 'success',
-      });
+
+      if (job.partial) {
+        toast({
+          title: 'Partial import',
+          description: job.notice ?? 'Add the remaining details, then save.',
+          variant: 'default',
+        });
+      } else {
+        toast({
+          title: `Imported from ${SOURCE_LABEL[job.source] ?? job.source}`,
+          description: 'Review the details, then save.',
+          variant: 'success',
+        });
+      }
     } catch (err) {
       toast({ title: apiErrorMessage(err, 'Import failed'), variant: 'error' });
     } finally {
@@ -178,13 +223,16 @@ export function ApplicationDialog({ open, onOpenChange, application, defaultStag
         <form onSubmit={onSubmit} className="space-y-4">
           {!isEdit && (
             <div className="rounded-xl border border-dashed bg-secondary/30 p-3.5">
-              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                <Sparkles className="size-3.5" />
-                Paste a job posting URL — Greenhouse, Lever, or Ashby — and Rys fills this in.
+              <div className="mb-2 flex items-start gap-2 text-xs font-medium text-muted-foreground">
+                <Sparkles className="mt-0.5 size-3.5 shrink-0" />
+                <span>
+                  Paste any job posting URL — Greenhouse, Lever, Ashby, SmartRecruiters, Workday,
+                  or most career pages — and Rys fills this in.
+                </span>
               </div>
               <div className="flex gap-2">
                 <Input
-                  placeholder="https://boards.greenhouse.io/…"
+                  placeholder="https://…  (paste a job link)"
                   value={importUrl}
                   onChange={(e) => setImportUrl(e.target.value)}
                   onKeyDown={(e) => {

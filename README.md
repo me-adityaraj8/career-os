@@ -98,7 +98,7 @@ Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), 
 | | Feature | Description |
 |---|---------|-------------|
 | 📋 | **Kanban board** | Six-stage drag-and-drop tracker (saved → applied → OA → interview → offer / rejected) with atomic reordering, search, smart filters, and a list view |
-| ⚡ | **One-click job import** | Paste a Greenhouse, Lever, or Ashby posting URL and the application fills itself from the board's official public API — company, role, location, and full description |
+| ⚡ | **One-click job import** | Paste a job URL from Greenhouse, Lever, Ashby, SmartRecruiters, Workday, or most career pages and the application fills itself — company, role, location, salary, employment type, skills (→ tags), description, and deadline — with graceful fallbacks for sites that block automated import |
 | 📄 | **Resume manager** | Upload multiple PDF versions, tag them, set a default, and link each application to the exact version you sent — with per-version performance (sent → interview rate) computed from your live pipeline |
 | 🎤 | **Interview prep** | Track rounds per application — type, schedule, outcome, prep notes, and feedback |
 | 🤝 | **Networking CRM** | Recruiters, referrals, alumni, and mentors with relationship context, last-contact dates, and follow-up flags |
@@ -501,7 +501,7 @@ All endpoints are prefixed with `/api/v1`. Protected routes require `Authorizati
 | `GET` / `POST` | `/applications` | ✅ | List / create applications |
 | `PATCH` / `DELETE` | `/applications/:id` | ✅ | Update / delete one |
 | `PATCH` | `/applications/reorder` | ✅ | Atomic Kanban reorder (stage + position batch) |
-| `GET` | `/applications/import-preview` | ✅ | Parse a Greenhouse/Lever/Ashby posting URL into pre-filled fields |
+| `GET` | `/applications/import-preview` | ✅ | Parse a job posting URL (ATS API, JSON-LD, or fallback) into pre-filled fields |
 | `GET` | `/applications/tags` | ✅ | Distinct tag list |
 | `GET` / `POST` | `/resumes` | ✅ | List / upload (PDF, multipart) |
 | `PATCH` / `DELETE` | `/resumes/:id` | ✅ | Update metadata / delete |
@@ -546,6 +546,32 @@ The resume **match score is always computed deterministically in code** (`comput
   "time": "2026-07-10T12:00:00.000Z"
 }
 ```
+
+---
+
+## 🔗 Job Import
+
+Paste a job URL and Rys pre-fills the application. The importer (`backend/src/services/jobImport/`) resolves a URL through three tiers, in order:
+
+1. **First-class ATS APIs** — for boards with clean public JSON, we call the official endpoint directly: **Greenhouse, Lever, Ashby, SmartRecruiters, Workday**. Most reliable and complete.
+2. **Generic JSON-LD** — for any other page, we fetch the HTML and extract the [schema.org `JobPosting`](https://schema.org/JobPosting) structured data that boards and career pages embed for SEO (the same data Google Jobs reads). This covers a long tail of company career pages and boards without a bespoke integration.
+3. **Graceful fallback** — if a site blocks automated requests (LinkedIn, Indeed, Glassdoor, and some client-rendered Indian boards) or has no structured data, the import never dead-ends: it pre-fills the URL and a domain-inferred company with a note on what to finish manually.
+
+Extracted fields: company, role, location, salary, employment type, skills (mapped to tags), description, deadline, and the original URL.
+
+```mermaid
+flowchart TD
+    U[Paste job URL] --> M{Matches an ATS provider?}
+    M -->|Yes| API[Call official ATS API]
+    M -->|No| LD[Fetch page · extract JobPosting JSON-LD]
+    LD -->|Found| OK[Normalized fields]
+    LD -->|Blocked / none| FB[Graceful fallback:<br/>URL + domain company + notice]
+    API --> OK
+```
+
+**Adding a provider** is a drop-in: implement the `Provider` interface (`match(url)` + `parse(url)`) in `providers/` and register it in `jobImport/index.ts`. Nothing else changes.
+
+**Safety:** arbitrary user URLs (the JSON-LD path) are fetched behind an SSRF guard — https-only, DNS-resolved and rejected if they point at private/loopback/link-local/metadata addresses, with per-hop revalidation on redirects, an 8s timeout, and a response-size cap.
 
 ---
 
