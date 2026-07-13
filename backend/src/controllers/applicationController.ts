@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import * as applicationService from '../services/applicationService';
-import * as jobImportService from '../services/jobImportService';
+import * as jobImportService from '../services/jobImport';
 import { AuthedRequest, getUserId } from '../middleware/auth';
 
 export async function list(req: AuthedRequest, res: Response): Promise<void> {
