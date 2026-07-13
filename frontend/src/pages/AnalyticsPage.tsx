@@ -45,7 +45,7 @@ export default function AnalyticsPage() {
     return (
       <div>
         <PageHeader title="Analytics" description="Insights across your entire job search." />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-[104px]" />
           ))}
@@ -78,7 +78,7 @@ export default function AnalyticsPage() {
         />
       ) : (
         <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-          <motion.div variants={fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             <StatCard label="Applications" value={data.totals.applications} icon={Send} />
             <StatCard label="Response Rate" value={`${data.rates.responseRate}%`} sublabel="Progressed past applied" icon={TrendingUp} />
             <StatCard label="Interview Rate" value={`${data.rates.interviewRate}%`} icon={MessageSquare} />

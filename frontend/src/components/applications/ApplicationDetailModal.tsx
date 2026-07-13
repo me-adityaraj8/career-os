@@ -89,7 +89,7 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -104,17 +104,19 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
             exit={{ opacity: 0 }}
           />
 
-          {/* Modal */}
+          {/* Modal — bottom sheet on mobile, centered card on desktop */}
           <motion.div
-            className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border bg-card shadow-2xl"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative z-10 max-h-[92dvh] w-full max-w-lg overflow-hidden rounded-t-[22px] border bg-card shadow-2xl sm:max-h-none sm:rounded-2xl"
+            initial={{ opacity: 0, scale: 0.98, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            exit={{ opacity: 0, scale: 0.98, y: 24 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Grabber handle — mobile only */}
+            <div className="mx-auto mt-2.5 h-1 w-9 shrink-0 rounded-full bg-border-strong sm:hidden" />
             {/* Header */}
-            <div className="relative border-b px-6 pb-5 pt-6">
+            <div className="relative border-b px-6 pb-5 pt-4 sm:pt-6">
               <button
                 onClick={onClose}
                 className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground/50 transition-all hover:bg-secondary hover:text-foreground"

@@ -84,7 +84,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-7 sm:space-y-10">
       <PageHeader
         title={`${greeting()}${user ? `, ${user.name.split(' ')[0]}` : ''}`}
         description="Here's your job search at a glance."
@@ -113,9 +113,9 @@ export default function DashboardPage() {
       )}
 
       {!empty && (
-        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-10">
+        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-7 sm:space-y-10">
           {/* Stat cards */}
-          <motion.div variants={fadeUp} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
             {isLoading || !analytics ? (
               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)
             ) : (

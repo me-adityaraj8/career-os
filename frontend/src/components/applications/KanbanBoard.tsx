@@ -201,7 +201,7 @@ function Column({
 
   return (
     <motion.div
-      className="flex min-w-0 flex-1 flex-col"
+      className="flex min-w-0 flex-1 snap-start flex-col"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
@@ -464,7 +464,7 @@ export function KanbanBoard({ applications, onEdit, onDelete, onView, onAdd }: P
       {/* All six columns share the row on wide screens; below that the board
           scrolls horizontally with usable column widths. dnd-kit auto-scrolls
           this container (and the page) when dragging near an edge. */}
-      <div className="grid grid-flow-col auto-cols-[minmax(232px,1fr)] gap-5 overflow-x-auto pb-4">
+      <div className="grid snap-x snap-proximity scroll-px-5 grid-flow-col auto-cols-[minmax(272px,1fr)] gap-4 overflow-x-auto pb-4 sm:auto-cols-[minmax(232px,1fr)] sm:gap-5">
         {STAGES.map((s, i) => (
           <Column
             key={s.value}

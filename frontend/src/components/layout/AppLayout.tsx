@@ -2,8 +2,9 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PageSkeleton } from '@/components/PageSkeleton';
-import { Menu, Moon, Sun, LogOut, User as UserIcon, X, Search, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Moon, Sun, LogOut, User as UserIcon, X, Search, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { MobileNav } from './MobileNav';
 import { SmartReminders } from '@/components/SmartReminders';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Button } from '@/components/ui/button';
@@ -161,13 +162,16 @@ export function AppLayout() {
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl lg:px-8">
           <div className="flex items-center gap-1">
+            {/* Mobile: the top-left opens search; primary nav lives in the
+                bottom bar, secondary nav in the drawer via its "More" tab. */}
             <Button
               variant="ghost"
               size="icon"
               className="lg:hidden"
-              onClick={() => setMobileOpen(true)}
+              onClick={openPalette}
+              aria-label="Search"
             >
-              <Menu className="size-5" />
+              <Search className="size-5" />
             </Button>
 
             <Button
@@ -227,7 +231,12 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main id="main-content" className="flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-10 lg:px-12 lg:py-12" role="main" tabIndex={-1}>
+        <main
+          id="main-content"
+          className="flex-1 overflow-y-auto px-5 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-8 sm:py-10 lg:px-12 lg:py-12 lg:pb-12"
+          role="main"
+          tabIndex={-1}
+        >
           <Suspense fallback={<div className="mx-auto max-w-[1400px]"><PageSkeleton /></div>}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -244,6 +253,9 @@ export function AppLayout() {
           </Suspense>
         </main>
       </div>
+
+      {/* Thumb-friendly bottom navigation — phones only */}
+      <MobileNav onOpenMore={() => setMobileOpen(true)} />
     </div>
   );
 }
