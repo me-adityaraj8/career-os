@@ -88,14 +88,14 @@ export default function AIToolsPage() {
       )}
 
       <Tabs defaultValue="analyzer">
-        <TabsList>
-          <TabsTrigger value="analyzer">
+        <TabsList className="flex w-full justify-start overflow-x-auto sm:inline-flex sm:w-auto sm:justify-center">
+          <TabsTrigger value="analyzer" className="shrink-0">
             <Target className="size-4" /> Job Analyzer
           </TabsTrigger>
-          <TabsTrigger value="cover">
+          <TabsTrigger value="cover" className="shrink-0">
             <FileText className="size-4" /> Cover Letter
           </TabsTrigger>
-          <TabsTrigger value="coach">
+          <TabsTrigger value="coach" className="shrink-0">
             <MessageSquareText className="size-4" /> Interview Coach
           </TabsTrigger>
         </TabsList>
