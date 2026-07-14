@@ -1,11 +1,17 @@
 import { Response } from 'express';
 import * as aiService from '../services/ai/aiService';
 import { AuthedRequest, getUserId } from '../middleware/auth';
-import { isAiLive, env } from '../config/env';
+import { aiHealth } from '../services/ai/gateway';
 
-/** Report whether AI runs live or in mock mode (drives a banner in the UI). */
+/** Report the active AI provider + the full provider chain (drives the UI banner). */
 export async function status(_req: AuthedRequest, res: Response): Promise<void> {
-  res.json({ mode: isAiLive ? 'live' : 'mock', model: isAiLive ? env.anthropicModel : 'mock' });
+  const health = aiHealth();
+  res.json({
+    mode: health.live ? 'live' : 'mock',
+    provider: health.active?.label ?? null,
+    model: health.active?.model ?? 'mock',
+    providers: health.providers,
+  });
 }
 
 export async function analyzeJob(req: AuthedRequest, res: Response): Promise<void> {

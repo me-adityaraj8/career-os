@@ -1,58 +1,79 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { env, isAiLive } from '../../config/env';
+import { complete } from './gateway';
+import { ApiError } from '../../utils/ApiError';
 
 /**
- * Thin wrapper around the Anthropic SDK.
+ * Thin task-shaped wrapper over the provider-agnostic gateway.
  *
- * - When ANTHROPIC_API_KEY is set (isAiLive), real calls are made.
- * - When it's absent, callers fall back to the mock generators in aiService.
+ * - `callText` returns free-form text (e.g. a cover letter).
+ * - `callJson` requests JSON mode and robustly parses the first JSON object
+ *   from the response (providers occasionally wrap JSON in prose or fences).
  *
- * Notes on model params: Opus 4.8 / current models reject `temperature`,
- * `top_p`, `top_k`, and `budget_tokens` (400), so we don't send them. For JSON
- * we use structured outputs via `output_config.format`, which guarantees the
- * response parses against our schema.
+ * Both return the concrete model that produced the text so callers can record it.
  */
-const client = isAiLive ? new Anthropic({ apiKey: env.anthropicApiKey }) : null;
 
-/** Extract the concatenated text from a message response. */
-function messageText(message: Anthropic.Message): string {
-  return message.content
-    .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
+/** Pull a JSON object out of a model response, tolerating fences/prose. */
+function parseJsonLoose<T>(text: string): T {
+  const trimmed = text.trim();
+  try {
+    return JSON.parse(trimmed) as T;
+  } catch {
+    // Strip ```json fences, then grab the outermost { … } span.
+    const unfenced = trimmed.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+    const start = unfenced.indexOf('{');
+    const end = unfenced.lastIndexOf('}');
+    if (start !== -1 && end > start) {
+      return JSON.parse(unfenced.slice(start, end + 1)) as T;
+    }
+    throw new Error('AI response was not valid JSON');
+  }
 }
 
-/** Call the model and parse a JSON object matching the given JSON Schema. */
+/** Map a total-provider-failure into a clean, user-facing 503. */
+function unavailable(err: unknown): never {
+  throw new ApiError(
+    503,
+    'AI is temporarily unavailable — all providers failed. Please try again shortly.',
+    'ai_unavailable',
+    err instanceof Error ? err.message : undefined,
+  );
+}
+
 export async function callJson<T>(params: {
   system: string;
   prompt: string;
-  schema: Record<string, unknown>;
   maxTokens?: number;
-}): Promise<T> {
-  if (!client) throw new Error('AI is not configured (mock mode)');
-  const message = await client.messages.create({
-    model: env.anthropicModel,
-    max_tokens: params.maxTokens ?? 2048,
-    system: params.system,
-    messages: [{ role: 'user', content: params.prompt }],
-    // Structured output: constrain the response to our schema.
-    output_config: { format: { type: 'json_schema', schema: params.schema } },
-  } as Anthropic.MessageCreateParamsNonStreaming);
-  return JSON.parse(messageText(message)) as T;
+}): Promise<{ data: T; model: string; provider: string }> {
+  let result;
+  try {
+    result = await complete({
+      system: `${params.system}\n\nRespond with ONLY a single valid JSON object — no prose, no markdown fences.`,
+      prompt: params.prompt,
+      maxTokens: params.maxTokens ?? 2048,
+      json: true,
+    });
+  } catch (err) {
+    unavailable(err);
+  }
+  try {
+    return { data: parseJsonLoose<T>(result.text), model: result.model, provider: result.provider };
+  } catch {
+    throw new ApiError(502, 'The AI returned an unexpected response. Please try again.', 'ai_bad_response');
+  }
 }
 
-/** Call the model for free-form text (e.g. a cover letter). */
 export async function callText(params: {
   system: string;
   prompt: string;
   maxTokens?: number;
-}): Promise<string> {
-  if (!client) throw new Error('AI is not configured (mock mode)');
-  const message = await client.messages.create({
-    model: env.anthropicModel,
-    max_tokens: params.maxTokens ?? 1500,
-    system: params.system,
-    messages: [{ role: 'user', content: params.prompt }],
-  });
-  return messageText(message);
+}): Promise<{ text: string; model: string; provider: string }> {
+  try {
+    const { text, model, provider } = await complete({
+      system: params.system,
+      prompt: params.prompt,
+      maxTokens: params.maxTokens ?? 1500,
+    });
+    return { text: text.trim(), model, provider };
+  } catch (err) {
+    unavailable(err);
+  }
 }

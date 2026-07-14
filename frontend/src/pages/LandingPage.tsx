@@ -721,7 +721,7 @@ const faqs = [
   },
   {
     q: 'How does the AI work?',
-    a: 'Rys uses Claude to analyze job descriptions, extract ATS keywords, score your resume against a role, draft cover letters, and generate interview prep questions. Your resume match score is computed deterministically, so it is consistent and explainable.',
+    a: 'Rys analyzes job descriptions, extracts ATS keywords, scores your resume against a role, drafts cover letters, and generates interview prep questions through a provider-agnostic AI gateway (Google Gemini by default, with automatic fallback). Your resume match score is computed deterministically, so it is consistent and explainable.',
   },
   {
     q: 'Can I try it without creating an account?',
