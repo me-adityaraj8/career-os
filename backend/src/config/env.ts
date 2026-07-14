@@ -21,14 +21,38 @@ export const env = {
   databaseUrl: required('DATABASE_URL'),
   jwtSecret: required('JWT_SECRET', 'dev_jwt_secret_change_me'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
-  // Anthropic key is optional — when absent, AI features run in mock mode.
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? '',
-  anthropicModel: process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-8',
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   uploadDir: process.env.UPLOAD_DIR ?? 'uploads',
+
+  // ---- AI gateway (provider-agnostic) ----
+  // Keys are all optional; when none are set, AI features run in mock mode.
+  // Providers are tried in `aiProviderOrder`, falling through on failure.
+  ai: {
+    order: (process.env.AI_PROVIDER_ORDER ?? 'gemini,groq,openrouter')
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean),
+    timeoutMs: parseInt(process.env.AI_TIMEOUT_MS ?? '30000', 10),
+    maxRetries: parseInt(process.env.AI_MAX_RETRIES ?? '2', 10),
+    gemini: {
+      apiKey: process.env.GEMINI_API_KEY ?? '',
+      model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+    },
+    groq: {
+      apiKey: process.env.GROQ_API_KEY ?? '',
+      model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+    },
+    openrouter: {
+      apiKey: process.env.OPENROUTER_API_KEY ?? '',
+      model: process.env.OPENROUTER_MODEL ?? 'google/gemini-2.5-flash',
+    },
+  },
 } as const;
 
-/** True when a real Anthropic key is configured. Drives mock vs. live AI calls. */
-export const isAiLive = env.anthropicApiKey.trim().length > 0;
+/** True when at least one AI provider key is configured; drives mock vs. live. */
+export const isAiLive =
+  env.ai.gemini.apiKey.trim().length > 0 ||
+  env.ai.groq.apiKey.trim().length > 0 ||
+  env.ai.openrouter.apiKey.trim().length > 0;
 
 export const isProduction = env.nodeEnv === 'production';

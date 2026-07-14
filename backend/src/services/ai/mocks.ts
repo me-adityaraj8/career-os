@@ -1,7 +1,7 @@
 import type { InterviewQuestionItem } from '../../data/ai';
 
 /**
- * MOCK AI generators — used only when ANTHROPIC_API_KEY is not set.
+ * MOCK AI generators — used only when no AI provider is configured.
  * Every response produced here is stored with is_mock = true so the UI can label
  * it honestly as a placeholder. These are deterministic heuristics, not an LLM.
  */
@@ -47,7 +47,7 @@ export function mockCoverLetter(input: {
   skills: string[];
 }): string {
   const skills = input.skills.length ? input.skills.slice(0, 4).join(', ') : 'full-stack development';
-  return `[This is a mock draft — add an ANTHROPIC_API_KEY to generate a real, tailored cover letter.]
+  return `[This is a mock draft — add a GEMINI_API_KEY to generate a real, tailored cover letter.]
 
 Dear Hiring Manager,
 

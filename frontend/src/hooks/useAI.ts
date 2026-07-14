@@ -2,11 +2,26 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import type { JobAnalysis, CoverLetter, InterviewQuestionSet } from '@/types';
 
-/** Whether the backend has a live API key or is running mock AI. */
+export interface AIProviderStatus {
+  id: string;
+  label: string;
+  model: string;
+  configured: boolean;
+  active: boolean;
+}
+
+export interface AIStatus {
+  mode: 'live' | 'mock';
+  provider: string | null;
+  model: string;
+  providers: AIProviderStatus[];
+}
+
+/** The active AI provider (or mock mode) and the full configured chain. */
 export function useAIStatus() {
   return useQuery({
     queryKey: ['ai-status'],
-    queryFn: async () => (await api.get<{ mode: 'live' | 'mock'; model: string }>('/ai/status')).data,
+    queryFn: async () => (await api.get<AIStatus>('/ai/status')).data,
     staleTime: Infinity,
   });
 }

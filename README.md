@@ -30,7 +30,7 @@
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18" />
   <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js 22" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL 16" />
-  <img src="https://img.shields.io/badge/AI-Claude-D97757?style=flat-square" alt="Claude AI" />
+  <img src="https://img.shields.io/badge/AI-Gemini%20%C2%B7%20Groq%20%C2%B7%20OpenRouter-4F46E5?style=flat-square" alt="AI providers" />
   <img src="https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white" alt="Railway" />
 </p>
 
@@ -86,7 +86,7 @@ Rys replaces that spreadsheet with a purpose-built workspace:
 
 - **A pipeline, not a list.** Applications move through a six-stage Kanban board with drag-and-drop that persists atomically — no lost cards, no stale state.
 - **Context lives on the card.** Salary, location, tags, notes, the exact resume version you sent, and every interview round are one click away.
-- **AI where it earns its keep.** Paste a job description and get ATS keywords, a resume match score, a tailored cover letter draft, and role-specific interview prep — powered by Claude, with a deterministic mock mode for development.
+- **AI where it earns its keep.** Paste a job description and get ATS keywords, a resume match score, a tailored cover letter draft, and role-specific interview prep — via a provider-agnostic AI gateway (Gemini → Groq → OpenRouter), with a deterministic mock mode for development.
 - **Momentum is a feature.** Goals, streaks, daily missions, and a conversion funnel keep the search moving when motivation dips.
 
 Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), themed for light and dark, and free during early access.
@@ -102,7 +102,7 @@ Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), 
 | 📄 | **Resume manager** | Upload multiple PDF versions, tag them, set a default, and link each application to the exact version you sent — with per-version performance (sent → interview rate) computed from your live pipeline |
 | 🎤 | **Interview prep** | Track rounds per application — type, schedule, outcome, prep notes, and feedback |
 | 🤝 | **Networking CRM** | Recruiters, referrals, alumni, and mentors with relationship context, last-contact dates, and follow-up flags |
-| 🤖 | **AI tools** | Job analyzer (ATS keywords + skill match), cover letter generator, and interview coach — Claude-powered with a mock fallback |
+| 🤖 | **AI tools** | Job analyzer (ATS keywords + skill match), cover letter generator, and interview coach — powered by a Gemini→Groq→OpenRouter gateway with a mock fallback |
 | 📊 | **Analytics** | Applications-per-week trends, conversion funnel, response/interview/offer rates |
 | 🎯 | **Goals & streaks** | Weekly/monthly targets computed from live data, XP, daily missions, and streak tracking |
 | ⌨️ | **Command palette** | `⌘K` to jump anywhere, create applications, or search — plus `g d`/`g a`-style shortcuts throughout |
@@ -118,7 +118,7 @@ Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), 
 | **Frontend** | React 18, Vite 5, TypeScript, Tailwind CSS, Framer Motion, dnd-kit, Radix UI, TanStack Query, Zustand, React Router, Recharts, Lucide |
 | **Backend** | Node.js 22, Express 4, TypeScript, Zod, JWT + bcrypt, Multer |
 | **Database** | PostgreSQL 16 — raw SQL, forward-only migrations, no ORM |
-| **AI** | Anthropic SDK (Claude) with a deterministic mock mode |
+| **AI** | Provider-agnostic gateway — Google Gemini (default) → Groq → OpenRouter, with a deterministic mock mode |
 | **Infra** | Docker Compose for local dev, single-container Railway deploy, multi-stage Dockerfile |
 
 The no-ORM choice is deliberate: the data layer is a thin module of typed, parameterized SQL per feature, which keeps queries inspectable and makes the migration story trivial.
@@ -193,8 +193,13 @@ The demo account is **read-only** — a backend guard rejects every write so sha
 | `DATABASE_URL` | Yes | — | PostgreSQL connection string |
 | `JWT_SECRET` | Yes | `dev_jwt_secret_change_me` | Secret for signing JWTs — change it in production |
 | `JWT_EXPIRES_IN` | No | `7d` | Token lifetime |
-| `ANTHROPIC_API_KEY` | No | — | Anthropic API key; leave blank for mock mode |
-| `ANTHROPIC_MODEL` | No | `claude-opus-4-8` | Claude model ID |
+| `GEMINI_API_KEY` | No | — | Google Gemini key (default AI provider). Blank on all providers = mock mode |
+| `GROQ_API_KEY` | No | — | Groq key — automatic fallback if Gemini is down/rate-limited |
+| `OPENROUTER_API_KEY` | No | — | OpenRouter key — final fallback in the chain |
+| `AI_PROVIDER_ORDER` | No | `gemini,groq,openrouter` | Order providers are tried in |
+| `GEMINI_MODEL` / `GROQ_MODEL` / `OPENROUTER_MODEL` | No | `gemini-2.5-flash` / `llama-3.3-70b-versatile` / `google/gemini-2.5-flash` | Per-provider model override |
+| `AI_TIMEOUT_MS` | No | `30000` | Per-request timeout before falling through |
+| `AI_MAX_RETRIES` | No | `2` | Retries per provider on transient errors |
 | `CORS_ORIGIN` | No | `http://localhost:5173` | Allowed frontend origin (enforced in production) |
 | `UPLOAD_DIR` | No | `uploads` | Resume PDF storage directory |
 | `PORT` | No | `4000` | Server port |
@@ -291,14 +296,14 @@ graph TB
         FS[/Resume PDFs on disk/]
     end
 
-    Claude[Claude API<br/>optional — mock mode without a key]
+    AIP[AI gateway<br/>Gemini · Groq · OpenRouter<br/>optional — mock mode without a key]
 
     UI --> RQ
     ZS --> UI
     RQ -->|HTTP + Bearer JWT| API
     API --> MW --> SVC --> DAL --> PG
     SVC --> FS
-    SVC -.-> Claude
+    SVC -.-> AIP
 ```
 
 ### Request lifecycle
@@ -527,23 +532,38 @@ All endpoints are prefixed with `/api/v1`. Protected routes require `Authorizati
 
 ## 🤖 AI Configuration
 
-Two modes, switched by the presence of `ANTHROPIC_API_KEY`:
+AI runs through a **provider-agnostic gateway** (`backend/src/services/ai/`) — no code is tied to any single vendor. Providers are tried in order and the gateway **falls through automatically** when one is down, rate-limited, or times out:
 
-| Mode | When | Behavior |
-|------|------|----------|
-| **Mock** | Key is empty | Deterministic, realistic placeholder responses — labeled as mock in the UI and stored with `is_mock = true`. Zero cost, works offline. |
-| **Live** | Key is set | Real Claude calls for job analysis, cover letters, and interview prep. |
+1. **Google Gemini** (`gemini-2.5-flash`) — default, for its generous free tier and speed
+2. **Groq** — first fallback (very fast inference)
+3. **OpenRouter** — final fallback (unified access to many models)
 
-The resume **match score is always computed deterministically in code** (`computeMatchScore`) regardless of mode — it's an explainable overlap metric, not model output, so it never hallucinates.
+Set at least one key (`GEMINI_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`) to go live; with none set, AI runs in **mock mode** — deterministic, realistic placeholders labeled in the UI and stored with `is_mock = true` (zero cost, works offline). Order, models, timeout, and retries are all env-configurable; **switching providers needs no code change**.
 
-`GET /health` reports the active mode:
+Each provider is a small module implementing an `AiProvider` interface (`isConfigured()` + `complete()`); **adding another** (Together, Fireworks, a local model…) is a one-line registration in the gateway's registry. Transient failures are retried with backoff before falling through; requests are logged with provider, latency, and outcome.
+
+The resume **match score is always computed deterministically in code** (`computeMatchScore`) regardless of provider — an explainable overlap metric, not model output, so it never hallucinates.
+
+```mermaid
+flowchart LR
+    Req[AI request] --> G{Gemini configured & up?}
+    G -->|Yes| GOK[Gemini]
+    G -->|Fail / rate-limit| GR{Groq?}
+    GR -->|Yes| GROK[Groq]
+    GR -->|Fail| OR{OpenRouter?}
+    OR -->|Yes| OROK[OpenRouter]
+    OR -->|None left| MOCK[Mock mode]
+```
+
+`GET /health` and `GET /api/v1/ai/status` report the active provider and the full chain:
 
 ```json
 {
   "status": "ok",
-  "aiMode": "mock",
-  "model": "claude-opus-4-8",
-  "time": "2026-07-10T12:00:00.000Z"
+  "aiMode": "live",
+  "aiProvider": "gemini",
+  "model": "gemini-2.5-flash",
+  "time": "2026-07-13T12:00:00.000Z"
 }
 ```
 
@@ -617,7 +637,7 @@ graph LR
     end
     RW --> C
     API --> PG[(Railway PostgreSQL)]
-    API -.-> AI[Claude API]
+    API -.-> AI[AI providers<br/>Gemini · Groq · OpenRouter]
     User([User]) -->|HTTPS| C
 ```
 
@@ -626,7 +646,7 @@ graph LR
 1. Fork this repo
 2. Create a [Railway](https://railway.app) project and add a **PostgreSQL** database
 3. Add a **service** linked to your fork — Railway detects the root `Dockerfile`
-4. Set `DATABASE_URL` (reference the Railway DB), `JWT_SECRET`, and `NODE_ENV=production`; optionally `ANTHROPIC_API_KEY`
+4. Set `DATABASE_URL` (reference the Railway DB), `JWT_SECRET`, and `NODE_ENV=production`; optionally `GEMINI_API_KEY` (+ `GROQ_API_KEY` / `OPENROUTER_API_KEY` fallbacks)
 5. Push to `main` — every push deploys, migrates, and reseeds the demo
 
 Nothing in the image is Railway-specific; any host that runs a container next to Postgres (Fly.io, Render, a VPS) works the same way.

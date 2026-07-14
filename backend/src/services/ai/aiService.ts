@@ -1,4 +1,4 @@
-import { env, isAiLive } from '../../config/env';
+import { isAiLive } from '../../config/env';
 import { ApiError } from '../../utils/ApiError';
 import * as aiData from '../../data/ai';
 import * as resumesData from '../../data/resumes';
@@ -41,31 +41,23 @@ export async function analyzeJob(
   let requiredSkills: string[];
   let atsKeywords: string[];
   let isMock: boolean;
+  let model = MOCK_MODEL;
 
   if (isAiLive) {
-    const result = await callJson<{
+    const { data, model: usedModel } = await callJson<{
       summary: string;
       requiredSkills: string[];
       atsKeywords: string[];
     }>({
       system:
         'You are an expert technical recruiter and ATS analyst. Extract structured, factual data from job descriptions. Be concise and specific.',
-      prompt: `Analyze this job description and return JSON with: a 2-3 sentence "summary", a "requiredSkills" array (concrete skills/technologies the role requires), and an "atsKeywords" array (terms an applicant tracking system would scan for).\n\nJOB DESCRIPTION:\n${input.jobDescription}`,
-      schema: {
-        type: 'object',
-        properties: {
-          summary: { type: 'string' },
-          requiredSkills: { type: 'array', items: { type: 'string' } },
-          atsKeywords: { type: 'array', items: { type: 'string' } },
-        },
-        required: ['summary', 'requiredSkills', 'atsKeywords'],
-        additionalProperties: false,
-      },
+      prompt: `Analyze this job description and return a JSON object with exactly these keys: "summary" (a 2-3 sentence string), "requiredSkills" (an array of concrete skills/technologies the role requires), and "atsKeywords" (an array of terms an applicant tracking system would scan for).\n\nJOB DESCRIPTION:\n${input.jobDescription}`,
     });
-    ({ summary, requiredSkills, atsKeywords } = result);
+    ({ summary, requiredSkills, atsKeywords } = data);
+    model = usedModel;
     isMock = false;
   } else {
-    // MOCK MODE — clearly marked; no API key configured.
+    // MOCK MODE — clearly marked; no provider configured.
     ({ summary, requiredSkills, atsKeywords } = mockAnalyzeJob(input.jobDescription));
     isMock = true;
   }
@@ -80,7 +72,7 @@ export async function analyzeJob(
     requiredSkills,
     atsKeywords,
     matchScore,
-    model: isMock ? MOCK_MODEL : env.anthropicModel,
+    model,
     isMock,
   });
 }
@@ -108,14 +100,17 @@ export async function generateCoverLetter(
 
   let content: string;
   let isMock: boolean;
+  let model = MOCK_MODEL;
 
   if (isAiLive) {
-    content = await callText({
+    const result = await callText({
       system:
         'You are a career coach who writes concise, specific, non-generic cover letters. Avoid clichés and filler. 3-4 short paragraphs. Do not invent facts about the candidate beyond the provided skills.',
       prompt: `Write a tailored cover letter for the role of ${ctx.role} at ${ctx.company}.\n\nCandidate's key skills: ${skills.join(', ') || 'general software engineering'}.\n\nJOB DESCRIPTION:\n${input.jobDescription}`,
       maxTokens: 1200,
     });
+    content = result.text;
+    model = result.model;
     isMock = false;
   } else {
     // MOCK MODE — clearly marked.
@@ -126,7 +121,7 @@ export async function generateCoverLetter(
   return aiData.saveCoverLetter(userId, {
     applicationId: input.applicationId ?? null,
     content,
-    model: isMock ? MOCK_MODEL : env.anthropicModel,
+    model,
     isMock,
   });
 }
@@ -156,36 +151,19 @@ export async function generateInterviewQuestions(
 ): Promise<aiData.InterviewQuestionRecord> {
   let questions: aiData.InterviewQuestionItem[];
   let isMock: boolean;
+  let model = MOCK_MODEL;
 
   if (isAiLive) {
-    const result = await callJson<{ questions: aiData.InterviewQuestionItem[] }>({
+    const { data, model: usedModel } = await callJson<{ questions: aiData.InterviewQuestionItem[] }>({
       system:
         'You are an interview coach. Generate likely interview questions grouped by category. Be specific to the role and company.',
-      prompt: `Generate ~9 likely interview questions for a ${input.role} role at ${input.company}. Include a mix of "technical", "behavioral", and "company"-specific questions.${
+      prompt: `Generate about 9 likely interview questions for a ${input.role} role at ${input.company}, mixing technical, behavioral, and company-specific questions.${
         input.jobDescription ? `\n\nJOB DESCRIPTION:\n${input.jobDescription}` : ''
-      }`,
-      schema: {
-        type: 'object',
-        properties: {
-          questions: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                category: { type: 'string', enum: ['technical', 'behavioral', 'company'] },
-                question: { type: 'string' },
-              },
-              required: ['category', 'question'],
-              additionalProperties: false,
-            },
-          },
-        },
-        required: ['questions'],
-        additionalProperties: false,
-      },
+      }\n\nReturn a JSON object with a "questions" array; each item has "category" (one of "technical", "behavioral", "company") and "question" (a string).`,
       maxTokens: 2048,
     });
-    questions = result.questions;
+    questions = data.questions;
+    model = usedModel;
     isMock = false;
   } else {
     // MOCK MODE — clearly marked.
@@ -198,7 +176,7 @@ export async function generateInterviewQuestions(
     company: input.company,
     role: input.role,
     questions,
-    model: isMock ? MOCK_MODEL : env.anthropicModel,
+    model,
     isMock,
   });
 }

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { isAiLive, env } from '../config/env';
+import { aiHealth } from '../services/ai/gateway';
 import { authRouter } from './authRoutes';
 import { applicationRouter } from './applicationRoutes';
 import { resumeRouter } from './resumeRoutes';
@@ -16,10 +16,12 @@ import { missionRouter } from './missionRoutes';
 export const apiRouter = Router();
 
 apiRouter.get('/health', (_req, res) => {
+  const health = aiHealth();
   res.json({
     status: 'ok',
-    aiMode: isAiLive ? 'live' : 'mock',
-    model: env.anthropicModel,
+    aiMode: health.live ? 'live' : 'mock',
+    aiProvider: health.active?.id ?? null,
+    model: health.active?.model ?? 'mock',
     time: new Date().toISOString(),
   });
 });

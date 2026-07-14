@@ -68,22 +68,42 @@ export default function AIToolsPage() {
         description="Analyze job descriptions, draft cover letters, and prep for interviews."
       />
 
-      {status?.mode === 'mock' && (
+      {status && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-6 flex items-center gap-2.5 rounded-xl border bg-secondary/40 px-4 py-2.5 text-[13px] text-muted-foreground"
         >
           <span className="relative flex size-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/60 opacity-60" />
-            <span className="relative inline-flex size-2 rounded-full bg-foreground/80" />
+            <span
+              className={cn(
+                'absolute inline-flex h-full w-full animate-ping rounded-full opacity-60',
+                status.mode === 'live' ? 'bg-emerald-500' : 'bg-foreground/60',
+              )}
+            />
+            <span
+              className={cn(
+                'relative inline-flex size-2 rounded-full',
+                status.mode === 'live' ? 'bg-emerald-500' : 'bg-foreground/80',
+              )}
+            />
           </span>
-          <span>
-            <span className="font-medium text-foreground">Mock mode</span> — results are realistic
-            placeholders. Set{' '}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">ANTHROPIC_API_KEY</code> to go
-            live.
-          </span>
+          {status.mode === 'live' ? (
+            <span>
+              <span className="font-medium text-foreground">{status.provider}</span> is powering
+              your AI tools
+              <span className="text-muted-foreground/70"> · {status.model}</span>
+            </span>
+          ) : (
+            <span>
+              <span className="font-medium text-foreground">Mock mode</span> — results are realistic
+              placeholders. Set{' '}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">GEMINI_API_KEY</code> to go live
+              (with optional <code className="rounded bg-muted px-1 py-0.5 text-xs">GROQ_API_KEY</code>{' '}
+              and <code className="rounded bg-muted px-1 py-0.5 text-xs">OPENROUTER_API_KEY</code>{' '}
+              fallbacks).
+            </span>
+          )}
         </motion.div>
       )}
 
