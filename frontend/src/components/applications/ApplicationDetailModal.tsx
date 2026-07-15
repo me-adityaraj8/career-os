@@ -42,6 +42,8 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
   const notesRef = useRef<HTMLTextAreaElement>(null);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
   const lastSaved = useRef<string>('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (editingNotes && notesRef.current) {
@@ -79,6 +81,56 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
     toast({ title: 'Notes saved', variant: 'success' });
   }
 
+  // Dialog accessibility: lock background scroll, move focus into the dialog on
+  // open, and restore focus to the trigger on close.
+  useEffect(() => {
+    if (!open) return;
+    restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const t = setTimeout(() => {
+      const el = dialogRef.current;
+      const first = el?.querySelector<HTMLElement>(
+        'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])',
+      );
+      (first ?? el)?.focus();
+    }, 0);
+    return () => {
+      clearTimeout(t);
+      document.body.style.overflow = prevOverflow;
+      restoreFocusRef.current?.focus?.();
+    };
+  }, [open]);
+
+  // Escape closes (exits notes editing first); Tab is trapped within the dialog.
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Escape') {
+      if (editingNotes) {
+        setEditingNotes(false);
+        return;
+      }
+      e.stopPropagation();
+      onClose();
+      return;
+    }
+    if (e.key !== 'Tab' || !dialogRef.current) return;
+    const focusables = Array.from(
+      dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((el) => el.offsetParent !== null);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   if (!application || !opp) return null;
 
   const priority = PRIORITIES.find((p) => p.value === application.priority);
@@ -106,7 +158,13 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
 
           {/* Modal — bottom sheet on mobile, centered card on desktop */}
           <motion.div
-            className="relative z-10 max-h-[92dvh] w-full max-w-lg overflow-hidden rounded-t-[22px] border bg-card shadow-2xl sm:max-h-none sm:rounded-2xl"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="app-detail-title"
+            tabIndex={-1}
+            onKeyDown={onKeyDown}
+            className="relative z-10 max-h-[92dvh] w-full max-w-lg overflow-hidden rounded-t-[22px] border bg-card shadow-2xl focus:outline-none sm:max-h-none sm:rounded-2xl"
             initial={{ opacity: 0, scale: 0.98, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 24 }}
@@ -119,7 +177,8 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
             <div className="relative border-b px-6 pb-5 pt-4 sm:pt-6">
               <button
                 onClick={onClose}
-                className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground/50 transition-all hover:bg-secondary hover:text-foreground"
+                aria-label="Close"
+                className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground/50 transition-all hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               >
                 <X className="size-4" />
               </button>
@@ -129,7 +188,7 @@ export function ApplicationDetailModal({ application, open, onClose, onEdit }: P
                   {application.company.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-xl font-bold tracking-tight">{application.company}</h2>
+                  <h2 id="app-detail-title" className="text-xl font-bold tracking-tight">{application.company}</h2>
                   <p className="mt-0.5 text-[15px] text-muted-foreground">{application.role}</p>
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">
                     <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium', stageColor)}>
