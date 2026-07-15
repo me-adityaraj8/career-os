@@ -116,7 +116,7 @@ Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), 
 | Layer | Technologies |
 |-------|-------------|
 | **Frontend** | React 18, Vite 5, TypeScript, Tailwind CSS, Framer Motion, dnd-kit, Radix UI, TanStack Query, Zustand, React Router, Recharts, Lucide |
-| **Backend** | Node.js 22, Express 4, TypeScript, Zod, JWT + bcrypt, Multer |
+| **Backend** | Node.js 22, Express 4, TypeScript, Zod, JWT + bcrypt, Multer, helmet, rate limiting, gzip |
 | **Database** | PostgreSQL 16 — raw SQL, forward-only migrations, no ORM |
 | **AI** | Provider-agnostic gateway — Google Gemini (default) → Groq → OpenRouter, with a deterministic mock mode |
 | **Infra** | Docker Compose for local dev, single-container Railway deploy, multi-stage Dockerfile |
@@ -670,6 +670,8 @@ Nothing in the image is Railway-specific; any host that runs a container next to
 - **SQL injection:** all queries are parameterized; there is no string-built SQL anywhere in the data layer.
 - **Tenant isolation:** every query filters by the authenticated `user_id`; ownership is re-verified inside multi-row transactions (e.g. reorder).
 - **Demo hardening:** a dedicated middleware rejects all non-GET requests from the demo account with `403 demo_readonly`.
+- **Security headers:** `helmet` sets HSTS, `X-Content-Type-Options: nosniff`, `X-Frame-Options` (clickjacking), and a strict referrer policy, and removes `X-Powered-By`.
+- **Rate limiting:** tiered per-client limits — strict on auth (brute-force / credential-stuffing), moderate on AI (model cost) and job import (outbound fetches), with a generous baseline everywhere else. Behind the proxy, `trust proxy` ensures limits key off the real client IP.
 - **CORS:** locked to the configured origin in production; permissive only for localhost in development.
 - **Uploads:** restricted to PDF mime types via Multer, stored outside the web root, served through an auth-checked download route.
 

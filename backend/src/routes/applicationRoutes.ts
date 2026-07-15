@@ -3,6 +3,7 @@ import * as controller from '../controllers/applicationController';
 import { requireAuth } from '../middleware/auth';
 import { demoGuard } from '../middleware/demoGuard';
 import { validate, idParamSchema } from '../middleware/validate';
+import { importLimiter } from '../middleware/rateLimit';
 import { asyncHandler } from '../utils/asyncHandler';
 import {
   createApplicationSchema,
@@ -27,6 +28,7 @@ applicationRouter.get('/tags', asyncHandler(controller.tags));
 // GET so the read-only demo account can try imports too (demoGuard passes GETs).
 applicationRouter.get(
   '/import-preview',
+  importLimiter,
   validate({ query: importPreviewQuerySchema }),
   asyncHandler(controller.importPreview),
 );
