@@ -4,6 +4,9 @@
   "description": "Rys backend API — the unified job-search workspace",
   "main": "dist/index.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
