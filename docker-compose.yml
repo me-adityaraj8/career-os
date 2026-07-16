@@ -42,8 +42,10 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-rys}:${POSTGRES_PASSWORD:-rys_dev_password}@db:5432/${POSTGRES_DB:-rys}
       JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_me}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-4-8}
+      # AI providers — all optional; blank on all = mock mode.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
     ports:
       - "4000:4000"
