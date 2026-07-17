@@ -21,11 +21,15 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
+import { FounderConnect, founderSocials } from '@/components/FounderConnect';
+import { founder } from '@/lib/founder';
 import { useLogin } from '@/hooks/useAuth';
 import { useThemeStore } from '@/stores/themeStore';
 import { toast } from '@/stores/toastStore';
 import { apiErrorMessage } from '@/lib/api';
 import { cn } from '@/lib/utils';
+
+const footerSocials = founderSocials;
 
 /* ------------------------------------------------------------------ */
 /* Shared motion presets                                                */
@@ -249,6 +253,7 @@ function Nav() {
           <a href="#features" className="transition-colors hover:text-foreground">Features</a>
           <a href="#pricing" className="transition-colors hover:text-foreground">Pricing</a>
           <a href="#faq" className="transition-colors hover:text-foreground">FAQ</a>
+          <a href="#founder" className="transition-colors hover:text-foreground">Contact</a>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -824,18 +829,62 @@ function FinalCTA() {
   );
 }
 
+function FounderSection() {
+  return (
+    <section id="founder" className="border-t bg-card/40 px-5 py-24">
+      <div className="mx-auto max-w-2xl">
+        <Reveal className="mb-8 text-center">
+          <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+            You're not just a user — you're a co-builder.
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            Rys is built in the open by one person who reads every message. The fastest way to
+            change the product is to tell me what you need.
+          </p>
+        </Reveal>
+        <Reveal delay={0.05}>
+          <FounderConnect />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
-    <footer className="border-t px-5 py-10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
-        <Logo />
+    <footer className="border-t px-5 py-12">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 text-center sm:flex-row sm:justify-between sm:text-left">
+        <div className="flex flex-col items-center gap-3 sm:items-start">
+          <Logo />
+          <p className="max-w-xs text-xs text-muted-foreground">
+            Built in the open by {founder.name}. Every piece of feedback shapes the product.
+          </p>
+        </div>
+
         <div className="flex items-center gap-6 text-sm text-muted-foreground">
           <a href="#features" className="transition-colors hover:text-foreground">Features</a>
           <a href="#pricing" className="transition-colors hover:text-foreground">Pricing</a>
-          <a href="#faq" className="transition-colors hover:text-foreground">FAQ</a>
+          <a href="#founder" className="transition-colors hover:text-foreground">Contact</a>
           <Link to="/login" className="transition-colors hover:text-foreground">Log in</Link>
         </div>
-        <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Rys. All rights reserved.</p>
+
+        <div className="flex flex-col items-center gap-3 sm:items-end">
+          <div className="flex items-center gap-2">
+            {footerSocials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                aria-label={s.label}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex size-9 items-center justify-center rounded-lg border text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-border-strong hover:text-foreground"
+              >
+                <s.icon className="size-4" />
+              </a>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Rys. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );
@@ -855,6 +904,7 @@ export default function LandingPage() {
         <Testimonials />
         <Pricing />
         <FAQ />
+        <FounderSection />
         <FinalCTA />
       </main>
       <Footer />

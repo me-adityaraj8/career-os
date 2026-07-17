@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Moon, Sun, Loader2, User, Palette } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
+import { FounderConnect } from '@/components/FounderConnect';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -108,6 +109,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <FounderConnect />
         </motion.div>
       </motion.div>
     </div>
