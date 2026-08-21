@@ -1,0 +1,35 @@
+# Render Blueprint — deploys Rys as a single Docker web service.
+# The database lives on Supabase (set DATABASE_URL below), so no Render DB here.
+#
+# One-time setup: on Render, New → Blueprint → connect this repo. Render reads
+# this file, provisions the service, and redeploys on every push to `main`.
+# You'll be prompted for the env vars marked `sync: false`.
+services:
+  - type: web
+    name: rys
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Supabase connection string (use the "Session pooler" URI, URL-encode
+      # the password). TLS is enabled automatically for non-local hosts.
+      - key: DATABASE_URL
+        sync: false
+      # A strong secret is generated once by Render and kept stable.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # Optional — leave unset to run AI features in mock mode.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false

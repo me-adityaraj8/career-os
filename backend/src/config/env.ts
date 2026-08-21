@@ -15,11 +15,25 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+const nodeEnv = process.env.NODE_ENV ?? 'development';
+const isProd = nodeEnv === 'production';
+
+const databaseUrl = required('DATABASE_URL');
+
+// Managed Postgres (Supabase, Neon, RDS…) requires TLS; a local/compose DB
+// doesn't. Auto-enable SSL for non-local hosts, overridable with DATABASE_SSL.
+const isLocalDb = /@(localhost|127\.0\.0\.1|\[::1\]|db)[:/]/.test(databaseUrl);
+const databaseSsl =
+  process.env.DATABASE_SSL !== undefined ? process.env.DATABASE_SSL === 'true' : !isLocalDb;
+
 export const env = {
-  nodeEnv: process.env.NODE_ENV ?? 'development',
+  nodeEnv,
   port: parseInt(process.env.PORT ?? '4000', 10),
-  databaseUrl: required('DATABASE_URL'),
-  jwtSecret: required('JWT_SECRET', 'dev_jwt_secret_change_me'),
+  databaseUrl,
+  databaseSsl,
+  // In production a real secret is mandatory — no insecure dev fallback, so a
+  // misconfigured deploy fails fast instead of signing forgeable tokens.
+  jwtSecret: isProd ? required('JWT_SECRET') : (process.env.JWT_SECRET ?? 'dev_jwt_secret_change_me'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   uploadDir: process.env.UPLOAD_DIR ?? 'uploads',
@@ -55,4 +69,4 @@ export const isAiLive =
   env.ai.groq.apiKey.trim().length > 0 ||
   env.ai.openrouter.apiKey.trim().length > 0;
 
-export const isProduction = env.nodeEnv === 'production';
+export const isProduction = isProd;

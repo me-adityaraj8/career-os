@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://rys-app-production.up.railway.app">Live demo</a>
+  <a href="#-deployment">Live demo — deploy your own</a>
   ·
   <a href="#-quick-start">Quick start</a>
   ·
@@ -31,7 +31,7 @@
   <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js 22" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL 16" />
   <img src="https://img.shields.io/badge/AI-Gemini%20%C2%B7%20Groq%20%C2%B7%20OpenRouter-4F46E5?style=flat-square" alt="AI providers" />
-  <img src="https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white" alt="Railway" />
+  <img src="https://img.shields.io/badge/Deploy-Render%20%2B%20Supabase-46E3B7?style=flat-square" alt="Render + Supabase" />
 </p>
 
 <br/>
@@ -119,7 +119,7 @@ Everything is keyboard-first (`⌘K` command palette, `g`-prefixed navigation), 
 | **Backend** | Node.js 22, Express 4, TypeScript, Zod, JWT + bcrypt, Multer, helmet, rate limiting, gzip |
 | **Database** | PostgreSQL 16 — raw SQL, forward-only migrations, no ORM |
 | **AI** | Provider-agnostic gateway — Google Gemini (default) → Groq → OpenRouter, with a deterministic mock mode |
-| **Infra** | Docker Compose for local dev, single-container Railway deploy, multi-stage Dockerfile |
+| **Infra** | Docker Compose for local dev; single-container deploy on Render + Supabase; multi-stage Dockerfile |
 
 The no-ORM choice is deliberate: the data layer is a thin module of typed, parameterized SQL per feature, which keeps queries inspectable and makes the migration story trivial.
 
@@ -213,7 +213,7 @@ The demo account is **read-only** — a backend guard rejects every write so sha
 | `VITE_UMAMI_SRC` | No | — | Umami tracking script URL. Leave unset to disable analytics entirely |
 | `VITE_UMAMI_WEBSITE_ID` | No | — | Umami website ID. Both this and `VITE_UMAMI_SRC` must be set for tracking to load |
 
-Rys ships with optional [Umami](https://umami.is) page-view tracking — cookieless and privacy-friendly, no consent banner required. It's a no-op unless both variables above are set, so local dev, forks, and preview builds stay untracked by default. Self-host Umami (a [Railway template](https://railway.app/template/umami) exists) or use their hosted cloud, then point these two variables at it.
+Rys ships with optional [Umami](https://umami.is) page-view tracking — cookieless and privacy-friendly, no consent banner required. It's a no-op unless both variables above are set, so local dev, forks, and preview builds stay untracked by default. Self-host Umami or use their hosted cloud, then point these two variables at it.
 
 ---
 
@@ -623,33 +623,35 @@ The unauthenticated root (`/`) serves the marketing page; authenticated users ar
 
 ## 🚢 Deployment
 
-Rys ships as a single container: a multi-stage Dockerfile builds the Vite frontend and compiled backend, and Express serves the static bundle alongside the API. Migrations and the demo seed run automatically on boot.
+Rys ships as a single container: a multi-stage Dockerfile builds the Vite frontend and compiled backend, and Express serves the static bundle alongside the API on one origin. Migrations run (and the demo account is best-effort seeded) automatically on boot. TLS to the database is enabled automatically for non-local hosts.
+
+The reference deployment is **[Render](https://render.com) (free tier) + [Supabase](https://supabase.com) Postgres (free tier) + GitHub auto-deploy** — no credit card, and it stays up without your machine running.
 
 ```mermaid
 graph LR
     Dev[git push main] --> GH[GitHub]
-    GH -->|auto deploy| RW[Railway]
-    subgraph C[Container]
+    GH -->|auto deploy| RN[Render web service]
+    subgraph C[Docker container]
         direction TB
-        MIG[migrate] --> SEED[seed demo] --> SRV[Express :4000]
+        MIG[migrate] --> SEED[seed demo] --> SRV[Express :PORT]
         SRV --> ST[static frontend build]
         SRV --> API[REST API /api/v1]
     end
-    RW --> C
-    API --> PG[(Railway PostgreSQL)]
+    RN --> C
+    API -->|TLS| PG[(Supabase Postgres)]
     API -.-> AI[AI providers<br/>Gemini · Groq · OpenRouter]
-    User([User]) -->|HTTPS| C
+    User([User]) -->|HTTPS| RN
 ```
 
-### Deploy your own
+### Deploy your own (Render + Supabase, free)
 
-1. Fork this repo
-2. Create a [Railway](https://railway.app) project and add a **PostgreSQL** database
-3. Add a **service** linked to your fork — Railway detects the root `Dockerfile`
-4. Set `DATABASE_URL` (reference the Railway DB), `JWT_SECRET`, and `NODE_ENV=production`; optionally `GEMINI_API_KEY` (+ `GROQ_API_KEY` / `OPENROUTER_API_KEY` fallbacks)
-5. Push to `main` — every push deploys, migrates, and reseeds the demo
+1. **Database — Supabase.** Create a project, then copy the connection string from **Connect → Session pooler** (URL-encode the password).
+2. **Host — Render.** New → **Blueprint** → connect your fork. Render reads [`render.yaml`](render.yaml), provisions the Docker web service, and generates a strong `JWT_SECRET` for you. Set **`DATABASE_URL`** to the Supabase string when prompted. (Optionally add `GEMINI_API_KEY` to enable live AI; otherwise it runs in mock mode.)
+3. **Auto-deploy — GitHub.** Every push to `main` triggers a redeploy that runs migrations on boot.
 
-Nothing in the image is Railway-specific; any host that runs a container next to Postgres (Fly.io, Render, a VPS) works the same way.
+That's it — accounts, login, and per-user data work out of the box. The image is host-agnostic: anything that runs a container and injects a `PORT` (Fly.io, a VPS, …) works the same way.
+
+> **Free-tier note:** Render free web services sleep after ~15 min idle and cold-start (~30s) on the next request — fine for a portfolio/demo. Supabase's free database is generous but pauses after a week of zero activity; a single visit wakes it.
 
 ---
 

@@ -15,6 +15,10 @@ export const pool = new Pool({
   connectionString: env.databaseUrl,
   max: 10,
   idleTimeoutMillis: 30_000,
+  // Managed providers (Supabase, Neon, …) require TLS. rejectUnauthorized is
+  // false because their pooler presents a cert not in the system CA bundle —
+  // the connection is still encrypted; this only skips chain verification.
+  ssl: env.databaseSsl ? { rejectUnauthorized: false } : undefined,
 });
 
 pool.on('error', (err) => {

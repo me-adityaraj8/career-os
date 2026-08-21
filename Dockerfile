@@ -1,5 +1,5 @@
 # Production Dockerfile — single container serving both API and static frontend.
-# Railway auto-detects this file at the repo root.
+# Works on any Docker host (Render, Fly, a VPS…) that injects a PORT env var.
 
 FROM node:22-alpine AS base
 
@@ -37,8 +37,11 @@ RUN mkdir -p /app/backend/uploads
 WORKDIR /app/backend
 
 ENV NODE_ENV=production
+# Default port; the host (Render, etc.) overrides PORT and the app honors it.
 ENV PORT=4000
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "node dist/db/migrate.js && node dist/db/seed.js && node dist/index.js"]
+# Migrations must succeed before serving. Seeding the demo account is
+# best-effort — a seed hiccup should never keep the app from starting.
+CMD ["sh", "-c", "node dist/db/migrate.js && (node dist/db/seed.js || echo 'seed skipped') && node dist/index.js"]
