@@ -11,6 +11,9 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     plan: free
+    # Co-locate the app with the Supabase database (Singapore) to keep
+    # per-request query latency low.
+    region: singapore
     branch: main
     autoDeploy: true
     healthCheckPath: /api/v1/health
