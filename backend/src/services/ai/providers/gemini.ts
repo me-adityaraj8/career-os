@@ -4,7 +4,7 @@ import { ProviderError, type AiProvider, type CompletionRequest, type Completion
 
 /**
  * Google Gemini via the Generative Language REST API. Default provider —
- * generous free tier, fast, and reliable. gemini-2.5-flash by default.
+ * generous free tier, fast, and reliable. gemini-3.6-flash by default.
  */
 export const gemini: AiProvider = {
   id: 'gemini',

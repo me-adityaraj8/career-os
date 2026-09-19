@@ -9,7 +9,7 @@ export interface CompletionRequest {
 
 export interface CompletionResult {
   text: string;
-  /** The concrete model that produced the text (e.g. "gemini-2.5-flash"). */
+  /** The concrete model that produced the text (e.g. "gemini-3.6-flash"). */
   model: string;
 }
 

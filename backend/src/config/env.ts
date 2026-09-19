@@ -72,7 +72,7 @@ export const env = {
     maxRetries: parseInt(process.env.AI_MAX_RETRIES ?? '2', 10),
     gemini: {
       apiKey: process.env.GEMINI_API_KEY ?? '',
-      model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+      model: process.env.GEMINI_MODEL ?? 'gemini-3.6-flash',
     },
     groq: {
       apiKey: process.env.GROQ_API_KEY ?? '',
@@ -80,7 +80,7 @@ export const env = {
     },
     openrouter: {
       apiKey: process.env.OPENROUTER_API_KEY ?? '',
-      model: process.env.OPENROUTER_MODEL ?? 'google/gemini-2.5-flash',
+      model: process.env.OPENROUTER_MODEL ?? 'google/gemini-3.6-flash',
     },
   },
 } as const;

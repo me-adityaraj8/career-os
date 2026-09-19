@@ -197,7 +197,7 @@ The demo account is **read-only** — a backend guard rejects every write so sha
 | `GROQ_API_KEY` | No | — | Groq key — automatic fallback if Gemini is down/rate-limited |
 | `OPENROUTER_API_KEY` | No | — | OpenRouter key — final fallback in the chain |
 | `AI_PROVIDER_ORDER` | No | `gemini,groq,openrouter` | Order providers are tried in |
-| `GEMINI_MODEL` / `GROQ_MODEL` / `OPENROUTER_MODEL` | No | `gemini-2.5-flash` / `llama-3.3-70b-versatile` / `google/gemini-2.5-flash` | Per-provider model override |
+| `GEMINI_MODEL` / `GROQ_MODEL` / `OPENROUTER_MODEL` | No | `gemini-3.6-flash` / `llama-3.3-70b-versatile` / `google/gemini-3.6-flash` | Per-provider model override |
 | `AI_TIMEOUT_MS` | No | `30000` | Per-request timeout before falling through |
 | `AI_MAX_RETRIES` | No | `2` | Retries per provider on transient errors |
 | `CORS_ORIGIN` | No | `http://localhost:5173` | Allowed frontend origin (enforced in production) |
@@ -534,7 +534,7 @@ All endpoints are prefixed with `/api/v1`. Protected routes require `Authorizati
 
 AI runs through a **provider-agnostic gateway** (`backend/src/services/ai/`) — no code is tied to any single vendor. Providers are tried in order and the gateway **falls through automatically** when one is down, rate-limited, or times out:
 
-1. **Google Gemini** (`gemini-2.5-flash`) — default, for its generous free tier and speed
+1. **Google Gemini** (`gemini-3.6-flash`) — default, for its generous free tier and speed
 2. **Groq** — first fallback (very fast inference)
 3. **OpenRouter** — final fallback (unified access to many models)
 
@@ -562,7 +562,7 @@ flowchart LR
   "status": "ok",
   "aiMode": "live",
   "aiProvider": "gemini",
-  "model": "gemini-2.5-flash",
+  "model": "gemini-3.6-flash",
   "time": "2026-07-13T12:00:00.000Z"
 }
 ```
