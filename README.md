@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="#-deployment">Live demo — deploy your own</a>
+  <a href="https://rys-eight.vercel.app"><strong>Live demo</strong></a>
   ·
   <a href="#-quick-start">Quick start</a>
   ·
@@ -21,7 +21,7 @@
   ·
   <a href="#-roadmap">Roadmap</a>
   ·
-  <a href="https://github.com/me-adityaraj8/rys/issues/new">Report a bug</a>
+  <a href="https://github.com/me-adityaraj8/career-os/issues/new">Report a bug</a>
 </p>
 
 <p align="center">
@@ -31,7 +31,8 @@
   <img src="https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js 22" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL 16" />
   <img src="https://img.shields.io/badge/AI-Gemini%20%C2%B7%20Groq%20%C2%B7%20OpenRouter-4F46E5?style=flat-square" alt="AI providers" />
-  <img src="https://img.shields.io/badge/Deploy-Render%20%2B%20Supabase-46E3B7?style=flat-square" alt="Render + Supabase" />
+  <img src="https://img.shields.io/badge/Deploy-Vercel%20%C2%B7%20Render-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel or Render" />
+  <img src="https://img.shields.io/badge/Data-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
 </p>
 
 <br/>
@@ -577,7 +578,18 @@ Paste a job URL and Rys pre-fills the application. The importer (`backend/src/se
 2. **Generic JSON-LD** — for any other page, we fetch the HTML and extract the [schema.org `JobPosting`](https://schema.org/JobPosting) structured data that boards and career pages embed for SEO (the same data Google Jobs reads). This covers a long tail of company career pages and boards without a bespoke integration.
 3. **Graceful fallback** — if a site blocks automated requests (LinkedIn, Indeed, Glassdoor, and some client-rendered Indian boards) or has no structured data, the import never dead-ends: it pre-fills the URL and a domain-inferred company with a note on what to finish manually.
 
-Extracted fields: company, role, location, salary, employment type, skills (mapped to tags), description, deadline, and the original URL.
+Extracted fields: company, role, location, salary, employment type, description, deadline, and the original URL. Skills (mapped to tags) come from the JSON-LD path — the dedicated ATS parsers do not expose a skills list yet.
+
+Verified against live postings:
+
+| Source | Result |
+|---|---|
+| Greenhouse · Lever · Ashby | Company, role, location, full description |
+| Company career pages with JSON-LD | Whatever the page publishes, incl. skills |
+| LinkedIn · Indeed · Naukri | Partial — these block automated fetches; you get the URL, an inferred company, and a note saying so |
+| Anything that isn't a link | Rejected with a message telling you to paste the posting URL |
+
+A bare host (`acme.com/jobs/12`) is accepted — the scheme is added rather than refused.
 
 ```mermaid
 flowchart TD
@@ -623,35 +635,64 @@ The unauthenticated root (`/`) serves the marketing page; authenticated users ar
 
 ## 🚢 Deployment
 
-Rys ships as a single container: a multi-stage Dockerfile builds the Vite frontend and compiled backend, and Express serves the static bundle alongside the API on one origin. Migrations run (and the demo account is best-effort seeded) automatically on boot. TLS to the database is enabled automatically for non-local hosts.
+Rys runs on two shapes of host from the same source tree, and the live demo runs on both.
 
-The reference deployment is **[Render](https://render.com) (free tier) + [Supabase](https://supabase.com) Postgres (free tier) + GitHub auto-deploy** — no credit card, and it stays up without your machine running.
+| | **Vercel** (primary) | **Render** |
+|---|---|---|
+| Frontend | Static build on the global CDN | Served by Express from the same container |
+| API | Express as a serverless function | Long-lived Node process |
+| Resume files | Supabase Storage | Local filesystem |
+| Cold start | None | ~30s after ~15 min idle (free tier) |
+| Config | [`vercel.json`](vercel.json) | [`render.yaml`](render.yaml) + [`Dockerfile`](Dockerfile) |
+
+Both point at the **same Supabase Postgres**, so accounts and data are shared.
 
 ```mermaid
-graph LR
-    Dev[git push main] --> GH[GitHub]
-    GH -->|auto deploy| RN[Render web service]
-    subgraph C[Docker container]
-        direction TB
-        MIG[migrate] --> SEED[seed demo] --> SRV[Express :PORT]
-        SRV --> ST[static frontend build]
-        SRV --> API[REST API /api/v1]
-    end
-    RN --> C
-    API -->|TLS| PG[(Supabase Postgres)]
-    API -.-> AI[AI providers<br/>Gemini · Groq · OpenRouter]
-    User([User]) -->|HTTPS| RN
+flowchart LR
+    Dev([git push main]) --> GH[GitHub]
+    GH -->|auto deploy| VC[Vercel]
+    GH -->|auto deploy| RD[Render]
+
+    VC --> CDN[Static frontend<br/>global edge]
+    VC --> FN[Express API<br/>serverless]
+    RD --> CT[Container<br/>migrate → seed → Express]
+
+    FN --> PG[(Supabase<br/>Postgres)]
+    CT --> PG
+    FN --> OBJ[(Supabase<br/>Storage)]
+    CT --> DSK[(Local disk)]
+    FN -.-> AI[Gemini · Groq<br/>OpenRouter]
+    CT -.-> AI
 ```
 
-### Deploy your own (Render + Supabase, free)
+### Storage is pluggable
 
-1. **Database — Supabase.** Create a project, then copy the connection string from **Connect → Session pooler** (URL-encode the password).
-2. **Host — Render.** New → **Blueprint** → connect your fork. Render reads [`render.yaml`](render.yaml), provisions the Docker web service, and generates a strong `JWT_SECRET` for you. Set **`DATABASE_URL`** to the Supabase string when prompted. (Optionally add `GEMINI_API_KEY` to enable live AI; otherwise it runs in mock mode.)
-3. **Auto-deploy — GitHub.** Every push to `main` triggers a redeploy that runs migrations on boot.
+A serverless filesystem does not survive the request that wrote to it, so resume PDFs go through a driver rather than straight to disk. One interface, two implementations, picked once at boot.
 
-That's it — accounts, login, and per-user data work out of the box. The image is host-agnostic: anything that runs a container and injects a `PORT` (Fly.io, a VPS, …) works the same way.
+```mermaid
+flowchart TD
+    UP[POST /resumes<br/>multipart PDF] --> MEM[Buffered in memory<br/>PDF only · 5 MB cap]
+    MEM --> SEL{STORAGE_DRIVER}
+    SEL -->|disk — container hosts| DSK[(Local filesystem)]
+    SEL -->|supabase — serverless| OBJ[(Private bucket)]
+    DSK --> DL[GET /resumes/:id/download]
+    OBJ --> DL
+    DL --> OWN{Owned by caller?}
+    OWN -->|yes| SEND[Stream the PDF]
+    OWN -->|no| NF[404]
+```
 
-> **Free-tier note:** Render free web services sleep after ~15 min idle and cold-start (~30s) on the next request — fine for a portfolio/demo. Supabase's free database is generous but pauses after a week of zero activity; a single visit wakes it.
+`auto` (the default) uses Supabase Storage when its credentials are present and the local disk otherwise, so a container deploy needs no extra configuration. The bucket stays **private** — downloads are proxied through the ownership-checked route above, never a public URL.
+
+### Deploy your own
+
+**Vercel** — import the repo, then set: `DATABASE_URL` (Supabase *session pooler* URI), `JWT_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `STORAGE_DRIVER=supabase`, and `VITE_API_URL=/api/v1`. Create a private `resumes` bucket in Supabase Storage first.
+
+**Render** — New → **Blueprint** → pick your fork. [`render.yaml`](render.yaml) provisions the Docker service and generates `JWT_SECRET`; supply `DATABASE_URL` when prompted. Migrations run on boot.
+
+Either way `GEMINI_API_KEY` is optional — without it the AI features run in a deterministic mock mode rather than failing.
+
+> **Free-tier notes:** Render sleeps after ~15 min idle and cold-starts on the next request. Supabase pauses a database after a week of zero activity; one visit wakes it. Vercel has no cold start for the static frontend.
 
 ---
 
