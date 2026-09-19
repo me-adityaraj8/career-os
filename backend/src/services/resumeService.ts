@@ -1,8 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
 import * as resumesData from '../data/resumes';
 import { ApiError } from '../utils/ApiError';
-import { uploadPath } from '../middleware/upload';
+import { storage } from './storage';
 import type { Resume } from '../types';
 
 export function list(userId: string): Promise<Resume[]> {
@@ -35,25 +33,41 @@ export async function setDefault(userId: string, id: string): Promise<Resume> {
   return updated;
 }
 
-/** Delete a resume record and best-effort remove its file from disk. */
+/** Delete a resume record and best-effort remove its stored file. */
 export async function remove(userId: string, id: string): Promise<void> {
   const removed = await resumesData.remove(userId, id);
   if (!removed) throw ApiError.notFound('Resume not found');
-  try {
-    await fs.unlink(path.join(uploadPath, removed.storageName));
-  } catch {
-    // File may already be gone; the DB row is what matters.
-  }
+  // Driver swallows a missing object; the DB row is what matters.
+  await storage.remove(removed.storageName);
 }
 
-/** Resolve the absolute path of a resume file for download, checking ownership. */
-export async function filePath(
+/** Persist an uploaded PDF and create its DB row. */
+export async function createFromUpload(
+  userId: string,
+  file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
+  fields: { label: string; tags: string[]; skills: string[] },
+): Promise<Resume> {
+  const { storageName } = await storage.put(file.buffer, file.mimetype);
+  return resumesData.create(userId, {
+    label: fields.label,
+    originalName: file.originalname,
+    storageName,
+    mimeType: file.mimetype,
+    sizeBytes: file.size,
+    tags: fields.tags,
+    skills: fields.skills,
+  });
+}
+
+/** Read a resume's bytes for download, checking ownership first. */
+export async function fileContents(
   userId: string,
   id: string,
-): Promise<{ absPath: string; downloadName: string }> {
+): Promise<{ buffer: Buffer; downloadName: string; mimeType: string }> {
   const resume = await get(userId, id);
   return {
-    absPath: path.join(uploadPath, resume.storageName),
+    buffer: await storage.get(resume.storageName),
     downloadName: resume.originalName,
+    mimeType: resume.mimeType,
   };
 }

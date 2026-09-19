@@ -1,24 +1,16 @@
-import fs from 'fs';
-import path from 'path';
-import { randomUUID } from 'crypto';
 import multer from 'multer';
-import { env } from '../config/env';
 import { ApiError } from '../utils/ApiError';
 
-// Resolve and ensure the upload directory exists at startup.
-const uploadPath = path.resolve(process.cwd(), env.uploadDir);
-fs.mkdirSync(uploadPath, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadPath),
-  // Store under a random uuid to avoid collisions / path traversal from the
-  // original filename; the original name is kept in the DB for display.
-  filename: (_req, _file, cb) => cb(null, `${randomUUID()}.pdf`),
-});
-
-/** Multer instance: PDF only, 5 MB max, single file field named "file". */
+/**
+ * Multer instance: PDF only, 5 MB max, single file field named "file".
+ *
+ * Uses memory storage so the bytes can be handed to whichever storage driver
+ * is active (local disk or Supabase Storage) rather than being written
+ * straight to a filesystem that may not persist. 5 MB is small enough that
+ * buffering in memory is cheaper than a temp-file round trip.
+ */
 export const uploadResume = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype !== 'application/pdf') {
@@ -28,5 +20,3 @@ export const uploadResume = multer({
     cb(null, true);
   },
 }).single('file');
-
-export { uploadPath };

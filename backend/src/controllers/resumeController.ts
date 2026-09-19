@@ -13,15 +13,16 @@ export async function create(req: AuthedRequest, res: Response): Promise<void> {
   if (!req.file) throw ApiError.badRequest('A PDF file is required');
   const fields = createResumeSchema.parse(req.body);
 
-  const resume = await resumeService.create(getUserId(req), {
-    label: fields.label,
-    originalName: req.file.originalname,
-    storageName: req.file.filename,
-    mimeType: req.file.mimetype,
-    sizeBytes: req.file.size,
-    tags: parseCsv(fields.tags),
-    skills: parseCsv(fields.skills),
-  });
+  const resume = await resumeService.createFromUpload(
+    getUserId(req),
+    {
+      buffer: req.file.buffer,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+    },
+    { label: fields.label, tags: parseCsv(fields.tags), skills: parseCsv(fields.skills) },
+  );
   res.status(201).json({ resume });
 }
 
@@ -41,6 +42,13 @@ export async function remove(req: AuthedRequest, res: Response): Promise<void> {
 }
 
 export async function download(req: AuthedRequest, res: Response): Promise<void> {
-  const { absPath, downloadName } = await resumeService.filePath(getUserId(req), req.params.id);
-  res.download(absPath, downloadName);
+  const { buffer, downloadName, mimeType } = await resumeService.fileContents(
+    getUserId(req),
+    req.params.id,
+  );
+  // Stream from the driver rather than the filesystem so this works on hosts
+  // where the uploaded file never touches local disk.
+  res.setHeader('Content-Type', mimeType);
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(downloadName)}"`);
+  res.send(buffer);
 }

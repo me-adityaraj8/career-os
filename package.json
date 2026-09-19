@@ -1,0 +1,30 @@
+{
+  "name": "rys",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vercel deploy target. The serverless function in api/ imports the Express app from backend/src, so the backend's runtime dependencies must resolve from the repository root as well.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "migrate": "npm --prefix backend run migrate",
+    "check:deps": "node scripts/check-root-deps.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.0",
+    "pg": "^8.13.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0"
+  }
+}

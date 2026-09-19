@@ -7,6 +7,7 @@ import { env, isProduction } from './config/env';
 import { apiRouter } from './routes';
 import { generalLimiter } from './middleware/rateLimit';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { storage } from './services/storage';
 
 /**
  * Builds the Express application (no listen() — kept separate from index.ts so
@@ -47,14 +48,22 @@ export function createApp(): Application {
   app.use(cors({ origin: corsOrigin, credentials: true }));
   app.use(express.json({ limit: '1mb' }));
 
-  // Serve uploaded resume PDFs statically (auth-checked download route also exists).
-  app.use('/uploads', express.static(path.resolve(process.cwd(), env.uploadDir)));
+  // Only the local-disk driver has a directory to serve. Object-storage
+  // deploys go through the auth-checked /resumes/:id/download route instead,
+  // which is the safer path anyway (it verifies ownership).
+  if (storage.id === 'disk') {
+    app.use('/uploads', express.static(path.resolve(process.cwd(), env.uploadDir)));
+  }
 
   app.use('/api/v1', generalLimiter, apiRouter);
 
   // In production, serve the frontend's static build from ../frontend/dist.
   // All non-API routes fall through to index.html for client-side routing.
-  if (isProduction) {
+  //
+  // Skipped on Vercel: there the static build is served by the platform's CDN
+  // and only /api/* is routed into this function, so there is no bundled
+  // frontend/dist for the process to read.
+  if (isProduction && !process.env.VERCEL) {
     const clientDir = path.resolve(__dirname, '../../frontend/dist');
     app.use(express.static(clientDir));
     app.get('*', (_req, res) => {

@@ -11,10 +11,18 @@ types.setTypeParser(1082, (value: string) => value);
  * All data-access modules import `query` / `getClient` from here — no module
  * should create its own pool.
  */
+// Serverless hosts run many short-lived instances, each with its own pool, so
+// a large per-instance pool multiplies into pooler exhaustion. Keep it tiny
+// there and let the upstream connection pooler do the multiplexing; a
+// long-lived container can afford the usual pool.
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+
 export const pool = new Pool({
   connectionString: env.databaseUrl,
-  max: 10,
-  idleTimeoutMillis: 30_000,
+  max: isServerless ? 1 : 10,
+  idleTimeoutMillis: isServerless ? 10_000 : 30_000,
+  // Fail fast instead of hanging a serverless invocation until its timeout.
+  connectionTimeoutMillis: isServerless ? 10_000 : 0,
   // Managed providers (Supabase, Neon, …) require TLS. rejectUnauthorized is
   // false because their pooler presents a cert not in the system CA bundle —
   // the connection is still encrypted; this only skips chain verification.

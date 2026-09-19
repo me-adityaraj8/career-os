@@ -38,6 +38,20 @@ export const env = {
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   uploadDir: process.env.UPLOAD_DIR ?? 'uploads',
 
+  // ---- File storage ----
+  // 'disk' keeps resume PDFs on the local filesystem (Docker / Render).
+  // 'supabase' pushes them to Supabase Storage, which is required on
+  // serverless hosts (Vercel) where the filesystem does not persist.
+  // 'auto' picks supabase when its credentials are present, else disk.
+  storage: {
+    driver: (process.env.STORAGE_DRIVER ?? 'auto') as 'auto' | 'disk' | 'supabase',
+    supabase: {
+      url: process.env.SUPABASE_URL ?? '',
+      serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+      bucket: process.env.SUPABASE_BUCKET ?? 'resumes',
+    },
+  },
+
   // ---- AI gateway (provider-agnostic) ----
   // Keys are all optional; when none are set, AI features run in mock mode.
   // Providers are tried in `aiProviderOrder`, falling through on failure.
