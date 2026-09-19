@@ -12,12 +12,8 @@
 # Installed and generated artifacts (rebuilt on Vercel)
 node_modules
 **/node_modules
-frontend/dist
+**/dist
 .vercel
-
-# backend/dist is intentionally NOT ignored: the backend service's entrypoint
-# is the bundle it contains, and Vercel checks that the entrypoint path exists
-# before it runs the build that regenerates it.
 
 # Local-only working files
 .git

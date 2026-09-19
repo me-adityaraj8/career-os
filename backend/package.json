@@ -15,8 +15,7 @@
     "seed": "tsx src/db/seed.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "build:vercel": "rm -rf dist && esbuild src/vercel.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist/vercel.js --external:pg-native --define:process.env.NODE_ENV=\\\"production\\\" --log-level=warning"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -40,7 +39,6 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.9.0",
     "@types/pg": "^8.11.10",
-    "esbuild": "^0.28.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "vitest": "^2.1.5"
