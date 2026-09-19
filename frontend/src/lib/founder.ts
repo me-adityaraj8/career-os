@@ -14,7 +14,7 @@ export const founder = {
   github: 'https://github.com/me-adityaraj8',
 
   // Optional — add when available; blank links are hidden.
-  linkedin: '',
+  linkedin: 'https://www.linkedin.com/in/aditya-raj-kumar-dora-44145b322/',
   x: '',
   discord: '',
   /** A scheduling link (Cal.com / Calendly / …) for "Book a Call". */
