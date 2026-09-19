@@ -6,7 +6,8 @@
     },
     "backend": {
       "root": "backend",
-      "entrypoint": "src/app.ts"
+      "entrypoint": "dist/vercel.js",
+      "buildCommand": "npm run build:vercel"
     }
   },
   "rewrites": [

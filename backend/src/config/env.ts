@@ -1,6 +1,14 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
+// Load a local .env only outside production. Hosted platforms (Render,
+// Vercel, Docker) inject real environment variables, and reading a stray
+// .env there would let machine-local values shadow production config.
+//
+// Required lazily rather than imported at the top so a production bundle can
+// eliminate the branch entirely — otherwise the bundler's dependency tracer
+// sees a dotenv call and pulls the local .env file into the deployment.
+if (process.env.NODE_ENV !== 'production') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+  (require('dotenv') as typeof import('dotenv')).config();
+}
 
 /**
  * Centralized, validated environment configuration.

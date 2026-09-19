@@ -1,0 +1,26 @@
+# Vercel uploads from the working directory, not from git, so .gitignore does
+# not apply here. Anything secret or machine-local must be listed again.
+
+# Local environment files — production values come from Vercel's env store.
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Installed and generated artifacts (rebuilt on Vercel)
+node_modules
+**/node_modules
+frontend/dist
+.vercel
+
+# backend/dist is intentionally NOT ignored: the backend service's entrypoint
+# is the bundle it contains, and Vercel checks that the entrypoint path exists
+# before it runs the build that regenerates it.
+
+# Local-only working files
+.git
+brag-output
+backend/uploads
+**/.DS_Store
