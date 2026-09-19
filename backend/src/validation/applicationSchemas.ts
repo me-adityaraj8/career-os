@@ -59,6 +59,30 @@ export const listApplicationsQuerySchema = z.object({
 });
 
 // Job-board import: the posting URL to parse into pre-filled fields.
+//
+// People paste a bare host ("acme.com/jobs/12") as readily as a full URL, so
+// the scheme is added rather than rejected. Anything that still isn't a URL —
+// most often a chunk of copied job text — gets a message that says what to do
+// instead of a bare "invalid url".
+const JOB_URL_HINT =
+  'That doesn\'t look like a link. Paste the job posting\'s URL, e.g. https://job-boards.greenhouse.io/acme/jobs/123';
+
 export const importPreviewQuerySchema = z.object({
-  url: z.string().url().max(1000),
+  url: z
+    .string()
+    .trim()
+    .max(1000)
+    .transform((value) =>
+      // Only prefix something that could plausibly be a host; pasted prose
+      // contains spaces and should fall through to the error below.
+      /^[a-z][a-z0-9+.-]*:\/\//i.test(value) || /\s/.test(value) ? value : `https://${value}`,
+    )
+    .refine((value) => {
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+      } catch {
+        return false;
+      }
+    }, JOB_URL_HINT),
 });

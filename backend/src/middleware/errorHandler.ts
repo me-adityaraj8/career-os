@@ -33,10 +33,14 @@ export function errorHandler(
   }
 
   if (err instanceof ZodError) {
+    // A single failing field is almost always the whole story, and the schema's
+    // own message is written for a human — surface it instead of a generic
+    // line the UI can only render as "something was wrong somewhere".
+    const single = err.issues.length === 1 ? err.issues[0]?.message : undefined;
     res.status(400).json({
       error: {
         code: 'validation_error',
-        message: 'Request validation failed',
+        message: single ?? 'Request validation failed',
         details: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
       },
     });
