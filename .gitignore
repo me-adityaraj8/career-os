@@ -37,3 +37,5 @@ backend/uploads/
 
 # Vercel
 .vercel/
+.env.local
+.env.*.local
