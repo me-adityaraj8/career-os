@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { query } from '../db/pool';
 import { aiHealth } from '../services/ai/gateway';
 import { authRouter } from './authRoutes';
 import { applicationRouter } from './applicationRoutes';
@@ -24,6 +25,18 @@ apiRouter.get('/health', (_req, res) => {
     model: health.active?.model ?? 'mock',
     time: new Date().toISOString(),
   });
+});
+
+// Readiness: proves Postgres is reachable. /health stays a pure liveness check
+// (the container host's health probe uses it), so this one can fail without
+// failing deploys. Also what the keep-alive job pings.
+apiRouter.get('/health/db', async (_req, res) => {
+  try {
+    await query('select 1');
+    res.json({ db: 'ok' });
+  } catch {
+    res.status(503).json({ db: 'down' });
+  }
 });
 
 // Feature routers (added per phase):
