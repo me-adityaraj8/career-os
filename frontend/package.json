@@ -11,7 +11,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build:vercel": "npm run build && node scripts/spa-shells.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
